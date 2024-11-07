@@ -1,13 +1,15 @@
+-- Insert roles
 INSERT INTO "roles" (role_name) VALUES
 ('Advisor'),
 ('Committee');
 
+-- Insert majors
 INSERT INTO "majors" (major_name) VALUES
 ('Computer Science'),
 ('Information Technology'),
 ('Software Engineering');
 
--- Insert students (note that student_id is now the primary key)
+-- Insert students
 INSERT INTO "students" (id, student_name, email, major_id) VALUES
 ('640610304', 'Alice Smith', 'alice@example.com', 1),
 ('640610305', 'Bob Johnson', 'bob@example.com', 1),
