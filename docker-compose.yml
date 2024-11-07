@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_NAME}
+    volumes:
+      - project_box_data:/var/lib/postgresql/data
+      # - ./db/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./db/migrations/mock_data.sql:/docker-entrypoint-initdb.d/mock_data.sql
+    networks:
+      - project_box_net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PG_ADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PG_ADMIN_PASSWORD}
+    volumes:
+      - project_box_pgadmin_data:/var/lib/pgadmin
+    networks:
+      - project_box_net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    volumes:
+      - 'rabbitmq_data:/var/lib/rabbitmq'
+      - 'rabbitmq_log:/var/log/rabbitmq'
+    networks:
+      - project_box_net
+
+volumes:
+  project_box_data:
+  project_box_pgadmin_data:
+  rabbitmq_data:
+  rabbitmq_log:
+
+networks:
+  project_box_net:
+    external: false

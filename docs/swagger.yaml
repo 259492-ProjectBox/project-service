@@ -1,0 +1,305 @@
+definitions:
+  dtos.ProjectWithDetails:
+    properties:
+      employees:
+        items:
+          $ref: '#/definitions/models.Employee'
+        type: array
+      project:
+        $ref: '#/definitions/models.Project'
+      students:
+        items:
+          $ref: '#/definitions/models.Student'
+        type: array
+    type: object
+  models.Course:
+    properties:
+      course_name:
+        type: string
+      course_no:
+        type: integer
+      id:
+        type: integer
+    type: object
+  models.Employee:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      employee_name:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/models.Role'
+      role_id:
+        type: integer
+    type: object
+  models.Major:
+    properties:
+      id:
+        type: integer
+      major_name:
+        type: string
+    type: object
+  models.Project:
+    properties:
+      abstract:
+        type: string
+      academic_year:
+        type: integer
+      advisor:
+        $ref: '#/definitions/models.Employee'
+      advisor_id:
+        type: integer
+      committees:
+        items:
+          $ref: '#/definitions/models.Employee'
+        type: array
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      major:
+        $ref: '#/definitions/models.Major'
+      major_id:
+        type: integer
+      members:
+        items:
+          $ref: '#/definitions/models.Student'
+        type: array
+      old_project_no:
+        type: string
+      project_no:
+        type: string
+      project_status:
+        type: string
+      relation_description:
+        type: string
+      section:
+        $ref: '#/definitions/models.Section'
+      section_id:
+        type: integer
+      semester:
+        type: integer
+      title_en:
+        type: string
+      title_th:
+        type: string
+    type: object
+  models.Role:
+    properties:
+      id:
+        type: integer
+      role_name:
+        type: string
+    type: object
+  models.Section:
+    properties:
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
+        type: integer
+      id:
+        type: integer
+      section_number:
+        type: string
+      semester:
+        type: integer
+    type: object
+  models.Student:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      major:
+        $ref: '#/definitions/models.Major'
+      major_id:
+        type: integer
+      student_name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /projects:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new project with the provided data
+      parameters:
+      - description: Project Data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.Project'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created project
+          schema:
+            $ref: '#/definitions/models.Project'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new project
+      tags:
+      - Project
+  /projects/{id}:
+    delete:
+      description: Deletes the specified project using its ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid project ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a project by ID
+      tags:
+      - Project
+    get:
+      description: Fetches a project by its unique ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved project
+          schema:
+            $ref: '#/definitions/models.Project'
+        "400":
+          description: Invalid project ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Project not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a project by ID
+      tags:
+      - Project
+    put:
+      consumes:
+      - application/json
+      description: Updates a project by its ID with the provided data
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Project Data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated project
+          schema:
+            $ref: '#/definitions/models.Project'
+        "400":
+          description: Invalid project ID or request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing project
+      tags:
+      - Project
+  /projects/student/{student_id}:
+    get:
+      description: Fetches a project by its student ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: student_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved project
+          schema:
+            items:
+              $ref: '#/definitions/dtos.ProjectWithDetails'
+            type: array
+        "400":
+          description: Invalid student ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Project not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a project by Student ID
+      tags:
+      - Project
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
