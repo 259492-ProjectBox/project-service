@@ -103,7 +103,7 @@ ALTER TABLE "projects" ADD FOREIGN KEY ("course_id") REFERENCES "courses" ("id")
 ALTER TABLE "projects" ADD FOREIGN KEY ("section_id") REFERENCES "sections" ("id");
 ALTER TABLE "projects" ADD FOREIGN KEY ("major_id") REFERENCES "majors" ("id");
 ALTER TABLE "project_students" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
-ALTER TABLE "project_students" ADD FOREIGN KEY ("student_id") REFERENCES "students" ("student_id")
+ALTER TABLE "project_students" ADD FOREIGN KEY ("student_id") REFERENCES "students" ("student_id");
 ALTER TABLE "project_employees" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
 ALTER TABLE "project_employees" ADD FOREIGN KEY ("employee_id") REFERENCES "employees" ("id");
 ALTER TABLE "project_employees" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
@@ -112,4 +112,3 @@ ALTER TABLE "employees" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
 ALTER TABLE "resources" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
 ALTER TABLE "resources" ADD FOREIGN KEY ("resource_type_id") REFERENCES "resource_types" ("id");
 ALTER TABLE "important_dates" ADD FOREIGN KEY ("major_id") REFERENCES "majors" ("id");
-  
