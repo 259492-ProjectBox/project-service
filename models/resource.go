@@ -13,3 +13,10 @@ type Resource struct {
 	Project        Project      `json:"project" gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 	ResourceType   ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
 }
+
+type FileResponse struct {
+	Name         string    `json:"name"`
+	Size         int64     `json:"size"`
+	LastModified time.Time `json:"lastModified"`
+	URL          string    `json:"url"`
+}

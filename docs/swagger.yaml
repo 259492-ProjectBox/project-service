@@ -92,6 +92,32 @@ definitions:
       title_th:
         type: string
     type: object
+  models.Resource:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      project:
+        $ref: '#/definitions/models.Project'
+      project_id:
+        type: integer
+      resource_type:
+        $ref: '#/definitions/models.ResourceType'
+      resource_type_id:
+        type: integer
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  models.ResourceType:
+    properties:
+      id:
+        type: integer
+      resource_type:
+        type: string
+    type: object
   models.Role:
     properties:
       id:
@@ -296,6 +322,129 @@ paths:
       summary: Get a project by Student ID
       tags:
       - Project
+  /resource:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to MinIO and save its information as a resource
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Project ID
+        in: formData
+        name: project_id
+        required: true
+        type: integer
+      - description: Resource Type ID
+        in: formData
+        name: resource_type_id
+        required: true
+        type: integer
+      - description: Resource Title
+        in: formData
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Resource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload a file and create a resource
+      tags:
+      - Resource
+  /resource/{id}:
+    delete:
+      description: Delete a resource and its file
+      parameters:
+      - description: Resource ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a resource
+      tags:
+      - Resource
+    get:
+      description: Get a resource by its ID
+      parameters:
+      - description: Resource ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Resource'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a resource by ID
+      tags:
+      - Resource
+  /resource/project/{project_id}:
+    get:
+      description: Get all resources associated with a project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Resource'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get resources by project ID
+      tags:
+      - Resource
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

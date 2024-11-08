@@ -43,10 +43,16 @@ wire.go
 go install github.com/google/wire/cmd/wire@latest
 ```
 
-Gorm
+# Minio
+
+`go get github.com/minio/minio-go/v7`
+
+# Gorm
+
 gorm.io/gorm
 
-Hot reload air
+# Hot reload air
+
 https://github.com/air-verse/air
 go install github.com/air-verse/air@latest
 
