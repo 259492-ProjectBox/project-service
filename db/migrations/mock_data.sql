@@ -1,27 +1,27 @@
 -- Insert roles
-INSERT INTO "roles" (role_name) VALUES
-('Advisor'),
-('Committee');
+INSERT INTO "roles" (role_name) VALUES ('Advisor'), ('Committee');
 
 -- Insert majors
-INSERT INTO "majors" (major_name) VALUES
-('Computer Science'),
-('Information Technology'),
-('Software Engineering');
+INSERT INTO "majors" (major_name) VALUES ('Computer Science'), ('Information Technology'), ('Software Engineering');
 
 -- Insert students
-INSERT INTO "students" (id, student_name, email, major_id) VALUES
-('640610304', 'Alice Smith', 'alice@example.com', 1),
-('640610305', 'Bob Johnson', 'bob@example.com', 1),
-('640610306', 'Charlie Brown', 'charlie@example.com', 2),
-('640610307', 'David Wilson', 'david@example.com', 3);
+INSERT INTO "students" (id, prefix, first_name, last_name, email, major_id) VALUES
+('640610304', 'Ms.', 'Alice', 'Smith', 'alice@example.com', 1),
+('640610305', 'Mr.', 'Bob', 'Johnson', 'bob@example.com', 1),
+('640610306', 'Mr.', 'Charlie', 'Brown', 'charlie@example.com', 2),
+('640610307', 'Mr.', 'David', 'Wilson', 'david@example.com', 3);
 
--- Insert courses
+-- Insert employees (with proper major_id)
+INSERT INTO "employees" (prefix, first_name, last_name, email, role_id) VALUES
+('Dr.', 'Jane', 'Doe', 'jane.doe@example.com', 1),
+('Dr.', 'John', 'Smith', 'john.smith@example.com', 2);
+
+-- Insert courses (make sure major_id is removed if not in the table structure)
 INSERT INTO "courses" (course_no, course_name) VALUES
-(101, 'Introduction to Computer Science'),
-(102, 'Data Structures'),
-(201, 'Software Engineering I'),
-(202, 'Database Systems');
+('259191', 'Introduction to Computer Science'),
+('259192', 'Data Structures'),
+('259193', 'Software Engineering I'),
+('259194', 'Database Systems');
 
 -- Insert sections
 INSERT INTO "sections" (course_id, section_number, semester) VALUES
@@ -29,11 +29,6 @@ INSERT INTO "sections" (course_id, section_number, semester) VALUES
 (1, 'B', 2),
 (2, 'A', 1),
 (3, 'C', 1);
-
--- Insert employees
-INSERT INTO "employees" (employee_name, email, role_id, created_at) VALUES
-('Dr. Jane Doe', 'jane.doe@example.com', 1, CURRENT_TIMESTAMP),
-('Dr. John Smith', 'john.smith@example.com', 2, CURRENT_TIMESTAMP);
 
 -- Insert projects
 INSERT INTO "projects" 
@@ -49,9 +44,7 @@ INSERT INTO "project_students" (project_id, student_id) VALUES
 (2, '640610306');
 
 -- Insert project employees
-INSERT INTO "project_employees" (project_id, employee_id) VALUES
-(1, 1),
-(2, 2);
+INSERT INTO "project_employees" (project_id, employee_id) VALUES (1, 1), (2, 2);
 
 -- Insert comments
 INSERT INTO "comments" (project_id, comment_text, created_at) VALUES

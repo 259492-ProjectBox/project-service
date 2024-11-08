@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	dto "github.com/project-box/dtos"
@@ -15,6 +16,7 @@ type ProjectRepository interface {
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]dto.ProjectWithDetails, error)
 	GetByProjectNo(ctx context.Context, oldProjectNo string) (*models.Project, error)
 	CreateProject(ctx context.Context, project *models.Project) (*models.Project, error)
+	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 }
 
 // ProjectHandler implementation
@@ -32,7 +34,7 @@ func NewProjectRepository(db *gorm.DB) ProjectRepository {
 
 func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*models.Project, error) {
 	project := &models.Project{}
-	if err := r.db.WithContext(ctx).Preload("Major").Preload("Course").Preload("Section").Preload("Advisor").First(project, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Major").Preload("Course").Preload("Section").Preload("Advisor").Preload("Advisor.Role").Preload("Committees").Preload("Members").First(project, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return project, nil
@@ -56,16 +58,18 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 		var project models.Project
 		if err := r.db.WithContext(ctx).
 			Where("id = ?", projectId).
-			Preload("Advisor"). // Preload advisor
-			Preload("Major").   // Preload major
-			Preload("Course").  // Preload course
-			Preload("Section"). // Preload section
+			Preload("Advisor").      // Preload advisor
+			Preload("Advisor.Role"). // Preload advisor
+			Preload("Major").        // Preload major
+			Preload("Course").       // Preload course
+			Preload("Section").      // Preload section
 			Find(&project).Error; err != nil {
 			return nil, err
 		}
 
 		var employees []models.Employee
 		if err := r.db.WithContext(ctx).
+			Preload("Role").
 			Joins("LEFT JOIN project_employees ON project_employees.employee_id = employees.id").
 			Where("project_employees.project_id = ?", projectId).
 			Find(&employees).Error; err != nil {
@@ -74,7 +78,8 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 
 		var students []models.Student
 		if err := r.db.WithContext(ctx).
-			Joins("LEFT JOIN project_students ON project_students.student_id = students.student_id").
+			Preload("Major").
+			Joins("LEFT JOIN project_students ON project_students.student_id = students.id").
 			Where("project_students.project_id = ?", projectId).
 			Find(&students).Error; err != nil {
 			return nil, err
@@ -104,6 +109,52 @@ func (r *projectRepositoryImpl) CreateProject(ctx context.Context, project *mode
 	if err := r.db.WithContext(ctx).Create(project).Error; err != nil {
 		return nil, err
 	}
-	r.db.Save(project)
 	return project, nil
+}
+func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error) {
+	tx := r.db.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	existingProject := &models.Project{}
+	if err := tx.First(existingProject, id).Error; err != nil {
+		tx.Rollback()
+		return nil, errors.New("project not found")
+	}
+	if err := tx.Where("project_id = ?", id).Delete(&models.ProjectEmployee{}).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Where("project_id = ?", id).Delete(&models.ProjectStudent{}).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	project.ID = id
+	if err := tx.Updates(project).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	updatedProject := &models.Project{}
+	if err := r.db.WithContext(ctx).
+		Preload("Major").
+		Preload("Course").
+		Preload("Section").
+		Preload("Advisor").
+		Preload("Advisor.Role").
+		Preload("Committees").
+		Preload("Members").
+		First(updatedProject, id).Error; err != nil {
+		return nil, err
+	}
+
+	return updatedProject, nil
 }

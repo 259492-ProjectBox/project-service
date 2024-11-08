@@ -2,6 +2,7 @@ package queues
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	rabbitmq "github.com/rabbitmq/amqp091-go"
@@ -24,7 +25,7 @@ func PublishMessageFromRabbitMQToElasticSearch(channel *rabbitmq.Channel, operat
 		log.Println("Error marshalling message:", err)
 		return err
 	}
-
+	fmt.Printf("%+v\n", message)
 	err = channel.Publish(
 		"project_service.elastic_search", // exchange
 		"elastic_search.crud",            // routing key

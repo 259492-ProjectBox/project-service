@@ -10,15 +10,16 @@ CREATE TABLE IF NOT EXISTS "majors" (
 
 CREATE TABLE IF NOT EXISTS "students" (
     "id" VARCHAR(255) PRIMARY KEY,
-    "student_name" VARCHAR(255) NOT NULL,
+    "prefix" VARCHAR(255) NOT NULL,
+    "first_name" VARCHAR(255) NOT NULL,
+    "last_name" VARCHAR(255) NOT NULL,
     "email" VARCHAR(255) UNIQUE NOT NULL,
-    "major_id" INTEGER NOT NULL,
+    "major_id" INTEGER,
     FOREIGN KEY ("major_id") REFERENCES "majors"("id") ON DELETE SET NULL
 );
-
 CREATE TABLE IF NOT EXISTS "courses" (
     "id" SERIAL PRIMARY KEY,
-    "course_no" INTEGER NOT NULL,
+    "course_no" VARCHAR(255) UNIQUE NOT NULL,
     "course_name" VARCHAR(255) UNIQUE NOT NULL
 );
 
@@ -32,7 +33,9 @@ CREATE TABLE IF NOT EXISTS "sections" (
 
 CREATE TABLE IF NOT EXISTS "employees" (
     "id" SERIAL PRIMARY KEY,
-    "employee_name" VARCHAR(255) NOT NULL,
+    "prefix" VARCHAR(255) NOT NULL,
+    "first_name" VARCHAR(255) NOT NULL,
+    "last_name" VARCHAR(255) NOT NULL,
     "email" VARCHAR(255) UNIQUE NOT NULL,
     "role_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -60,19 +63,26 @@ CREATE TABLE IF NOT EXISTS "projects" (
     FOREIGN KEY ("section_id") REFERENCES "sections"("id") ON DELETE SET NULL,
     FOREIGN KEY ("major_id") REFERENCES "majors"("id") ON DELETE SET NULL
 );
-
 CREATE TABLE IF NOT EXISTS "project_employees" (
     "project_id" INTEGER NOT NULL,
     "employee_id" INTEGER NOT NULL,
-    FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE SET NULL,
-    FOREIGN KEY ("employee_id") REFERENCES "employees"("id") ON DELETE SET NULL
+    FOREIGN KEY ("project_id") REFERENCES "projects"("id") 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    FOREIGN KEY ("employee_id") REFERENCES "employees"("id") 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "project_students" (
     "project_id" INTEGER NOT NULL,
     "student_id" VARCHAR(255) NOT NULL,
-    FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE SET NULL,
-    FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE SET NULL
+    FOREIGN KEY ("project_id") REFERENCES "projects"("id") 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    FOREIGN KEY ("student_id") REFERENCES "students"("id") 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "comments" (

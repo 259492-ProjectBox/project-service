@@ -22,7 +22,7 @@ type Project struct {
 	Advisor             Employee    `json:"advisor" gorm:"foreignKey:AdvisorID;constraint:OnDelete:SET NULL"`
 	Major               Major       `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
 	Course              Course      `json:"course" gorm:"foreignKey:CourseID;constraint:OnDelete:SET NULL"`
-	Section             *Section    `json:"section" gorm:"foreignKey:SectionID;constraint:OnDelete:SET NULL"`
-	Committees          []*Employee `json:"committees" gorm:"many2many:project_employees"`
-	Members             []*Student  `json:"members" gorm:"many2many:project_students"`
+	Section             Section     `json:"section" gorm:"foreignKey:SectionID;constraint:OnDelete:SET NULL"`
+	Committees          []*Employee `json:"committees" gorm:"many2many:project_employees;constraint:OnDelete:CASCADE;"`
+	Members             []*Student  `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 }
