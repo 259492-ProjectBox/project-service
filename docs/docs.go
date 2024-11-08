@@ -290,19 +290,13 @@ const docTemplate = `{
                         "name": "resource_type_id",
                         "in": "formData",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Resource Title",
-                        "name": "title",
-                        "in": "formData"
                     }
                 ],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Resource"
+                            "$ref": "#/definitions/models.UploadResourceResponse"
                         }
                     },
                     "400": {
@@ -351,7 +345,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Resource"
+                                "$ref": "#/definitions/models.UploadResourceResponse"
                             }
                         }
                     },
@@ -390,7 +384,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Resource"
+                            "$ref": "#/definitions/models.UploadResourceResponse"
                         }
                     },
                     "404": {
@@ -585,46 +579,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Resource": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "project": {
-                    "$ref": "#/definitions/models.Project"
-                },
-                "project_id": {
-                    "type": "integer"
-                },
-                "resource_type": {
-                    "$ref": "#/definitions/models.ResourceType"
-                },
-                "resource_type_id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.ResourceType": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "resource_type": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Role": {
             "type": "object",
             "properties": {
@@ -672,6 +626,23 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "student_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UploadResourceResponse": {
+            "type": "object",
+            "properties": {
+                "project_id": {
+                    "type": "integer"
+                },
+                "resource_type_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

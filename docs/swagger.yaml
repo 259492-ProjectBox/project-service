@@ -92,32 +92,6 @@ definitions:
       title_th:
         type: string
     type: object
-  models.Resource:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: integer
-      project:
-        $ref: '#/definitions/models.Project'
-      project_id:
-        type: integer
-      resource_type:
-        $ref: '#/definitions/models.ResourceType'
-      resource_type_id:
-        type: integer
-      title:
-        type: string
-      url:
-        type: string
-    type: object
-  models.ResourceType:
-    properties:
-      id:
-        type: integer
-      resource_type:
-        type: string
-    type: object
   models.Role:
     properties:
       id:
@@ -149,6 +123,17 @@ definitions:
       major_id:
         type: integer
       student_name:
+        type: string
+    type: object
+  models.UploadResourceResponse:
+    properties:
+      project_id:
+        type: integer
+      resource_type_id:
+        type: integer
+      title:
+        type: string
+      url:
         type: string
     type: object
 host: localhost:8080
@@ -343,17 +328,13 @@ paths:
         name: resource_type_id
         required: true
         type: integer
-      - description: Resource Title
-        in: formData
-        name: title
-        type: string
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Resource'
+            $ref: '#/definitions/models.UploadResourceResponse'
         "400":
           description: Bad Request
           schema:
@@ -408,7 +389,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Resource'
+            $ref: '#/definitions/models.UploadResourceResponse'
         "404":
           description: Not Found
           schema:
@@ -434,7 +415,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Resource'
+              $ref: '#/definitions/models.UploadResourceResponse'
             type: array
         "404":
           description: Not Found

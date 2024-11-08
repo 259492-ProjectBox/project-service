@@ -46,8 +46,7 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 // @Param file formData file true "File to upload"
 // @Param project_id formData int true "Project ID"
 // @Param resource_type_id formData int true "Resource Type ID"
-// @Param title formData string false "Resource Title"
-// @Success 201 {object} models.Resource
+// @Success 201 {object} models.UploadResourceResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /resource [post]
@@ -64,8 +63,6 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid resource_type_id"})
 		return
 	}
-
-	title := c.PostForm("title")
 
 	// Get the file
 	file, header, err := c.Request.FormFile("file")
@@ -103,8 +100,8 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 	}
 
 	// Create resource in database
-	resource, err := h.resourceService.CreateResource(c, &models.Resource{
-		Title:          &title,
+	_, err = h.resourceService.CreateResource(c, &models.Resource{
+		Title:          &filename,
 		ProjectID:      projectID,
 		ResourceTypeID: resourceTypeID,
 		URL:            url.String(),
@@ -116,8 +113,14 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save resource: %v", err)})
 		return
 	}
+	response := models.UploadResourceResponse{
+		Title:          &filename,
+		ProjectID:      projectID,
+		ResourceTypeID: resourceTypeID,
+		URL:            url.String(),
+	}
 
-	c.JSON(http.StatusCreated, resource)
+	c.JSON(http.StatusCreated, response)
 }
 
 // GetResourceByID godoc
@@ -126,7 +129,7 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 // @Tags Resource
 // @Produce json
 // @Param id path int true "Resource ID"
-// @Success 200 {object} models.Resource
+// @Success 200 {object} models.UploadResourceResponse
 // @Failure 404 {object} map[string]string
 // @Router /resource/{id} [get]
 func (h *resourceHandler) GetResourceByID(c *gin.Context) {
@@ -138,7 +141,15 @@ func (h *resourceHandler) GetResourceByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, resource)
+	// fmt.Println(*resource.Title)
+	response := models.UploadResourceResponse{
+		Title:          resource.Title,
+		ProjectID:      resource.ProjectID,
+		ResourceTypeID: resource.ResourceTypeID,
+		URL:            resource.URL,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // DeleteResource godoc
@@ -184,7 +195,7 @@ func (h *resourceHandler) DeleteResource(c *gin.Context) {
 // @Tags Resource
 // @Produce json
 // @Param project_id path int true "Project ID"
-// @Success 200 {array} models.Resource
+// @Success 200 {array} models.UploadResourceResponse
 // @Failure 404 {object} map[string]string
 // @Router /resource/project/{project_id} [get]
 func (h *resourceHandler) GetResourcesByProjectID(c *gin.Context) {
@@ -195,6 +206,17 @@ func (h *resourceHandler) GetResourcesByProjectID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch resources"})
 		return
 	}
+	var response []models.UploadResourceResponse
 
-	c.JSON(http.StatusOK, resources)
+	// Iterate over the resources and map them to UploadResourceResponse
+	for _, resource := range resources {
+		response = append(response, models.UploadResourceResponse{
+			Title:          resource.Title, // Assuming resource.Title is a *string
+			ProjectID:      resource.ProjectID,
+			ResourceTypeID: resource.ResourceTypeID,
+			URL:            resource.URL,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
