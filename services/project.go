@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	dto "github.com/project-box/dtos"
 	"github.com/project-box/models"
 	rabbitMQQueue "github.com/project-box/queues/rabbitmq"
 	"github.com/project-box/repositories"
@@ -17,7 +16,7 @@ type ProjectService interface {
 	ValidateProject(ctx context.Context, project *models.Project) error
 	CreateProject(ctx context.Context, project *models.Project) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
-	GetProjectsByStudentId(ctx context.Context, studentId string) ([]dto.ProjectWithDetails, error)
+	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 	DeleteProject(ctx context.Context, id int) error
 }
@@ -146,7 +145,7 @@ func (s *projectServiceImpl) GetProjectById(ctx context.Context, id int) (*model
 	return project, nil
 }
 
-func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, studentId string) ([]dto.ProjectWithDetails, error) {
+func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error) {
 	project, err := s.projectRepo.GetProjectsByStudentId(ctx, studentId)
 	if err != nil {
 		return nil, err
