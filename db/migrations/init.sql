@@ -4,7 +4,7 @@ CREATE TABLE "majors" (
 );
 
 CREATE TABLE "students" (
-  "student_id" VARCHAR PRIMARY KEY,
+  "id" VARCHAR PRIMARY KEY,
   "student_name" VARCHAR,
   "email" VARCHAR UNIQUE,
   "major_id" INT NOT NULL
@@ -103,7 +103,7 @@ ALTER TABLE "projects" ADD FOREIGN KEY ("course_id") REFERENCES "courses" ("id")
 ALTER TABLE "projects" ADD FOREIGN KEY ("section_id") REFERENCES "sections" ("id");
 ALTER TABLE "projects" ADD FOREIGN KEY ("major_id") REFERENCES "majors" ("id");
 ALTER TABLE "project_students" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
-ALTER TABLE "project_students" ADD FOREIGN KEY ("student_id") REFERENCES "students" ("student_id");
+ALTER TABLE "project_students" ADD FOREIGN KEY ("student_id") REFERENCES "students" ("id");
 ALTER TABLE "project_employees" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
 ALTER TABLE "project_employees" ADD FOREIGN KEY ("employee_id") REFERENCES "employees" ("id");
 ALTER TABLE "project_employees" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");

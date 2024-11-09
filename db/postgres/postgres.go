@@ -66,7 +66,7 @@ func NewPostgresDatabase() *gorm.DB {
 	}
 
 	if err = migrateModel(db); err != nil {
-		log.Println(err)
+		log.Println("migrateModel", err)
 		return nil
 	}
 

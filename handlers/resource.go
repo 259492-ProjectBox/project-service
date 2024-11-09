@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -100,7 +99,7 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 	}
 
 	// Create resource in database
-	_, err = h.resourceService.CreateResource(c, &models.Resource{
+	resource, err := h.resourceService.CreateResource(c, &models.Resource{
 		Title:          &filename,
 		ProjectID:      projectID,
 		ResourceTypeID: resourceTypeID,
@@ -114,6 +113,7 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 		return
 	}
 	response := models.UploadResourceResponse{
+		ID:             resource.ID,
 		Title:          &filename,
 		ProjectID:      projectID,
 		ResourceTypeID: resourceTypeID,
@@ -143,6 +143,7 @@ func (h *resourceHandler) GetResourceByID(c *gin.Context) {
 
 	// fmt.Println(*resource.Title)
 	response := models.UploadResourceResponse{
+		ID:             resource.ID,
 		Title:          resource.Title,
 		ProjectID:      resource.ProjectID,
 		ResourceTypeID: resource.ResourceTypeID,
@@ -157,8 +158,8 @@ func (h *resourceHandler) GetResourceByID(c *gin.Context) {
 // @Description Delete a resource and its file
 // @Tags Resource
 // @Param id path int true "Resource ID"
-// @Success 200 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Success 200 {object} models.ResponseMessage
+// @Failure 500 {object} models.ResponseMessage
 // @Router /resource/{id} [delete]
 func (h *resourceHandler) DeleteResource(c *gin.Context) {
 	id := c.Param("id")
@@ -171,20 +172,24 @@ func (h *resourceHandler) DeleteResource(c *gin.Context) {
 	}
 
 	// Extract filename from URL
-	filename := filepath.Base(resource.URL)
+	// filename := filepath.Base(resource.URL)
+	filename := *resource.Title
 
 	// Delete from MinIO first
 	err = h.minioClient.RemoveObject(context.Background(), h.bucketName, filename, minio.RemoveObjectOptions{})
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete file"})
+		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: "Failed to delete file"})
 		return
 	}
 
 	// Then delete from database
 	if err := h.resourceService.DeleteResource(c, id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete resource record"})
+		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: "Failed to delete resource record"})
 		return
 	}
+
+	c.JSON(http.StatusOK, models.ResponseMessage{Message: "Resource deleted successfully"})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Resource deleted successfully"})
 }
@@ -211,6 +216,7 @@ func (h *resourceHandler) GetResourcesByProjectID(c *gin.Context) {
 	// Iterate over the resources and map them to UploadResourceResponse
 	for _, resource := range resources {
 		response = append(response, models.UploadResourceResponse{
+			ID:             resource.ID,
 			Title:          resource.Title, // Assuming resource.Title is a *string
 			ProjectID:      resource.ProjectID,
 			ResourceTypeID: resource.ResourceTypeID,

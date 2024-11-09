@@ -92,6 +92,11 @@ definitions:
       title_th:
         type: string
     type: object
+  models.ResponseMessage:
+    properties:
+      message:
+        type: string
+    type: object
   models.Role:
     properties:
       id:
@@ -127,6 +132,8 @@ definitions:
     type: object
   models.UploadResourceResponse:
     properties:
+      id:
+        type: integer
       project_id:
         type: integer
       resource_type_id:
@@ -363,15 +370,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
+            $ref: '#/definitions/models.ResponseMessage'
+        "500":
+          description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ResponseMessage'
       summary: Delete a resource
       tags:
       - Resource

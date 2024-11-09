@@ -22,6 +22,7 @@ type FileResponse struct {
 }
 
 type UploadResourceResponse struct {
+	ID             int     `json:"id"`
 	Title          *string `json:"title"`
 	ProjectID      int     `json:"project_id"`
 	ResourceTypeID int     `json:"resource_type_id"`

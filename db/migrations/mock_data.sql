@@ -9,7 +9,7 @@ INSERT INTO "majors" (id ,major_name) VALUES
 
 SELECT * FROM "majors";
 -- Insert students (note that student_id is now the primary key)
-INSERT INTO "students" (student_id, student_name, email, major_id) VALUES
+INSERT INTO "students" (id, student_name, email, major_id) VALUES
 ('640610304', 'Alice Smith', 'alice@example.com', 1),
 ('640610305', 'Bob Johnson', 'bob@example.com', 1),
 ('640610306', 'Charlie Brown', 'charlie@example.com', 2),
