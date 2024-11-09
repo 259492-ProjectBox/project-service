@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 
-	dto "github.com/project-box/dtos"
 	"github.com/project-box/models"
 	rabbitMQQueue "github.com/project-box/queues/rabbitmq"
 	"github.com/project-box/repositories"
@@ -16,7 +16,7 @@ type ProjectService interface {
 	ValidateProject(ctx context.Context, project *models.Project) error
 	CreateProject(ctx context.Context, project *models.Project) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
-	GetProjectsByStudentId(ctx context.Context, studentId string) ([]dto.ProjectWithDetails, error)
+	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 	DeleteProject(ctx context.Context, id int) error
 }
@@ -43,6 +43,17 @@ func NewProjectService(
 		majorRepo:       majorRepo,
 		sectionRepo:     sectionRepo,
 	}
+}
+
+// Helper function to publish CRUD operations to Elasticsearch via RabbitMQ
+func (s *projectServiceImpl) publishToElasticSearch(ctx context.Context, action string, project *models.Project) {
+	go func() {
+		projectMessage := utils.SanitizeProjectMessage(project)
+		err := rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage)
+		if err != nil {
+			log.Printf("Failed to publish message to RabbitMQ for action %s: %v", action, err)
+		}
+	}()
 }
 
 func (s *projectServiceImpl) createProjectNumber(project *models.Project) *models.Project {
@@ -94,13 +105,6 @@ func (s *projectServiceImpl) validateOldProjectNumber(ctx context.Context, oldPr
 
 	return nil
 }
-func (s *projectServiceImpl) validateProjectNumber(projectNo string) error {
-	if err := utils.IsValidProjectNumberFormat(projectNo); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
 	if err := s.validateCourse(ctx, project.CourseID, project.SectionID, project.Semester); err != nil {
 		return err
@@ -112,9 +116,6 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 		return err
 	}
 	if err := s.validateOldProjectNumber(ctx, project.OldProjectNo); err != nil {
-		return err
-	}
-	if err := s.validateProjectNumber(project.ProjectNo); err != nil {
 		return err
 	}
 	return nil
@@ -130,10 +131,7 @@ func (s *projectServiceImpl) CreateProject(ctx context.Context, project *models.
 		return nil, err
 	}
 
-	err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, "create", project)
-	if err != nil {
-		return nil, err
-	}
+	s.publishToElasticSearch(ctx, "create", project)
 
 	return project, nil
 }
@@ -147,7 +145,7 @@ func (s *projectServiceImpl) GetProjectById(ctx context.Context, id int) (*model
 	return project, nil
 }
 
-func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, studentId string) ([]dto.ProjectWithDetails, error) {
+func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error) {
 	project, err := s.projectRepo.GetProjectsByStudentId(ctx, studentId)
 	if err != nil {
 		return nil, err
@@ -161,18 +159,17 @@ func (s *projectServiceImpl) UpdateProject(ctx context.Context, id int, project 
 		return nil, err
 	}
 
-	project, err := s.projectRepo.Update(ctx, id, project)
+	// Instead of deleting and re-creating, update the project directly
+	project, err := s.projectRepo.UpdateProject(ctx, id, project)
 	if err != nil {
 		return nil, err
 	}
 
-	err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, "update", project)
-	if err != nil {
-		return nil, err
-	}
+	s.publishToElasticSearch(ctx, "update", project)
 
 	return project, nil
 }
+
 func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 	project, err := s.projectRepo.GetProjectByID(ctx, id)
 	if err != nil {
@@ -183,10 +180,7 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 		return err
 	}
 
-	err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, "delete", project)
-	if err != nil {
-		return err
-	}
+	s.publishToElasticSearch(ctx, "delete", project)
 
 	return nil
 }

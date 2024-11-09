@@ -44,7 +44,6 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	project, err := h.projectService.CreateProject(c, project)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -126,7 +125,7 @@ func (h *projectHandler) GetProjectById(c *gin.Context) {
 // @Router /projects/student/{student_id} [get]
 func (h *projectHandler) GetProjectsByStudentId(c *gin.Context) {
 	studentId := c.Param("student_id")
-	
+
 	projectWithDetails, err := h.projectService.GetProjectsByStudentId(c, studentId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
