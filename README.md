@@ -47,6 +47,8 @@ go install github.com/google/wire/cmd/wire@latest
 
 `go get github.com/minio/minio-go/v7`
 
+if you can not run project you need to change the env in minioendpoint
+
 # Gorm
 
 gorm.io/gorm
