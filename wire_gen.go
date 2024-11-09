@@ -9,6 +9,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"github.com/project-box/configs"
 	"github.com/project-box/db/postgres"
 	db2 "github.com/project-box/db/rabbitmq"
 	"github.com/project-box/handlers"
@@ -27,7 +28,14 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	sectionRepository := repositories.NewSectionRepository(gormDB)
 	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, sectionRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
-	engine, err := NewApp(gormDB, channel, projectHandler)
+	client, err := configs.InitializeMinioClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	resourceRepository := repositories.NewResourceRepository(gormDB)
+	resourceService := services.NewResourceService(resourceRepository)
+	resourceHandler := handlers.NewResourceHandler(client, resourceService)
+	engine, err := NewApp(gormDB, channel, projectHandler, resourceHandler, client)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -41,10 +49,12 @@ var AppSet = wire.NewSet(
 	NewApp, db.NewPostgresDatabase, db2.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewResourceHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService)
+var ServiceSet = wire.NewSet(services.NewProjectService, services.NewResourceService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewSectionRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewSectionRepository, repositories.NewResourceRepository)
+
+var MinioSet = wire.NewSet(configs.InitializeMinioClient)
 
 var RedisSet = wire.NewSet()

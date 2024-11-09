@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
 	"github.com/project-box/configs"
 	"github.com/project-box/handlers"
 	"github.com/project-box/routers"
@@ -20,6 +21,8 @@ func NewApp(
 	db *gorm.DB,
 	rabbitmqChannel *rabbitmq.Channel,
 	projectHandler handlers.ProjectHandler,
+	resourceHandler handlers.ResourceHandler,
+	minioClient *minio.Client,
 ) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -36,6 +39,7 @@ func NewApp(
 	routers.SetupRoutes(
 		r,
 		projectHandler,
+		resourceHandler,
 	)
 
 	return r, nil
