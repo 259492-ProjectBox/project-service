@@ -25,16 +25,24 @@ func PublishMessageFromRabbitMQToElasticSearch(channel *rabbitmq.Channel, operat
 		log.Println("Error marshalling message:", err)
 		return err
 	}
-	fmt.Printf("%+v\n", message)
+
+	fmt.Println("Published Message Body:", string(body))
+
 	err = channel.Publish(
-		"project_service.elastic_search", // exchange
-		"elastic_search.crud",            // routing key
-		false,                            // mandatory
-		false,                            // immediate
+		"project_service.search",      // exchange
+		"project_service.events.crud", // routing key
+		false,                         // mandatory
+		false,                         // immediate
 		rabbitmq.Publishing{
 			ContentType: "application/json",
 			Body:        body,
 		},
 	)
+	if err != nil {
+		log.Println("Error publishing message to RabbitMQ:", err)
+	} else {
+		fmt.Println("Message published successfully.")
+	}
+
 	return err
 }

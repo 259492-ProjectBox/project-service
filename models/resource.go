@@ -5,7 +5,7 @@ import "time"
 // Resource model
 type Resource struct {
 	ID             int          `json:"id" gorm:"primaryKey;autoIncrement"`
-	Title          *string      `json:"title"`
+	Title          string       `json:"title"`
 	ProjectID      int          `json:"project_id" gorm:"not null"`
 	ResourceTypeID int          `json:"resource_type_id" gorm:"not null"`
 	URL            string       `json:"url"`

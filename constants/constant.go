@@ -18,5 +18,6 @@ const (
 	Youtube    ResourceType = "youtube"
 	Powerpoint ResourceType = "powerpoint"
 	PDF        ResourceType = "pdf"
-	
+	Download   ResourceType = "download"
+	Asset      ResourceType = "asset"
 )

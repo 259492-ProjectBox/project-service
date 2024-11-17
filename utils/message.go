@@ -1,74 +1,72 @@
 package utils
 
 import (
+	"github.com/project-box/dtos"
 	dto "github.com/project-box/dtos"
 	"github.com/project-box/models"
 )
 
+func getStringValue(ptr *string) string {
+	if ptr == nil {
+		return ""
+	}
+	return *ptr
+}
 func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
-	// Create the base ProjectData structure
+
 	projectData := dto.ProjectData{
 		ID:                  project.ID,
-		OldProjectNo:        *project.OldProjectNo,
+		OldProjectNo:        getStringValue(project.OldProjectNo),
 		ProjectNo:           project.ProjectNo,
-		TitleTH:             *project.TitleTH,
-		TitleEN:             *project.TitleEN,
-		Abstract:            *project.Abstract,
+		TitleTH:             getStringValue(project.TitleTH),
+		TitleEN:             getStringValue(project.TitleEN),
+		Abstract:            getStringValue(project.Abstract),
 		ProjectStatus:       project.ProjectStatus,
 		RelationDescription: project.RelationDescription,
 		AcademicYear:        project.AcademicYear,
 		Semester:            project.Semester,
 		CreatedAt:           project.CreatedAt,
-		Advisor: models.Employee{
-			ID:           project.Advisor.ID,
-			Prefix:       project.Advisor.Prefix,
-			FirstName:    project.Advisor.FirstName,
-			LastName:     project.Advisor.LastName,
-			Email:        project.Advisor.Email,
-			RoleID:       project.Advisor.RoleID,
-			Role: models.Role{
-				ID:       project.Advisor.Role.ID,
-				RoleName: project.Advisor.Role.RoleName,
-			},
+		Advisor: dtos.Employee{
+			ID:        project.Advisor.ID,
+			Prefix:    project.Advisor.Prefix,
+			FirstName: project.Advisor.FirstName,
+			LastName:  project.Advisor.LastName,
+			Email:     project.Advisor.Email,
 		},
-		Major: models.Major{
+		Major: dtos.Major{
 			ID:        project.Major.ID,
 			MajorName: project.Major.MajorName,
 		},
-		Course: models.Course{
+		Course: dtos.Course{
 			ID:         project.Course.ID,
+			CourseNo:   project.Course.CourseNo,
 			CourseName: project.Course.CourseName,
+		},
+		Section: dtos.Section{
+			ID:            project.Section.ID,
+			SectionNumber: project.Section.SectionNumber,
+			Semester:      project.Section.Semester,
 		},
 	}
 
-	// Loop through Committees and add each to the DTO
 	for _, committee := range project.Committees {
-		projectData.Committees = append(projectData.Committees, models.Employee{
+		projectData.Committees = append(projectData.Committees, dtos.Employee{
 			ID:        committee.ID,
 			Prefix:    committee.Prefix,
 			FirstName: committee.FirstName,
 			LastName:  committee.LastName,
 			Email:     committee.Email,
-			RoleID:    committee.RoleID,
-			Role: models.Role{
-				ID:       committee.Role.ID,
-				RoleName: committee.Role.RoleName,
-			},
 		})
 	}
 
 	// Loop through Members and add each to the DTO
 	for _, member := range project.Members {
-		projectData.Members = append(projectData.Members, models.Student{
+		projectData.Members = append(projectData.Members, dtos.Student{
 			ID:        member.ID,
 			Prefix:    member.Prefix,
 			FirstName: member.FirstName,
 			LastName:  member.LastName,
 			Email:     member.Email,
-			Major: models.Major{
-				ID:        member.Major.ID,
-				MajorName: member.Major.MajorName,
-			},
 		})
 	}
 

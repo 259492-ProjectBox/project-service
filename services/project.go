@@ -46,11 +46,22 @@ func NewProjectService(
 }
 
 // Helper function to publish CRUD operations to Elasticsearch via RabbitMQ
-func (s *projectServiceImpl) publishToElasticSearch(ctx context.Context, action string, project *models.Project) {
+func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project) {
 	go func() {
-		projectMessage := utils.SanitizeProjectMessage(project)
-		err := rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage)
+		project, err := s.GetProjectById(ctx, project.ID)
 		if err != nil {
+			log.Printf("Failed to fetch project by ID: %v", err)
+			return
+		}
+
+		if project == nil {
+			log.Printf("Project with ID is nil")
+			return
+		}
+
+		projectMessage := utils.SanitizeProjectMessage(project)
+		fmt.Printf("%+v\n", projectMessage)
+		if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
 			log.Printf("Failed to publish message to RabbitMQ for action %s: %v", action, err)
 		}
 	}()
@@ -131,7 +142,7 @@ func (s *projectServiceImpl) CreateProject(ctx context.Context, project *models.
 		return nil, err
 	}
 
-	s.publishToElasticSearch(ctx, "create", project)
+	s.publishProjectMessageToElasticSearch(ctx, "create", project)
 
 	return project, nil
 }
@@ -159,13 +170,12 @@ func (s *projectServiceImpl) UpdateProject(ctx context.Context, id int, project 
 		return nil, err
 	}
 
-	// Instead of deleting and re-creating, update the project directly
 	project, err := s.projectRepo.UpdateProject(ctx, id, project)
 	if err != nil {
 		return nil, err
 	}
 
-	s.publishToElasticSearch(ctx, "update", project)
+	s.publishProjectMessageToElasticSearch(ctx, "update", project)
 
 	return project, nil
 }
@@ -180,7 +190,7 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 		return err
 	}
 
-	s.publishToElasticSearch(ctx, "delete", project)
+	s.publishProjectMessageToElasticSearch(ctx, "delete", project)
 
 	return nil
 }
