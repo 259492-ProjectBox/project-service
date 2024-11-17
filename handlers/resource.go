@@ -36,7 +36,6 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 	}
 }
 
-// UploadResource godoc
 // @Summary Upload a file and create a resource
 // @Description Upload a file to MinIO and save its information as a resource
 // @Tags Resource
@@ -100,7 +99,7 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 
 	// Create resource in database
 	resource, err := h.resourceService.CreateResource(c, &models.Resource{
-		Title:          &filename,
+		Title:          filename,
 		ProjectID:      projectID,
 		ResourceTypeID: resourceTypeID,
 		URL:            url.String(),
@@ -114,7 +113,7 @@ func (h *resourceHandler) UploadResource(c *gin.Context) {
 	}
 	response := models.UploadResourceResponse{
 		ID:             resource.ID,
-		Title:          &filename,
+		Title:          filename,
 		ProjectID:      projectID,
 		ResourceTypeID: resourceTypeID,
 		URL:            url.String(),
@@ -173,7 +172,7 @@ func (h *resourceHandler) DeleteResource(c *gin.Context) {
 
 	// Extract filename from URL
 	// filename := filepath.Base(resource.URL)
-	filename := *resource.Title
+	filename := resource.Title
 
 	// Delete from MinIO first
 	err = h.minioClient.RemoveObject(context.Background(), h.bucketName, filename, minio.RemoveObjectOptions{})
