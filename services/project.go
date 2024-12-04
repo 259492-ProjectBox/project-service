@@ -27,7 +27,7 @@ type projectServiceImpl struct {
 	projectRepo              repositories.ProjectRepository
 	committeeRepo            repositories.EmployeeRepository
 	majorRepo                repositories.MajorRepository
-	sectionRepo              repositories.SectionRepository
+	courseRepo               repositories.CourseRepository
 	projectNumberCounterRepo repositories.ProjectNumberCounterRepository
 }
 
@@ -36,15 +36,15 @@ func NewProjectService(
 	projectRepo repositories.ProjectRepository,
 	committeeRepo repositories.EmployeeRepository,
 	majorRepo repositories.MajorRepository,
-	sectionRepo repositories.SectionRepository,
+	courseRepo repositories.CourseRepository,
 	projectNumberCounterRepo repositories.ProjectNumberCounterRepository,
 ) ProjectService {
 	return &projectServiceImpl{
 		rabbitMQChannel:          rabbitMQChannel,
 		projectRepo:              projectRepo,
+		courseRepo:               courseRepo,
 		committeeRepo:            committeeRepo,
 		majorRepo:                majorRepo,
-		sectionRepo:              sectionRepo,
 		projectNumberCounterRepo: projectNumberCounterRepo,
 	}
 }
@@ -81,9 +81,9 @@ func (s *projectServiceImpl) createProjectNumber(project *models.Project) (*mode
 }
 
 func (s *projectServiceImpl) validateCourse(ctx context.Context, courseID int, semester int) error {
-	section, err := s.sectionRepo.GetByCourseAndSemester(ctx, courseID, semester)
+	section, err := s.courseRepo.GetByCourseAndSemester(ctx, courseID, semester)
 	if err != nil {
-		return fmt.Errorf("invalid course and section combination")
+		return fmt.Errorf("invalid course and semester combination")
 	}
 	if section == nil {
 		return fmt.Errorf("section not found")
@@ -131,9 +131,9 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	if err := s.validateMajor(ctx, project.MajorID); err != nil {
 		return err
 	}
-	if err := s.validateAdvisor(ctx, project.AdvisorID); err != nil {
-		return err
-	}
+	// if err := s.validateAdvisor(ctx, project.AdvisorID); err != nil {
+	// 	return err
+	// }
 	if err := s.validateOldProjectNumber(ctx, project.OldProjectNo); err != nil {
 		return err
 	}

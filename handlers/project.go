@@ -29,7 +29,6 @@ func NewProjectHandler(projectService services.ProjectService) ProjectHandler {
 	}
 }
 
-// CreateProject handles the creation of a project
 // @Summary Create a new project
 // @Description Creates a new project with the provided data
 // @Tags Project
@@ -40,7 +39,6 @@ func NewProjectHandler(projectService services.ProjectService) ProjectHandler {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /projects [post]
-
 func (h *projectHandler) CreateProject(c *gin.Context) {
 	req := &dtos.CreateProjectRequest{}
 	if err := c.ShouldBind(&req); err != nil {
@@ -57,7 +55,6 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 	c.JSON(http.StatusCreated, *project)
 }
 
-// UpdateProject handles the update of a project
 // @Summary Update an existing project
 // @Description Updates a project by its ID with the provided data
 // @Tags Project
@@ -123,20 +120,20 @@ func (h *projectHandler) GetProjectById(c *gin.Context) {
 // @Tags Project
 // @Produce  json
 // @Param student_id path string true "Student ID"
-// @Success 200 {object} []dtos.ProjectWithDetails "Successfully retrieved project"
+// @Success 200 {object} []models.Project "Successfully retrieved project"
 // @Failure 400 {object} map[string]interface{} "Invalid student ID"
 // @Failure 404 {object} map[string]interface{} "Project not found"
 // @Router /projects/student/{student_id} [get]
 func (h *projectHandler) GetProjectsByStudentId(c *gin.Context) {
 	studentId := c.Param("student_id")
 
-	projectWithDetails, err := h.projectService.GetProjectsByStudentId(c, studentId)
+	projects, err := h.projectService.GetProjectsByStudentId(c, studentId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, projectWithDetails)
+	c.JSON(http.StatusOK, projects)
 }
 
 // DeleteProject deletes a project by its ID

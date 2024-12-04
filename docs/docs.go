@@ -97,7 +97,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dtos.ProjectWithDetails"
+                                "$ref": "#/definitions/models.Project"
                             }
                         }
                     },
@@ -255,202 +255,9 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/resource": {
-            "post": {
-                "description": "Upload a file to MinIO and save its information as a resource",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Upload a file and create a resource",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "File to upload",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Project ID",
-                        "name": "project_id",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Resource Type ID",
-                        "name": "resource_type_id",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.UploadResourceResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/resource/project/{project_id}": {
-            "get": {
-                "description": "Get all resources associated with a project",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Get resources by project ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Project ID",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.UploadResourceResponse"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/resource/{id}": {
-            "get": {
-                "description": "Get a resource by its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Get a resource by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Resource ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.UploadResourceResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a resource and its file",
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Delete a resource",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Resource ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "dtos.ProjectWithDetails": {
-            "type": "object",
-            "properties": {
-                "employees": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Employee"
-                    }
-                },
-                "project": {
-                    "$ref": "#/definitions/models.Project"
-                },
-                "students": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Student"
-                    }
-                }
-            }
-        },
         "models.Course": {
             "type": "object",
             "properties": {
@@ -458,9 +265,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "course_no": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "major": {
+                    "$ref": "#/definitions/models.Major"
+                },
+                "major_id": {
                     "type": "integer"
                 }
             }
@@ -468,17 +281,26 @@ const docTemplate = `{
         "models.Employee": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
-                "employee_name": {
+                "first_name": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "major": {
+                    "$ref": "#/definitions/models.Major"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "prefix": {
+                    "type": "string"
                 },
                 "role": {
                     "$ref": "#/definitions/models.Role"
@@ -508,18 +330,6 @@ const docTemplate = `{
                 "academic_year": {
                     "type": "integer"
                 },
-                "advisor": {
-                    "$ref": "#/definitions/models.Employee"
-                },
-                "advisor_id": {
-                    "type": "integer"
-                },
-                "committees": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Employee"
-                    }
-                },
                 "course": {
                     "$ref": "#/definitions/models.Course"
                 },
@@ -529,8 +339,17 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "employees": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Employee"
+                    }
+                },
                 "id": {
                     "type": "integer"
+                },
+                "is_approved": {
+                    "type": "boolean"
                 },
                 "major": {
                     "$ref": "#/definitions/models.Major"
@@ -550,17 +369,11 @@ const docTemplate = `{
                 "project_no": {
                     "type": "string"
                 },
-                "project_status": {
-                    "type": "string"
-                },
                 "relation_description": {
                     "type": "string"
                 },
-                "section": {
-                    "$ref": "#/definitions/models.Section"
-                },
                 "section_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "semester": {
                     "type": "integer"
@@ -569,14 +382,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title_th": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.ResponseMessage": {
-            "type": "object",
-            "properties": {
-                "message": {
                     "type": "string"
                 }
             }
@@ -592,62 +397,39 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Section": {
-            "type": "object",
-            "properties": {
-                "course": {
-                    "$ref": "#/definitions/models.Course"
-                },
-                "course_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "section_number": {
-                    "type": "string"
-                },
-                "semester": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.Student": {
             "type": "object",
             "properties": {
                 "email": {
+                    "description": "Unique email address",
+                    "type": "string"
+                },
+                "first_name": {
+                    "description": "First name of the student",
                     "type": "string"
                 },
                 "id": {
+                    "description": "Use ` + "`" + `ID` + "`" + ` as the primary key",
+                    "type": "string"
+                },
+                "last_name": {
+                    "description": "Last name of the student",
                     "type": "string"
                 },
                 "major": {
-                    "$ref": "#/definitions/models.Major"
+                    "description": "Major related to student",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Major"
+                        }
+                    ]
                 },
                 "major_id": {
+                    "description": "Major ID, not null",
                     "type": "integer"
                 },
-                "student_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.UploadResourceResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "project_id": {
-                    "type": "integer"
-                },
-                "resource_type_id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
+                "prefix": {
+                    "description": "Optional field for title (e.g., Mr., Ms., etc.)",
                     "type": "string"
                 }
             }

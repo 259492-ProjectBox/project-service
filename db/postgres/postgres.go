@@ -40,6 +40,7 @@ func migrateModel(db *gorm.DB) error {
 		&models.Project{},
 		&models.ProjectResource{},
 		&models.AssetResource{},
+		&models.ResourceType{},
 		&models.Resource{},
 		&models.Employee{},
 		&models.Student{},
@@ -47,8 +48,6 @@ func migrateModel(db *gorm.DB) error {
 		&models.Section{},
 		&models.Major{},
 		&models.Calendar{},
-		&models.ResourceType{},
-		&models.Resource{},
 	); err != nil {
 		return fmt.Errorf("migration error: %w", err)
 	}

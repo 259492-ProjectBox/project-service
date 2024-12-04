@@ -1,76 +1,82 @@
-INSERT INTO "roles" (id, role_name) VALUES
-(1 ,'Advisor'),
-(2, 'Committee');
+-- Insert Majors
+INSERT INTO "majors" ("major_name") VALUES
+  ('Computer Science'),
+  ('Electrical Engineering'),
+  ('Mechanical Engineering'),
+  ('Civil Engineering');
 
-INSERT INTO "majors" (id ,major_name) VALUES
-(1,'Computer Science'),
-(2,'Information Technology'),
-(3,'Software Engineering');
+-- Insert Courses
+INSERT INTO "courses" ("course_no", "course_name", "major_id" , "semester") VALUES
+  ('CS101', 'Introduction to Computer Science', 1 , 1),
+  ('EE101', 'Introduction to Electrical Engineering', 2 , 1),
+  ('ME101', 'Introduction to Mechanical Engineering', 3,2),
+  ('CE101', 'Introduction to Civil Engineering', 4,2);
 
-SELECT * FROM "majors";
--- Insert students (note that student_id is now the primary key)
-INSERT INTO "students" (id, student_name, email, major_id) VALUES
-('640610304', 'Alice Smith', 'alice@example.com', 1),
-('640610305', 'Bob Johnson', 'bob@example.com', 1),
-('640610306', 'Charlie Brown', 'charlie@example.com', 2),
-('640610307', 'David Wilson', 'david@example.com', 3);
+-- Insert Students
+INSERT INTO "students" ("id", "prefix", "first_name", "last_name", "email", "major_id") VALUES
+  ('640610304', 'Mr.', 'John', 'Doe', 'john.doe@example.com', 1),
+  ('640610305', 'Ms.', 'Jane', 'Smith', 'jane.smith@example.com', 2),
+  ('640610306', 'Mr.', 'Mark', 'Johnson', 'mark.johnson@example.com', 3),
+  ('640610307', 'Ms.', 'Emily', 'Davis', 'emily.davis@example.com', 4);
 
+-- Insert Projects
+INSERT INTO "projects" ("old_project_no", "project_no", "title_th", "title_en", "abstract", "relation_description", "academic_year", "semester", "section_id", "is_approved", "course_id", "major_id") VALUES
+  (NULL, 'P002', 'โครงการศึกษา', 'Study Project', 'Abstract of Study Project', 'Project relations description', 2024, 1, 'A', true, 1, 1),
+  ('P002', 'P004', 'โครงการวิศวกรรม', 'Engineering Project', 'Abstract of Engineering Project', 'Engineering project relations', 2024, 2, 'B', false, 2, 2);
 
--- Insert courses
-INSERT INTO "courses" (id ,course_no, course_name) VALUES
-(1,101, 'Introduction to Computer Science'),
-(2, 102, 'Data Structures'),
-(3,201, 'Software Engineering I'),
-(4, 202, 'Database Systems');
+-- Insert Project Students
+INSERT INTO "project_students" ("project_id", "student_id") VALUES
+  (1, '640610304'),
+  (1, '640610305'),
+  (2, '640610306'),
+  (2, '640610307');
+-- Insert Project Employee Types
+INSERT INTO "project_employee_types" ("type_name") VALUES
+  ('Manager'),
+  ('Developer'),
+  ('Designer');
 
--- Insert sections
-INSERT INTO "sections" (id,course_id, section_number, semester) VALUES
-(1,1, 'A', 1),
-(2,1, 'B', 2),
-(3,2, 'A', 1),
-(4,3, 'C', 1);
+-- Insert Roles
+INSERT INTO "roles" ("role_name") VALUES
+  ('Advisor'),
+  ('Coordinator');
 
--- Insert employees
-INSERT INTO "employees" (id,employee_name, email, role_id, created_at) VALUES
-(1,'Dr. Jane Doe', 'jane.doe@example.com', 1, CURRENT_TIMESTAMP),
-(2,'Dr. John Smith', 'john.smith@example.com', 2, CURRENT_TIMESTAMP);
+-- Insert Employees
+INSERT INTO "employees" ("prefix", "first_name", "last_name", "email", "major_id", "role_id") VALUES
+  ('Dr.', 'Alice', 'Walker', 'alice.walker@example.com', 1, 1),
+  ('Mr.', 'Bob', 'Taylor', 'bob.taylor@example.com', 2, 2);
 
--- Insert projects
-INSERT INTO "projects" 
-(id ,old_project_no, project_no, title_th, title_en, abstract, relation_description, advisor_id, course_id, section_id, semester, academic_year, major_id, project_status, created_at) 
-VALUES
-(1,NULL, 'P001-1/67', 'โปรเจค 1', 'Project 1', 'This is an abstract for project 1.', 'Relation description 1', 1, 1, 1, 1, 2567, 1, 'อยู่ในการพิจารณา', CURRENT_TIMESTAMP),
-(2,'P001-1/67', 'P002-1/67', 'โปรเจค 2', 'Project 2', 'This is an abstract for project 2.', 'Relation description 2', 2, 2, 2, 1, 2567, 1, 'อยู่ในการพิจารณา', CURRENT_TIMESTAMP);
+-- Insert Project Employees
+INSERT INTO "project_employees" ("project_id", "employee_id") VALUES
+  (1, 1),
+  (2, 2);
 
--- Insert project students
-INSERT INTO "project_students" (project_id, student_id) VALUES
-(1, '640610304'),
-(1, '640610305'),
-(2, '640610306');
+-- Insert Resource Types
+INSERT INTO "resource_types" ("resource_type") VALUES
+  ('Textbook'),
+  ('Lab Equipment');
 
--- Insert project employees
-INSERT INTO "project_employees" (project_id, employee_id , role_id) VALUES
-(1, 1 ,1),
-(2, 2 , 1);
+-- Insert Resources
+INSERT INTO "resources" ("title", "resource_type_id", "url") VALUES
+  ('Computer Science Textbook', 1, 'https://example.com/cs-textbook'),
+  ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab');
 
--- Insert comments
-INSERT INTO "comments" (project_id, comment_text, created_at) VALUES
-(1, 'Great project! Looking forward to seeing the final results.', CURRENT_TIMESTAMP),
-(2, 'Interesting approach to the problem.', CURRENT_TIMESTAMP);
+-- Insert Asset Resources
+INSERT INTO "asset_resources" ("resource_id", "description", "major_id") VALUES
+  (1, 'A comprehensive guide to comp  uter science', 1),
+  (2, 'Tools and equipment for electrical engineering labs', 2);
 
--- Insert resource types
-INSERT INTO "resource_types" (resource_type) VALUES
-('Report'),
-('Presentation'),
-('Video');
+-- Insert Project Resources
+INSERT INTO "project_resources" ("resource_id", "project_id") VALUES
+  (1, 1),
+  (2, 2);
 
--- Insert resources
-INSERT INTO "resources" (title, project_id, resource_type_id, url, created_at) VALUES
-('Project Report', 1, 1, 'http://example.com/report1', CURRENT_TIMESTAMP),
-('Project Presentation', 1, 2, 'http://example.com/presentation1', CURRENT_TIMESTAMP),
-('Project Video', 2, 3, 'http://example.com/video1', CURRENT_TIMESTAMP);
+-- Insert Project Resource Configs
+INSERT INTO "project_resource_configs" ("title", "resource_type_id", "major_id") VALUES
+  ('Default Resource Config', 1, 1),
+  ('Lab Resource Config', 2, 2);
 
--- Insert important dates
-INSERT INTO "important_dates" (major_id, event_date, title, description) VALUES
-(1, '2024-12-01', 'Submission Deadline', 'Final project submission deadline for CS majors.'),
-(2, '2024-11-15', 'Midterm Exam', 'Midterm exam for IT majors.');
+-- Insert Calendar Events
+INSERT INTO "calendar" ("major_id", "event_date", "title", "description") VALUES
+  (1, '2024-01-15', 'CS 101 Exam', 'Final exam for CS 101 course'),
+  (2, '2024-02-20', 'EE 101 Lab', 'Electrical Engineering Lab practical session');

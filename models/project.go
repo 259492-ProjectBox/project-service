@@ -6,19 +6,16 @@ import "time"
 type Project struct {
 	ID                  int        `json:"id" gorm:"primaryKey;autoIncrement"`
 	OldProjectNo        *string    `json:"old_project_no"`
-	ProjectNo           string     `json:"project_no"`
+	ProjectNo           string     `json:"project_no" gorm:"unique"`
 	TitleTH             *string    `json:"title_th"`
 	TitleEN             *string    `json:"title_en"`
 	Abstract            *string    `json:"abstract"`
-	ProjectStatus       string     `json:"project_status"`
 	RelationDescription string     `json:"relation_description"`
 	AcademicYear        int        `json:"academic_year" gorm:"not null"`
 	Semester            int        `json:"semester"`
 	IsApproved          bool       `json:"is_approved"`
 	CreatedAt           time.Time  `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	SectionID           string     `json:"section_id"`
-	AdvisorID           int        `json:"advisor_id" gorm:"not null"`
-	Advisor             Employee   `json:"advisor" gorm:"foreignKey:AdvisorID;constraint:OnDelete:SET NULL"`
 	MajorID             int        `json:"major_id" gorm:"not null"`
 	Major               Major      `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
 	CourseID            int        `json:"course_id" gorm:"not null"`

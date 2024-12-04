@@ -138,7 +138,6 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 			return nil, err
 		}
 		defer src.Close()
-
 		_, err = r.minioClient.PutObject(ctx, "projects", filePath, src, file.Size, minio.PutObjectOptions{
 			ContentType: file.Header.Get("Content-Type"),
 		})

@@ -21,18 +21,10 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 		TitleTH:             getStringValue(project.TitleTH),
 		TitleEN:             getStringValue(project.TitleEN),
 		Abstract:            getStringValue(project.Abstract),
-		ProjectStatus:       project.ProjectStatus,
 		RelationDescription: project.RelationDescription,
 		AcademicYear:        project.AcademicYear,
 		Semester:            project.Semester,
 		CreatedAt:           project.CreatedAt,
-		Advisor: dtos.Employee{
-			ID:        project.Advisor.ID,
-			Prefix:    project.Advisor.Prefix,
-			FirstName: project.Advisor.FirstName,
-			LastName:  project.Advisor.LastName,
-			Email:     project.Advisor.Email,
-		},
 		Major: dtos.Major{
 			ID:        project.Major.ID,
 			MajorName: project.Major.MajorName,
