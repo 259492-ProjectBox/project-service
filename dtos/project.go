@@ -1,9 +1,17 @@
 package dtos
 
 import (
+	"mime/multipart"
 	"time"
+
+	"github.com/project-box/models"
 )
 
+type CreateProjectRequest struct {
+	Files   []*multipart.FileHeader `form:"files"`
+	Titles  []string                `form:"titles"`
+	Project models.Project          `form:"project"`
+}
 type ProjectData struct {
 	ID                  int        `json:"id"`
 	OldProjectNo        string     `json:"old_project_no"`

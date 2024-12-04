@@ -24,7 +24,6 @@ type ProjectService interface {
 
 type projectServiceImpl struct {
 	rabbitMQChannel          *rabbitmq.Channel
-	resourceService          resourceService
 	projectRepo              repositories.ProjectRepository
 	committeeRepo            repositories.EmployeeRepository
 	majorRepo                repositories.MajorRepository
@@ -71,10 +70,14 @@ func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Co
 	}()
 }
 
-func (s *projectServiceImpl) createProjectNumber(project *models.Project) *models.Project {
-	projectNumber := utils.FormatProjectNumber(project.Semester, project.AcademicYear)
-	project.ProjectNo = projectNumber
-	return project
+func (s *projectServiceImpl) createProjectNumber(project *models.Project) (*models.Project, error) {
+	nextProjectNumber, err := s.projectNumberCounterRepo.GetNextProjectNumber(project.AcademicYear, project.Semester, project.CourseID)
+	if err != nil {
+		return nil, err
+	}
+	projectID := utils.FormatProjectID(project.AcademicYear, project.Semester, nextProjectNumber)
+	project.ProjectNo = projectID
+	return project, nil
 }
 
 func (s *projectServiceImpl) validateCourse(ctx context.Context, courseID int, semester int) error {
@@ -120,6 +123,7 @@ func (s *projectServiceImpl) validateOldProjectNumber(ctx context.Context, oldPr
 
 	return nil
 }
+
 func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
 	if err := s.validateCourse(ctx, project.CourseID, project.Semester); err != nil {
 		return err
@@ -141,7 +145,12 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 		return nil, err
 	}
 
-	project, err := s.projectRepo.CreateProjectWithFiles(ctx, s.createProjectNumber(project), files, titles)
+	project, err := s.createProjectNumber(project)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles)
 	if err != nil {
 		return nil, err
 	}

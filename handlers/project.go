@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/services"
 )
@@ -38,22 +40,15 @@ func NewProjectHandler(projectService services.ProjectService) ProjectHandler {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /projects [post]
+
 func (h *projectHandler) CreateProject(c *gin.Context) {
-	project := &models.Project{}
-	if err := c.ShouldBindJSON(&project); err != nil {
+	req := &dtos.CreateProjectRequest{}
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	form, err := c.MultipartForm()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file upload"})
-		return
-	}
-
-	files := form.File["resources"]
-	titles := c.PostFormArray("titles")
-	project, err = h.projectService.CreateProjectWithFiles(c, project, files, titles)
+	fmt.Printf("%+v\n", req.Project)
+	project, err := h.projectService.CreateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

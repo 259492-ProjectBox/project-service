@@ -32,11 +32,17 @@ func GetPostgresConfig() *PostgresConfig {
 
 func migrateModel(db *gorm.DB) error {
 	if err := db.AutoMigrate(
+		&models.Comment{},
+		&models.Config{},
 		&models.Role{},
+		&models.ProjectNumberCounter{},
+		&models.ProjectEmployeeType{},
 		&models.Project{},
+		&models.ProjectResource{},
+		&models.AssetResource{},
+		&models.Resource{},
 		&models.Employee{},
 		&models.Student{},
-		&models.Comment{},
 		&models.Course{},
 		&models.Section{},
 		&models.Major{},
@@ -65,10 +71,10 @@ func NewPostgresDatabase() *gorm.DB {
 		return nil
 	}
 
-	// if err = migrateModel(db); err != nil {
-	// 	log.Println(err)
-	// 	return nil
-	// }
+	if err = migrateModel(db); err != nil {
+		log.Println(err)
+		return nil
+	}
 
 	return db
 }

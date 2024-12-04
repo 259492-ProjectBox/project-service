@@ -9,7 +9,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
-	"github.com/project-box/configs"
+	db3 "github.com/project-box/db/minio"
 	"github.com/project-box/db/postgres"
 	db2 "github.com/project-box/db/rabbitmq"
 	"github.com/project-box/handlers"
@@ -22,20 +22,15 @@ import (
 func InitializeApp() (*gin.Engine, func(), error) {
 	gormDB := db.NewPostgresDatabase()
 	channel := db2.NewRabbitMQConnection()
-	projectRepository := repositories.NewProjectRepository(gormDB)
+	client := db3.NewMinIOConnection()
+	projectRepository := repositories.NewProjectRepository(gormDB, client)
 	employeeRepository := repositories.NewEmployeeRepository(gormDB)
 	majorRepository := repositories.NewMajorRepository(gormDB)
 	sectionRepository := repositories.NewSectionRepository(gormDB)
-	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, sectionRepository)
+	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
+	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, sectionRepository, projectNumberCounterRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
-	client, err := configs.InitializeMinioClient()
-	if err != nil {
-		return nil, nil, err
-	}
-	resourceRepository := repositories.NewResourceRepository(gormDB)
-	resourceService := services.NewResourceService(resourceRepository)
-	resourceHandler := handlers.NewResourceHandler(client, resourceService)
-	engine, err := NewApp(gormDB, channel, projectHandler, resourceHandler, client)
+	engine, err := NewApp(gormDB, channel, projectHandler, client)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -46,13 +41,13 @@ func InitializeApp() (*gin.Engine, func(), error) {
 // wire.go:
 
 var AppSet = wire.NewSet(
-	NewApp, db.NewPostgresDatabase, db2.NewRabbitMQConnection,
+	NewApp, db.NewPostgresDatabase, db3.NewMinIOConnection, db2.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewResourceHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService, services.NewResourceService)
+var ServiceSet = wire.NewSet(services.NewProjectService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewSectionRepository, repositories.NewResourceRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewSectionRepository, repositories.NewResourceRepository)
 
 var RedisSet = wire.NewSet()

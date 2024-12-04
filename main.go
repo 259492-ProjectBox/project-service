@@ -21,7 +21,6 @@ func NewApp(
 	db *gorm.DB,
 	rabbitmqChannel *rabbitmq.Channel,
 	projectHandler handlers.ProjectHandler,
-	resourceHandler handlers.ResourceHandler,
 	minioClient *minio.Client,
 ) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
@@ -39,7 +38,6 @@ func NewApp(
 	routers.SetupRoutes(
 		r,
 		projectHandler,
-		resourceHandler,
 	)
 
 	return r, nil
