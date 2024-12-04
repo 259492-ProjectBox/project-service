@@ -6,7 +6,6 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
-	"github.com/project-box/configs"
 	database "github.com/project-box/db/postgres"
 	rabbitMQ "github.com/project-box/db/rabbitmq"
 	"github.com/project-box/handlers"
@@ -19,8 +18,7 @@ func InitializeApp() (*gin.Engine, func(), error) {
 		AppSet,
 		HandlerSet,
 		ServiceSet,
-		RepositorySet,
-		MinioSet)
+		RepositorySet)
 
 	return gin.New(), func() {}, nil
 }
@@ -28,6 +26,7 @@ func InitializeApp() (*gin.Engine, func(), error) {
 var AppSet = wire.NewSet(
 	NewApp,
 	database.NewPostgresDatabase,
+	database.NewMinIOConnection,
 	rabbitMQ.NewRabbitMQConnection,
 )
 
@@ -48,7 +47,5 @@ var RepositorySet = wire.NewSet(
 	repositories.NewSectionRepository,
 	repositories.NewResourceRepository,
 )
-var MinioSet = wire.NewSet(
-	configs.InitializeMinioClient,
-)
+
 var RedisSet = wire.NewSet()

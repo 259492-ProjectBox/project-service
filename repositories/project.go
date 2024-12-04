@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mime/multipart"
+	"time"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/project-box/models"
 	"gorm.io/gorm"
 )
@@ -14,19 +17,21 @@ type ProjectRepository interface {
 	GetProjectByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	GetByProjectNo(ctx context.Context, oldProjectNo string) (*models.Project, error)
-	CreateProject(ctx context.Context, project *models.Project) (*models.Project, error)
+	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 }
 
 // ProjectHandler implementation
 type projectRepositoryImpl struct {
-	db *gorm.DB
+	db          *gorm.DB
+	minioClient *minio.Client
 	*repositoryImpl[models.Project]
 }
 
-func NewProjectRepository(db *gorm.DB) ProjectRepository {
+func NewProjectRepository(db *gorm.DB, minioClient *minio.Client) ProjectRepository {
 	return &projectRepositoryImpl{
 		db:             db,
+		minioClient:    minioClient,
 		repositoryImpl: newRepository[models.Project](db),
 	}
 }
@@ -98,7 +103,7 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 
 	for i := range projects {
 		project := &projects[i]
-		project.Committees = employeesMap[project.ID]
+		project.Employees = employeesMap[project.ID]
 		project.Members = studentsMap[project.ID]
 	}
 
@@ -112,13 +117,64 @@ func (r *projectRepositoryImpl) GetByProjectNo(ctx context.Context, projectNo st
 	}
 	return project, nil
 }
+func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 
-func (r *projectRepositoryImpl) CreateProject(ctx context.Context, project *models.Project) (*models.Project, error) {
-	if err := r.db.WithContext(ctx).Create(project).Error; err != nil {
+	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+
+	for i, file := range files {
+		fileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
+		filePath := fmt.Sprintf("uploads/%s", fileName)
+
+		src, err := file.Open()
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		defer src.Close()
+
+		_, err = r.minioClient.PutObject(ctx, "projects", filePath, src, file.Size, minio.PutObjectOptions{
+			ContentType: file.Header.Get("Content-Type"),
+		})
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		fileURL := fmt.Sprintf("http://localhost:9000/%s/%s", "projects", filePath)
+
+		projectResource := &models.ProjectResource{
+			ProjectID: project.ID,
+		}
+		if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		resource := &models.Resource{
+			Title:             titles[i],
+			URL:               fileURL,
+			ProjectResourceID: &projectResource.ID,
+		}
+		if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
 	return project, nil
 }
+
 func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error) {
 	tx := r.db.WithContext(ctx).Begin()
 	if tx.Error != nil {

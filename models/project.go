@@ -12,17 +12,17 @@ type Project struct {
 	Abstract            *string    `json:"abstract"`
 	ProjectStatus       string     `json:"project_status"`
 	RelationDescription string     `json:"relation_description"`
-	AdvisorID           int        `json:"advisor_id" gorm:"not null"`
-	CourseID            int        `json:"course_id" gorm:"not null"`
-	SectionID           *int       `json:"section_id"`
 	AcademicYear        int        `json:"academic_year" gorm:"not null"`
 	Semester            int        `json:"semester"`
-	MajorID             int        `json:"major_id" gorm:"not null"`
+	IsApproved          bool       `json:"is_approved"`
 	CreatedAt           time.Time  `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	SectionID           string     `json:"section_id"`
+	AdvisorID           int        `json:"advisor_id" gorm:"not null"`
 	Advisor             Employee   `json:"advisor" gorm:"foreignKey:AdvisorID;constraint:OnDelete:SET NULL"`
+	MajorID             int        `json:"major_id" gorm:"not null"`
 	Major               Major      `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
+	CourseID            int        `json:"course_id" gorm:"not null"`
 	Course              Course     `json:"course" gorm:"foreignKey:CourseID;constraint:OnDelete:SET NULL"`
-	Section             Section    `json:"section" gorm:"foreignKey:SectionID;constraint:OnDelete:SET NULL"`
-	Committees          []Employee `json:"committees" gorm:"many2many:project_employees;constraint:OnDelete:CASCADE;"`
+	Employees           []Employee `json:"employees" gorm:"many2many:project_employees;constraint:OnDelete:CASCADE;"`
 	Members             []Student  `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 }

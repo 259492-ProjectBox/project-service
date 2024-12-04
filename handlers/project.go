@@ -44,7 +44,16 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	project, err := h.projectService.CreateProject(c, project)
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file upload"})
+		return
+	}
+
+	files := form.File["resources"]
+	titles := c.PostFormArray("titles")
+	project, err = h.projectService.CreateProjectWithFiles(c, project, files, titles)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

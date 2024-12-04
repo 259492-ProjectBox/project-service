@@ -2,16 +2,28 @@ package models
 
 import "time"
 
-// Resource model
 type Resource struct {
-	ID             int          `json:"id" gorm:"primaryKey;autoIncrement"`
-	Title          string       `json:"title"`
-	ProjectID      int          `json:"project_id" gorm:"not null"`
-	ResourceTypeID int          `json:"resource_type_id" gorm:"not null"`
-	URL            string       `json:"url"`
-	CreatedAt      time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-	Project        Project      `json:"project" gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
-	ResourceType   ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
+	ID                int          `json:"id" gorm:"primaryKey;autoIncrement"`
+	Title             string       `json:"title"`
+	URL               string       `json:"url"`
+	CreatedAt         time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	ProjectResourceID *int         `json:"project_resource_id"`
+	AssetResourceID   *int         `json:"assets_resource_id"`
+	ResourceTypeID    int          `json:"resource_type_id" gorm:"not null"`
+	ResourceType      ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
+}
+
+type ProjectResource struct {
+	ID        int      `json:"id" gorm:"primaryKey;autoIncrement"`
+	ProjectID int      `json:"project_id" gorm:"not null"`
+	Project   Project  `json:"project" gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
+	Resource  Resource `json:"resource"`
+}
+
+type AssetResource struct {
+	ID          int      `json:"id" gorm:"primaryKey;autoIncrement"`
+	Description string   `json:"description"`
+	Resource    Resource `json:"resource"`
 }
 
 type FileResponse struct {

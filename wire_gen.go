@@ -55,6 +55,4 @@ var ServiceSet = wire.NewSet(services.NewProjectService, services.NewResourceSer
 
 var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewSectionRepository, repositories.NewResourceRepository)
 
-var MinioSet = wire.NewSet(configs.InitializeMinioClient)
-
 var RedisSet = wire.NewSet()

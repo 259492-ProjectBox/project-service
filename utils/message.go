@@ -42,15 +42,10 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 			CourseNo:   project.Course.CourseNo,
 			CourseName: project.Course.CourseName,
 		},
-		Section: dtos.Section{
-			ID:            project.Section.ID,
-			SectionNumber: project.Section.SectionNumber,
-			Semester:      project.Section.Semester,
-		},
 	}
 
-	for _, committee := range project.Committees {
-		projectData.Committees = append(projectData.Committees, dtos.Employee{
+	for _, committee := range project.Employees {
+		projectData.Employees = append(projectData.Employees, dtos.Employee{
 			ID:        committee.ID,
 			Prefix:    committee.Prefix,
 			FirstName: committee.FirstName,
@@ -59,7 +54,6 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 		})
 	}
 
-	// Loop through Members and add each to the DTO
 	for _, member := range project.Members {
 		projectData.Members = append(projectData.Members, dtos.Student{
 			ID:        member.ID,

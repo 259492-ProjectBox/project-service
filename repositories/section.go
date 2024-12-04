@@ -9,7 +9,7 @@ import (
 
 type SectionRepository interface {
 	repository[models.Section]
-	GetByCourseAndSectionAndSemester(ctx context.Context, courseId int, sectionId *int, semester int) (*models.Section, error)
+	GetByCourseAndSemester(ctx context.Context, courseId int, semester int) (*models.Section, error)
 }
 
 type sectionRepositoryImpl struct {
@@ -24,12 +24,8 @@ func NewSectionRepository(db *gorm.DB) SectionRepository {
 	}
 }
 
-func (r *sectionRepositoryImpl) GetByCourseAndSectionAndSemester(ctx context.Context, courseID int, sectionID *int, semester int) (*models.Section, error) {
+func (r *sectionRepositoryImpl) GetByCourseAndSemester(ctx context.Context, courseID int, semester int) (*models.Section, error) {
 	filters := map[string]interface{}{"course_id": courseID, "semester": semester}
-	if sectionID != nil {
-		filters["id"] = *sectionID
-	}
-
 	var section models.Section
 	if err := r.db.WithContext(ctx).Where(filters).First(&section).Error; err != nil {
 		return nil, err

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mime/multipart"
 
 	"github.com/project-box/models"
 	rabbitMQQueue "github.com/project-box/queues/rabbitmq"
@@ -14,7 +15,7 @@ import (
 
 type ProjectService interface {
 	ValidateProject(ctx context.Context, project *models.Project) error
-	CreateProject(ctx context.Context, project *models.Project) (*models.Project, error)
+	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
@@ -22,11 +23,13 @@ type ProjectService interface {
 }
 
 type projectServiceImpl struct {
-	rabbitMQChannel *rabbitmq.Channel
-	projectRepo     repositories.ProjectRepository
-	committeeRepo   repositories.EmployeeRepository
-	majorRepo       repositories.MajorRepository
-	sectionRepo     repositories.SectionRepository
+	rabbitMQChannel          *rabbitmq.Channel
+	resourceService          resourceService
+	projectRepo              repositories.ProjectRepository
+	committeeRepo            repositories.EmployeeRepository
+	majorRepo                repositories.MajorRepository
+	sectionRepo              repositories.SectionRepository
+	projectNumberCounterRepo repositories.ProjectNumberCounterRepository
 }
 
 func NewProjectService(
@@ -35,17 +38,18 @@ func NewProjectService(
 	committeeRepo repositories.EmployeeRepository,
 	majorRepo repositories.MajorRepository,
 	sectionRepo repositories.SectionRepository,
+	projectNumberCounterRepo repositories.ProjectNumberCounterRepository,
 ) ProjectService {
 	return &projectServiceImpl{
-		rabbitMQChannel: rabbitMQChannel,
-		projectRepo:     projectRepo,
-		committeeRepo:   committeeRepo,
-		majorRepo:       majorRepo,
-		sectionRepo:     sectionRepo,
+		rabbitMQChannel:          rabbitMQChannel,
+		projectRepo:              projectRepo,
+		committeeRepo:            committeeRepo,
+		majorRepo:                majorRepo,
+		sectionRepo:              sectionRepo,
+		projectNumberCounterRepo: projectNumberCounterRepo,
 	}
 }
 
-// Helper function to publish CRUD operations to Elasticsearch via RabbitMQ
 func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project) {
 	go func() {
 		project, err := s.GetProjectById(ctx, project.ID)
@@ -68,13 +72,13 @@ func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Co
 }
 
 func (s *projectServiceImpl) createProjectNumber(project *models.Project) *models.Project {
-	projectNumber := utils.FormatProjectNumber(*project.SectionID, project.Semester, project.AcademicYear)
+	projectNumber := utils.FormatProjectNumber(project.Semester, project.AcademicYear)
 	project.ProjectNo = projectNumber
 	return project
 }
 
-func (s *projectServiceImpl) validateCourse(ctx context.Context, courseID int, sectionID *int, semester int) error {
-	section, err := s.sectionRepo.GetByCourseAndSectionAndSemester(ctx, courseID, sectionID, semester)
+func (s *projectServiceImpl) validateCourse(ctx context.Context, courseID int, semester int) error {
+	section, err := s.sectionRepo.GetByCourseAndSemester(ctx, courseID, semester)
 	if err != nil {
 		return fmt.Errorf("invalid course and section combination")
 	}
@@ -117,7 +121,7 @@ func (s *projectServiceImpl) validateOldProjectNumber(ctx context.Context, oldPr
 	return nil
 }
 func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
-	if err := s.validateCourse(ctx, project.CourseID, project.SectionID, project.Semester); err != nil {
+	if err := s.validateCourse(ctx, project.CourseID, project.Semester); err != nil {
 		return err
 	}
 	if err := s.validateMajor(ctx, project.MajorID); err != nil {
@@ -132,12 +136,12 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	return nil
 }
 
-func (s *projectServiceImpl) CreateProject(ctx context.Context, project *models.Project) (*models.Project, error) {
+func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
 	}
 
-	project, err := s.projectRepo.Create(ctx, s.createProjectNumber(project))
+	project, err := s.projectRepo.CreateProjectWithFiles(ctx, s.createProjectNumber(project), files, titles)
 	if err != nil {
 		return nil, err
 	}

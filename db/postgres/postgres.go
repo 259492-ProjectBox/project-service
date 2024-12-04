@@ -40,7 +40,7 @@ func migrateModel(db *gorm.DB) error {
 		&models.Course{},
 		&models.Section{},
 		&models.Major{},
-		&models.ImportantDate{},
+		&models.Calendar{},
 		&models.ResourceType{},
 		&models.Resource{},
 	); err != nil {

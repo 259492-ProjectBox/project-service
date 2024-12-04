@@ -19,7 +19,6 @@ type ProjectData struct {
 	Advisor             Employee   `json:"advisor"`
 	Major               Major      `json:"major"`
 	Course              Course     `json:"course"`
-	Section             Section    `json:"section"`
-	Committees          []Employee `json:"committees"`
+	Employees           []Employee `json:"employees"`
 	Members             []Student  `json:"members"`
 }
