@@ -75,7 +75,7 @@ func (s *projectServiceImpl) createProjectNumber(project *models.Project) (*mode
 	if err != nil {
 		return nil, err
 	}
-	projectID := utils.FormatProjectID(project.AcademicYear, project.Semester, nextProjectNumber)
+	projectID := utils.FormatProjectID(project.Semester, project.AcademicYear, nextProjectNumber)
 	project.ProjectNo = projectID
 	return project, nil
 }
@@ -107,34 +107,11 @@ func (s *projectServiceImpl) validateAdvisor(ctx context.Context, advisorID int)
 	return nil
 }
 
-func (s *projectServiceImpl) validateOldProjectNumber(ctx context.Context, oldProjectNo *string) error {
-	if oldProjectNo == nil {
-		return nil
-	}
-
-	if err := utils.IsValidProjectNumberFormat(*oldProjectNo); err != nil {
-		return err
-	}
-
-	_, err := s.projectRepo.GetByProjectNo(ctx, *oldProjectNo)
-	if err != nil {
-		return fmt.Errorf("project number not exists: %w", err)
-	}
-
-	return nil
-}
-
 func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
 	if err := s.validateCourse(ctx, project.CourseID, project.Semester); err != nil {
 		return err
 	}
 	if err := s.validateMajor(ctx, project.MajorID); err != nil {
-		return err
-	}
-	// if err := s.validateAdvisor(ctx, project.AdvisorID); err != nil {
-	// 	return err
-	// }
-	if err := s.validateOldProjectNumber(ctx, project.OldProjectNo); err != nil {
 		return err
 	}
 	return nil

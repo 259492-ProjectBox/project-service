@@ -8,19 +8,19 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func NewMinIOConnection() *minio.Client {
+func NewMinIOConnection() (*minio.Client, error) {
 	endpoint := os.Getenv("MINIO_ENDPOINT")
-	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
-	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
+	accessKeyID := os.Getenv("MINIO_ROOT_USER")
+	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
 
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: false,
+		Secure: false, // Change to true if you are using HTTPS
 	})
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("failed to connect to MinIO: %w", err)
 	}
 
 	fmt.Println("Successfully connected to MinIO")
-	return minioClient
+	return minioClient, nil
 }

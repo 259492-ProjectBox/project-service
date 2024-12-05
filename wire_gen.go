@@ -22,7 +22,10 @@ import (
 func InitializeApp() (*gin.Engine, func(), error) {
 	channel := db.NewRabbitMQConnection()
 	gormDB := db2.NewPostgresDatabase()
-	client := db3.NewMinIOConnection()
+	client, err := db3.NewMinIOConnection()
+	if err != nil {
+		return nil, nil, err
+	}
 	projectRepository := repositories.NewProjectRepository(gormDB, client)
 	employeeRepository := repositories.NewEmployeeRepository(gormDB)
 	majorRepository := repositories.NewMajorRepository(gormDB)

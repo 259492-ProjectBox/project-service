@@ -5,6 +5,13 @@ INSERT INTO "majors" ("major_name") VALUES
   ('Mechanical Engineering'),
   ('Civil Engineering');
 
+INSERT INTO "configs" ("config_name", "value", "major_id")
+VALUES 
+    ('academic year', '2025', 1),
+    ('academic year', '2025', 2),
+    ('academic year', '2025', 3),
+    ('academic year', '2025', 4);
+
 -- Insert Courses
 INSERT INTO "courses" ("course_no", "course_name", "major_id" , "semester") VALUES
   ('CS101', 'Introduction to Computer Science', 1 , 1),
@@ -20,9 +27,9 @@ INSERT INTO "students" ("id", "prefix", "first_name", "last_name", "email", "maj
   ('640610307', 'Ms.', 'Emily', 'Davis', 'emily.davis@example.com', 4);
 
 -- Insert Projects
-INSERT INTO "projects" ("old_project_no", "project_no", "title_th", "title_en", "abstract", "relation_description", "academic_year", "semester", "section_id", "is_approved", "course_id", "major_id") VALUES
-  (NULL, 'P002', 'โครงการศึกษา', 'Study Project', 'Abstract of Study Project', 'Project relations description', 2024, 1, 'A', true, 1, 1),
-  ('P002', 'P004', 'โครงการวิศวกรรม', 'Engineering Project', 'Abstract of Engineering Project', 'Engineering project relations', 2024, 2, 'B', false, 2, 2);
+INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract", "academic_year", "semester", "section_id", "is_approved", "course_id", "major_id") VALUES
+  ('P002', 'โครงการศึกษา', 'Study Project', 'Abstract of Study Project', 2024, 1, 'A', true, 1, 1),
+  ('P004', 'โครงการวิศวกรรม', 'Engineering Project', 'Abstract of Engineering Project', 2024, 2, 'B', false, 2, 2);
 
 -- Insert Project Students
 INSERT INTO "project_students" ("project_id", "student_id") VALUES
@@ -52,9 +59,14 @@ INSERT INTO "project_employees" ("project_id", "employee_id") VALUES
   (2, 2);
 
 -- Insert Resource Types
-INSERT INTO "resource_types" ("resource_type") VALUES
-  ('Textbook'),
-  ('Lab Equipment');
+INSERT INTO "resource_types" ("type_name","mime_type") VALUES
+  ('jpeg','image/jpeg'),
+  ('text','text/plain'),
+  ('png','image/png'),
+  ('word','application/msword'),
+  ('zip','application/vnd.rar'),
+  ('pdf','application/pdf'),
+  ('powerpoint','application/vnd.ms-powerpoint');
 
 -- Insert Resources
 INSERT INTO "resources" ("title", "resource_type_id", "url") VALUES
@@ -62,21 +74,31 @@ INSERT INTO "resources" ("title", "resource_type_id", "url") VALUES
   ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab');
 
 -- Insert Asset Resources
-INSERT INTO "asset_resources" ("resource_id", "description", "major_id") VALUES
-  (1, 'A comprehensive guide to comp  uter science', 1),
-  (2, 'Tools and equipment for electrical engineering labs', 2);
+INSERT INTO "asset_resources" ("description", "major_id") VALUES
+  ('A comprehensive guide to comp  uter science', 1),
+  ('Tools and equipment for electrical engineering labs', 2);
 
 -- Insert Project Resources
-INSERT INTO "project_resources" ("resource_id", "project_id") VALUES
-  (1, 1),
-  (2, 2);
+INSERT INTO "project_resources" ("project_id") VALUES
+  (1),
+  (2);
 
 -- Insert Project Resource Configs
 INSERT INTO "project_resource_configs" ("title", "resource_type_id", "major_id") VALUES
   ('Default Resource Config', 1, 1),
   ('Lab Resource Config', 2, 2);
 
+-- Insert Project Resource Configs
+INSERT INTO "project_configs" ("title", "is_active", "major_id") VALUES
+  ('title_th',true, 1),
+  ('title_en', true, 2),
+  ('abstract', true, 2),
+  ('academic_year', true, 2),
+  ('semester', true, 2),
+  ('section_id', true, 2),
+  ('course_id', true, 2);
+
 -- Insert Calendar Events
-INSERT INTO "calendar" ("major_id", "event_date", "title", "description") VALUES
-  (1, '2024-01-15', 'CS 101 Exam', 'Final exam for CS 101 course'),
-  (2, '2024-02-20', 'EE 101 Lab', 'Electrical Engineering Lab practical session');
+INSERT INTO "calendar" ("major_id", "event_date","description") VALUES
+  (1, '2024-01-15', 'Final exam for CS 101 course'),
+  (2, '2024-02-20', 'Electrical Engineering Lab practical session');

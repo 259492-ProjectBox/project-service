@@ -38,11 +38,19 @@ func NewProjectRepository(db *gorm.DB, minioClient *minio.Client) ProjectReposit
 
 func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*models.Project, error) {
 	project := &models.Project{}
-	if err := r.db.WithContext(ctx).Preload("Major").Preload("Course").Preload("Section").Preload("Advisor").Preload("Advisor.Role").Preload("Committees").Preload("Members").First(project, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Preload("Major").
+		Preload("Course.Major").
+		Preload("Employees.Role").
+		Preload("Employees.Major").
+		Preload("Members.Major").
+		Preload("ProjectResources.Resources.ResourceType").
+		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return project, nil
 }
+
 func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error) {
 	var projectIds []int
 	if err := r.db.WithContext(ctx).
@@ -117,6 +125,7 @@ func (r *projectRepositoryImpl) GetByProjectNo(ctx context.Context, projectNo st
 	}
 	return project, nil
 }
+
 func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
 	tx := r.db.Begin()
 	if tx.Error != nil {
@@ -138,6 +147,7 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 			return nil, err
 		}
 		defer src.Close()
+
 		_, err = r.minioClient.PutObject(ctx, "projects", filePath, src, file.Size, minio.PutObjectOptions{
 			ContentType: file.Header.Get("Content-Type"),
 		})
@@ -148,6 +158,17 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 
 		fileURL := fmt.Sprintf("http://localhost:9000/%s/%s", "projects", filePath)
 
+		fileType := file.Header.Get("Content-Type") // MIME type
+		if fileType == "" {
+			fileType = "unknown"
+		}
+
+		resourceType := &models.ResourceType{}
+		if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(resourceType).Error; err != nil {
+			tx.Rollback()
+			return nil, fmt.Errorf("file type not found: %w", err)
+		}
+
 		projectResource := &models.ProjectResource{
 			ProjectID: project.ID,
 		}
@@ -156,10 +177,12 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 			return nil, err
 		}
 
+		// Create Resource record
 		resource := &models.Resource{
 			Title:             titles[i],
 			URL:               fileURL,
 			ProjectResourceID: &projectResource.ID,
+			ResourceTypeID:    resourceType.ID,
 		}
 		if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
 			tx.Rollback()
@@ -171,9 +194,13 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 		return nil, err
 	}
 
+	project, err := r.GetProjectByID(ctx, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return project, nil
 }
-
 func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error) {
 	tx := r.db.WithContext(ctx).Begin()
 	if tx.Error != nil {

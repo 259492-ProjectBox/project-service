@@ -45,7 +45,7 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Printf("%+v\n", req.Project)
+	fmt.Printf("%+v\n", req.Titles)
 	project, err := h.projectService.CreateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

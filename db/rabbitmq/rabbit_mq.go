@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"os"
 
 	rabbitmq "github.com/rabbitmq/amqp091-go"
@@ -20,7 +21,8 @@ func DeclareExchange(channel *rabbitmq.Channel) *rabbitmq.Channel {
 	if err != nil {
 		panic(err)
 	}
-
+	
+	fmt.Println("Successfully connected to RabbitMQ")
 	return channel
 }
 
@@ -42,4 +44,3 @@ func NewRabbitMQConnection() *rabbitmq.Channel {
 
 	return DeclareExchange(channelRabbitMQ)
 }
-

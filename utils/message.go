@@ -15,16 +15,14 @@ func getStringValue(ptr *string) string {
 func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 
 	projectData := dto.ProjectData{
-		ID:                  project.ID,
-		OldProjectNo:        getStringValue(project.OldProjectNo),
-		ProjectNo:           project.ProjectNo,
-		TitleTH:             getStringValue(project.TitleTH),
-		TitleEN:             getStringValue(project.TitleEN),
-		Abstract:            getStringValue(project.Abstract),
-		RelationDescription: project.RelationDescription,
-		AcademicYear:        project.AcademicYear,
-		Semester:            project.Semester,
-		CreatedAt:           project.CreatedAt,
+		ID:           project.ID,
+		ProjectNo:    project.ProjectNo,
+		TitleTH:      getStringValue(project.TitleTH),
+		TitleEN:      getStringValue(project.TitleEN),
+		Abstract:     getStringValue(project.Abstract),
+		AcademicYear: project.AcademicYear,
+		Semester:     project.Semester,
+		CreatedAt:    project.CreatedAt,
 		Major: dtos.Major{
 			ID:        project.Major.ID,
 			MajorName: project.Major.MajorName,

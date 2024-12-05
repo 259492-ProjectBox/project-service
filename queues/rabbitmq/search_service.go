@@ -26,8 +26,6 @@ func PublishMessageFromRabbitMQToElasticSearch(channel *rabbitmq.Channel, operat
 		return err
 	}
 
-	fmt.Println("Published Message Body:", string(body))
-
 	err = channel.Publish(
 		"project_service.search",      // exchange
 		"project_service.events.crud", // routing key

@@ -7,17 +7,16 @@ type Resource struct {
 	Title             string       `json:"title"`
 	URL               string       `json:"url"`
 	CreatedAt         time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-	ProjectResourceID *int         `json:"project_resource_id"`
-	AssetResourceID   *int         `json:"assets_resource_id"`
+	ProjectResourceID *int         `json:"-"`
+	AssetResourceID   *int         `json:"-"`
 	ResourceTypeID    int          `json:"resource_type_id" gorm:"not null"`
 	ResourceType      ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
 }
 
 type ProjectResource struct {
 	ID        int      `json:"id" gorm:"primaryKey;autoIncrement"`
-	ProjectID int      `json:"project_id" gorm:"not null"`
-	Project   Project  `json:"project" gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
-	Resource  Resource `json:"resource"`
+	ProjectID int      `json:"-" gorm:"not null"`
+	Resources []Resource `json:"resources"`
 }
 
 type AssetResource struct {
@@ -25,7 +24,7 @@ type AssetResource struct {
 	Description string   `json:"description"`
 	MajorID     int      `json:"major_id" gorm:"not null"`
 	Major       Major    `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
-	Resource    Resource `json:"resource"`
+	Resources   []Resource `json:"resources"`
 }
 
 type FileResponse struct {
