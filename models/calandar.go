@@ -8,5 +8,5 @@ type Calendar struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Major       Major     `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:CASCADE"`
-	MajorID     int       `json:"major_id" gorm:"not null"`
+	MajorID     int       `json:"major_id"`
 }

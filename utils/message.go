@@ -19,7 +19,7 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 		ProjectNo:    project.ProjectNo,
 		TitleTH:      getStringValue(project.TitleTH),
 		TitleEN:      getStringValue(project.TitleEN),
-		Abstract:     getStringValue(project.Abstract),
+		AbstractText: getStringValue(project.AbstractText),
 		AcademicYear: project.AcademicYear,
 		Semester:     project.Semester,
 		CreatedAt:    project.CreatedAt,

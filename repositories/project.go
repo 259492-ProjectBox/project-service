@@ -44,7 +44,7 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*mo
 		Preload("Employees.Role").
 		Preload("Employees.Major").
 		Preload("Members.Major").
-		Preload("ProjectResources.Resources.ResourceType").
+		Preload("ProjectResources.Resource.ResourceType").
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}

@@ -15,16 +15,16 @@ type Resource struct {
 
 type ProjectResource struct {
 	ID        int      `json:"id" gorm:"primaryKey;autoIncrement"`
-	ProjectID int      `json:"-" gorm:"not null"`
-	Resources []Resource `json:"resources"`
+	ProjectID int      `json:"-"`
+	Resource  Resource `json:"resource"`
 }
 
 type AssetResource struct {
 	ID          int      `json:"id" gorm:"primaryKey;autoIncrement"`
 	Description string   `json:"description"`
-	MajorID     int      `json:"major_id" gorm:"not null"`
+	MajorID     int      `json:"major_id"`
 	Major       Major    `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
-	Resources   []Resource `json:"resources"`
+	Resource    Resource `json:"resource"`
 }
 
 type FileResponse struct {

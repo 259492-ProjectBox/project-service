@@ -324,7 +324,7 @@ const docTemplate = `{
         "models.Project": {
             "type": "object",
             "properties": {
-                "abstract": {
+                "abstract_text": {
                     "type": "string"
                 },
                 "academic_year": {

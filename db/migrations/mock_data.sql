@@ -27,7 +27,7 @@ INSERT INTO "students" ("id", "prefix", "first_name", "last_name", "email", "maj
   ('640610307', 'Ms.', 'Emily', 'Davis', 'emily.davis@example.com', 4);
 
 -- Insert Projects
-INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract", "academic_year", "semester", "section_id", "is_approved", "course_id", "major_id") VALUES
+INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract_text", "academic_year", "semester", "section_id", "is_approved", "course_id", "major_id") VALUES
   ('P002', 'โครงการศึกษา', 'Study Project', 'Abstract of Study Project', 2024, 1, 'A', true, 1, 1),
   ('P004', 'โครงการวิศวกรรม', 'Engineering Project', 'Abstract of Engineering Project', 2024, 2, 'B', false, 2, 2);
 
@@ -68,20 +68,20 @@ INSERT INTO "resource_types" ("type_name","mime_type") VALUES
   ('pdf','application/pdf'),
   ('powerpoint','application/vnd.ms-powerpoint');
 
--- Insert Resources
-INSERT INTO "resources" ("title", "resource_type_id", "url") VALUES
-  ('Computer Science Textbook', 1, 'https://example.com/cs-textbook'),
-  ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab');
+  -- Insert Asset Resources
+  INSERT INTO "asset_resources" ("description", "major_id") VALUES
+    ('A comprehensive guide to comp  uter science', 1),
+    ('Tools and equipment for electrical engineering labs', 2);
 
--- Insert Asset Resources
-INSERT INTO "asset_resources" ("description", "major_id") VALUES
-  ('A comprehensive guide to comp  uter science', 1),
-  ('Tools and equipment for electrical engineering labs', 2);
+  -- Insert Project Resources
+  INSERT INTO "project_resources" ("project_id") VALUES
+    (1),
+    (2);
 
--- Insert Project Resources
-INSERT INTO "project_resources" ("project_id") VALUES
-  (1),
-  (2);
+  -- Insert Resources
+  INSERT INTO "resources" ("title", "resource_type_id", "url" , "asset_resource_id" , "project_resource_id") VALUES
+    ('Computer Science Textbook', 1, 'https://example.com/cs-textbook',1 , NULL),
+    ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab', NULL, 2);
 
 -- Insert Project Resource Configs
 INSERT INTO "project_resource_configs" ("title", "resource_type_id", "major_id") VALUES
@@ -92,7 +92,7 @@ INSERT INTO "project_resource_configs" ("title", "resource_type_id", "major_id")
 INSERT INTO "project_configs" ("title", "is_active", "major_id") VALUES
   ('title_th',true, 1),
   ('title_en', true, 2),
-  ('abstract', true, 2),
+  ('abstract_text', true, 2),
   ('academic_year', true, 2),
   ('semester', true, 2),
   ('section_id', true, 2),

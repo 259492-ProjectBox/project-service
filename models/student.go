@@ -7,6 +7,6 @@ type Student struct {
 	FirstName string `json:"first_name"`                                                   // First name of the student
 	LastName  string `json:"last_name"`                                                    // Last name of the student
 	Email     string `json:"email" gorm:"unique"`                                          // Unique email address
-	MajorID   int    `json:"major_id" gorm:"not null"`                                     // Major ID, not null
+	MajorID   int    `json:"major_id"`                                                     // Major ID, not null
 	Major     Major  `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"` // Major related to student
 }

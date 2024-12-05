@@ -19,7 +19,7 @@ type ProjectData struct {
 	ProjectNo           string     `json:"project_no"`
 	TitleTH             string     `json:"title_th"`
 	TitleEN             string     `json:"title_en"`
-	Abstract            string     `json:"abstract"`
+	AbstractText        string     `json:"abstract_text"`
 	ProjectStatus       string     `json:"project_status"`
 	RelationDescription string     `json:"relation_description"`
 	AcademicYear        int        `json:"academic_year"`

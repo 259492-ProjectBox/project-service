@@ -42,7 +42,7 @@ definitions:
     type: object
   models.Project:
     properties:
-      abstract:
+      abstract_text:
         type: string
       academic_year:
         type: integer
