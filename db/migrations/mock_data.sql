@@ -37,21 +37,17 @@ INSERT INTO "project_students" ("project_id", "student_id") VALUES
   (1, '640610305'),
   (2, '640610306'),
   (2, '640610307');
+
 -- Insert Project Employee Types
 INSERT INTO "project_employee_types" ("type_name") VALUES
   ('Manager'),
   ('Developer'),
   ('Designer');
 
--- Insert Roles
-INSERT INTO "roles" ("role_name") VALUES
-  ('Advisor'),
-  ('Coordinator');
-
 -- Insert Employees
-INSERT INTO "employees" ("prefix", "first_name", "last_name", "email", "major_id", "role_id") VALUES
-  ('Dr.', 'Alice', 'Walker', 'alice.walker@example.com', 1, 1),
-  ('Mr.', 'Bob', 'Taylor', 'bob.taylor@example.com', 2, 2);
+INSERT INTO "employees" ("prefix", "first_name", "last_name", "email", "major_id") VALUES
+  ('Dr.', 'Alice', 'Walker', 'alice.walker@example.com', 1),
+  ('Mr.', 'Bob', 'Taylor', 'bob.taylor@example.com', 2);
 
 -- Insert Project Employees
 INSERT INTO "project_employees" ("project_id", "employee_id") VALUES
@@ -99,6 +95,6 @@ INSERT INTO "project_configs" ("title", "is_active", "major_id") VALUES
   ('course_id', true, 2);
 
 -- Insert Calendar Events
-INSERT INTO "calendar" ("major_id", "event_date","description") VALUES
-  (1, '2024-01-15', 'Final exam for CS 101 course'),
-  (2, '2024-02-20', 'Electrical Engineering Lab practical session');
+INSERT INTO "calendar" ("major_id", "start_date", "end_date", "description") VALUES
+  (1, '2024-01-15', '2024-01-15', 'Final exam for CS 101 course'),
+  (2, '2024-02-20', '2024-02-20', 'Electrical Engineering Lab practical session');

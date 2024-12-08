@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Project model
 type Project struct {
 	ID               int               `json:"id" gorm:"primaryKey;autoIncrement"`
 	ProjectNo        string            `json:"project_no" gorm:"unique"`
