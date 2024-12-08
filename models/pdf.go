@@ -1,9 +1,12 @@
 package models
 
-// import "time"
+// PDF represents the entire PDF document.
+type PDF struct {
+	Pages []PDFPage `json:"pages"` // List of pages in the PDF
+}
 
-// type PDF struct {
-// 	Title     string    `json:"title"`      // Title of the PDF document
-// 	Content   string    `json:"content"`    // Main text or content of the PDF
-// 	CreatedAt time.Time `json:"created_at"` // Date and time when the PDF was created
-// }
+// PDFPage represents a single page in the PDF.
+type PDFPage struct {
+	PageNumber int    `json:"page_number"` // The page number
+	Content    string `json:"content"`     // The text or content of the page
+}

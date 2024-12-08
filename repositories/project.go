@@ -10,6 +10,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/project-box/models"
+	"github.com/project-box/utils"
 	"gorm.io/gorm"
 )
 
@@ -83,68 +84,13 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 		return nil, tx.Error
 	}
 
-	var uploadedFilePaths []string
-
-	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
-		tx.Rollback()
+	if err := r.createProject(ctx, tx, project); err != nil {
 		return nil, err
 	}
 
-	for i, file := range files {
-		fileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
-		filePath := fmt.Sprintf("uploads/%s", fileName)
-
-		src, err := file.Open()
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-		defer src.Close()
-
-		_, err = r.minioClient.PutObject(ctx, "projects", filePath, src, file.Size, minio.PutObjectOptions{
-			ContentType: file.Header.Get("Content-Type"),
-		})
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-
-		uploadedFilePaths = append(uploadedFilePaths, filePath)
-
-		fileURL := fmt.Sprintf("http://localhost:9000/%s/%s", "projects", filePath)
-
-		fileType := file.Header.Get("Content-Type") // MIME type
-		if fileType == "" {
-			fileType = "unknown"
-		}
-
-		resourceType := &models.ResourceType{}
-		if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(resourceType).Error; err != nil {
-			r.deleteUploadedFiles(ctx, uploadedFilePaths)
-			tx.Rollback()
-			return nil, fmt.Errorf("file type not found: %w", err)
-		}
-
-		projectResource := &models.ProjectResource{
-			ProjectID: project.ID,
-		}
-		if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
-			r.deleteUploadedFiles(ctx, uploadedFilePaths)
-			tx.Rollback()
-			return nil, err
-		}
-
-		resource := &models.Resource{
-			Title:             titles[i],
-			URL:               fileURL,
-			ProjectResourceID: &projectResource.ID,
-			ResourceTypeID:    resourceType.ID,
-		}
-		if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
-			r.deleteUploadedFiles(ctx, uploadedFilePaths)
-			tx.Rollback()
-			return nil, err
-		}
+	uploadedFilePaths, err := r.handleFiles(ctx, tx, project.ID, files, titles)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
@@ -152,12 +98,115 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 		return nil, err
 	}
 
-	project, err := r.GetProjectByID(ctx, project.ID)
-	if err != nil {
-		return nil, err
+	return r.GetProjectByID(ctx, project.ID)
+}
+
+func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, project *models.Project) error {
+	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	return nil
+}
+
+func isPdfFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
+
+// handleFiles processes and uploads all files, and creates associated resources.
+func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, projectID int, files []*multipart.FileHeader, titles []string) ([]string, error) {
+	var uploadedFilePaths []string
+
+	for i, file := range files {
+		filePath, fileURL, err := r.uploadFileToMinio(ctx, file)
+		if err != nil {
+			tx.Rollback()
+			return uploadedFilePaths, err
+		}
+		uploadedFilePaths = append(uploadedFilePaths, filePath)
+
+		resourceType, err := r.getResourceType(ctx, tx, file)
+		if err != nil {
+			r.deleteUploadedFiles(ctx, uploadedFilePaths)
+			tx.Rollback()
+			return uploadedFilePaths, err
+		}
+
+		pdf := &models.PDF{}
+		if isPdfFile(resourceType.MimeType) {
+			if pdf, err = utils.ReadPdf(file); err != nil {
+				tx.Rollback()
+				return uploadedFilePaths, err
+			}
+
+		}
+
+		if err := r.createProjectResourceAndResource(ctx, tx, projectID, fileURL, titles[i], pdf, resourceType.ID); err != nil {
+			r.deleteUploadedFiles(ctx, uploadedFilePaths)
+			tx.Rollback()
+			return uploadedFilePaths, err
+		}
 	}
 
-	return project, nil
+	return uploadedFilePaths, nil
+}
+
+// uploadFileToMinio handles the file upload to MinIO and returns the file path and URL.
+func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, file *multipart.FileHeader) (string, string, error) {
+	fileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
+	filePath := fmt.Sprintf("uploads/%s", fileName)
+
+	src, err := file.Open()
+	if err != nil {
+		return "", "", err
+	}
+	defer src.Close()
+
+	_, err = r.minioClient.PutObject(ctx, "projects", filePath, src, file.Size, minio.PutObjectOptions{
+		ContentType: file.Header.Get("Content-Type"),
+	})
+	if err != nil {
+		return "", "", err
+	}
+
+	fileURL := fmt.Sprintf("http://localhost:9000/projects/%s", filePath)
+	return filePath, fileURL, nil
+}
+
+func (r *projectRepositoryImpl) getResourceType(ctx context.Context, tx *gorm.DB, file *multipart.FileHeader) (*models.ResourceType, error) {
+	fileType := file.Header.Get("Content-Type")
+	if fileType == "" {
+		fileType = "unknown"
+	}
+
+	resourceType := &models.ResourceType{}
+	if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(resourceType).Error; err != nil {
+		return nil, fmt.Errorf("file type not found: %w", err)
+	}
+
+	return resourceType, nil
+}
+
+func (r *projectRepositoryImpl) createProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectID int, fileURL string, title string, pdf *models.PDF, resourceTypeID int) error {
+	projectResource := &models.ProjectResource{
+		ProjectID: projectID,
+	}
+
+	if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
+		return err
+	}
+
+	resource := &models.Resource{
+		Title:             title,
+		URL:               fileURL,
+		ProjectResourceID: &projectResource.ID,
+		PDF:               pdf,
+		ResourceTypeID:    resourceTypeID,
+	}
+
+	if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *projectRepositoryImpl) deleteUploadedFiles(ctx context.Context, filePaths []string) {

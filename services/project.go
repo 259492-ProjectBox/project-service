@@ -18,7 +18,7 @@ type ProjectService interface {
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	UpdateProject(ctx context.Context, id int, project *models.Project) error
+	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 	DeleteProject(ctx context.Context, id int) error
 }
 
@@ -155,19 +155,24 @@ func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, student
 	return project, nil
 }
 
-func (s *projectServiceImpl) UpdateProject(ctx context.Context, id int, project *models.Project) error {
+func (s *projectServiceImpl) UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error) {
 	if err := s.ValidateProject(ctx, project); err != nil {
-		return err
+		return nil, err
 	}
 
 	err := s.projectRepo.UpdateProject(ctx, id, project)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	project, err = s.GetProjectById(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
 	s.publishProjectMessageToElasticSearch(ctx, "update", project)
 
-	return nil
+	return project, nil
 }
 
 func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
