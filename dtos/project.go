@@ -2,7 +2,6 @@ package dtos
 
 import (
 	"mime/multipart"
-	"time"
 
 	"github.com/project-box/models"
 )
@@ -14,20 +13,21 @@ type CreateProjectRequest struct {
 }
 
 type ProjectData struct {
-	ID                  int        `json:"id"`
-	OldProjectNo        string     `json:"old_project_no"`
-	ProjectNo           string     `json:"project_no"`
-	TitleTH             string     `json:"title_th"`
-	TitleEN             string     `json:"title_en"`
-	AbstractText        string     `json:"abstract_text"`
-	ProjectStatus       string     `json:"project_status"`
-	RelationDescription string     `json:"relation_description"`
-	AcademicYear        int        `json:"academic_year"`
-	Semester            int        `json:"semester"`
-	CreatedAt           time.Time  `json:"created_at"`
-	Advisor             Employee   `json:"advisor"`
-	Major               Major      `json:"major"`
-	Course              Course     `json:"course"`
-	Employees           []Employee `json:"employees"`
-	Members             []Student  `json:"members"`
+	ID               int               `json:"id"`
+	ProjectNo        string            `json:"project_no"`
+	TitleTH          string            `json:"title_th"`
+	TitleEN          string            `json:"title_en"`
+	AbstractText     string            `json:"abstract_text"`
+	AcademicYear     int               `json:"academic_year"`
+	Semester         int               `json:"semester"`
+	IsApproved       bool              `json:"is_approved"`
+	SectionID        string            `json:"section_id"`
+	CreatedAt        string            `json:"created_at"`
+	MajorID          int               `json:"major_id"`
+	Major            Major             `json:"major"`
+	CourseID         int               `json:"course_id"`
+	Course           Course            `json:"course"`
+	Employees        []Employee        `json:"employees"`
+	Members          []Student         `json:"members"`
+	ProjectResources []ProjectResource `json:"project_resources"`
 }

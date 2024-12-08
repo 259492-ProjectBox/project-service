@@ -11,7 +11,7 @@ type Project struct {
 	AcademicYear     int               `json:"academic_year"`
 	Semester         int               `json:"semester"`
 	IsApproved       bool              `json:"is_approved"`
-	CreatedAt        time.Time         `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt        time.Time         `json:"created_at" gorm:"default:CURRENT_DATE"`
 	SectionID        *string           `json:"section_id"`
 	MajorID          int               `json:"major_id"`
 	Major            Major             `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`

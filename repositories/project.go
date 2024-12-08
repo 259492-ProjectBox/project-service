@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"time"
 
@@ -16,9 +17,8 @@ type ProjectRepository interface {
 	repository[models.Project]
 	GetProjectByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	GetByProjectNo(ctx context.Context, oldProjectNo string) (*models.Project, error)
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
-	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
+	UpdateProject(ctx context.Context, id int, project *models.Project) error
 }
 
 // ProjectHandler implementation
@@ -41,7 +41,6 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*mo
 	if err := r.db.WithContext(ctx).
 		Preload("Major").
 		Preload("Course.Major").
-		Preload("Employees.Role").
 		Preload("Employees.Major").
 		Preload("Members.Major").
 		Preload("ProjectResources.Resource.ResourceType").
@@ -61,69 +60,21 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 	}
 
 	if len(projectIds) == 0 {
-		return nil, fmt.Errorf("no projects found for student ID %s", studentId)
+		return []models.Project{}, nil
 	}
 
 	var projects []models.Project
 	if err := r.db.WithContext(ctx).
 		Where("id IN ?", projectIds).
-		Preload("Advisor").
-		Preload("Advisor.Role").
 		Preload("Major").
 		Preload("Course").
-		Preload("Section").
+		Preload("Employees.Major").
+		Preload("Members.Major").
+		Preload("ProjectResources.Resource.ResourceType").
 		Find(&projects).Error; err != nil {
 		return nil, err
 	}
-
-	var projectEmployees []models.ProjectEmployee
-	if err := r.db.WithContext(ctx).
-		Model(&models.ProjectEmployee{}).
-		Preload("Employee").
-		Preload("Employee.Role").
-		Where("project_employees.project_id IN ?", projectIds).
-		Find(&projectEmployees).Error; err != nil {
-		return nil, err
-	}
-
-	employeesMap := make(map[int][]models.Employee)
-	for _, projectEmployee := range projectEmployees {
-		projectID := projectEmployee.ProjectID
-		employee := projectEmployee.Employee
-		employeesMap[projectID] = append(employeesMap[projectID], employee)
-	}
-
-	var projectStudents []models.ProjectStudent
-	if err := r.db.WithContext(ctx).
-		Model(&models.ProjectStudent{}).
-		Preload("Student").
-		Preload("Student.Major").
-		Where("project_students.project_id IN ?", projectIds).
-		Find(&projectStudents).Error; err != nil {
-		return nil, err
-	}
-
-	studentsMap := make(map[int][]models.Student)
-	for _, projectStudent := range projectStudents {
-		projectID := projectStudent.ProjectID
-		studentsMap[projectID] = append(studentsMap[projectID], projectStudent.Student)
-	}
-
-	for i := range projects {
-		project := &projects[i]
-		project.Employees = employeesMap[project.ID]
-		project.Members = studentsMap[project.ID]
-	}
-
 	return projects, nil
-}
-
-func (r *projectRepositoryImpl) GetByProjectNo(ctx context.Context, projectNo string) (*models.Project, error) {
-	project := &models.Project{}
-	if err := r.db.WithContext(ctx).Where("project_no = ?", projectNo).First(project).Error; err != nil {
-		return nil, err
-	}
-	return project, nil
 }
 
 func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
@@ -131,6 +82,8 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+
+	var uploadedFilePaths []string
 
 	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
 		tx.Rollback()
@@ -156,6 +109,8 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 			return nil, err
 		}
 
+		uploadedFilePaths = append(uploadedFilePaths, filePath)
+
 		fileURL := fmt.Sprintf("http://localhost:9000/%s/%s", "projects", filePath)
 
 		fileType := file.Header.Get("Content-Type") // MIME type
@@ -165,6 +120,7 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 
 		resourceType := &models.ResourceType{}
 		if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(resourceType).Error; err != nil {
+			r.deleteUploadedFiles(ctx, uploadedFilePaths)
 			tx.Rollback()
 			return nil, fmt.Errorf("file type not found: %w", err)
 		}
@@ -173,11 +129,11 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 			ProjectID: project.ID,
 		}
 		if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
+			r.deleteUploadedFiles(ctx, uploadedFilePaths)
 			tx.Rollback()
 			return nil, err
 		}
 
-		// Create Resource record
 		resource := &models.Resource{
 			Title:             titles[i],
 			URL:               fileURL,
@@ -185,12 +141,14 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 			ResourceTypeID:    resourceType.ID,
 		}
 		if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
+			r.deleteUploadedFiles(ctx, uploadedFilePaths)
 			tx.Rollback()
 			return nil, err
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		r.deleteUploadedFiles(ctx, uploadedFilePaths)
 		return nil, err
 	}
 
@@ -201,50 +159,47 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 
 	return project, nil
 }
-func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error) {
+
+func (r *projectRepositoryImpl) deleteUploadedFiles(ctx context.Context, filePaths []string) {
+	for _, filePath := range filePaths {
+		err := r.minioClient.RemoveObject(ctx, "projects", filePath, minio.RemoveObjectOptions{})
+		if err != nil {
+			log.Printf("Failed to delete file from MinIO: %s, error: %v", filePath, err)
+		}
+	}
+}
+
+func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, project *models.Project) error {
 	tx := r.db.WithContext(ctx).Begin()
 	if tx.Error != nil {
-		return nil, tx.Error
+		return tx.Error
 	}
 
 	existingProject := &models.Project{}
 	if err := tx.First(existingProject, id).Error; err != nil {
 		tx.Rollback()
-		return nil, errors.New("project not found")
+		return errors.New("project not found")
 	}
 	if err := tx.Where("project_id = ?", id).Delete(&models.ProjectEmployee{}).Error; err != nil {
 		tx.Rollback()
-		return nil, err
+		return err
 	}
 
 	if err := tx.Where("project_id = ?", id).Delete(&models.ProjectStudent{}).Error; err != nil {
 		tx.Rollback()
-		return nil, err
+		return err
 	}
 
 	project.ID = id
 	if err := tx.Updates(project).Error; err != nil {
 		tx.Rollback()
-		return nil, err
+		return err
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return nil, err
+		return err
 	}
 
-	updatedProject := &models.Project{}
-	if err := r.db.WithContext(ctx).
-		Preload("Major").
-		Preload("Course").
-		Preload("Section").
-		Preload("Advisor").
-		Preload("Advisor.Role").
-		Preload("Committees").
-		Preload("Members").
-		First(updatedProject, id).Error; err != nil {
-		return nil, err
-	}
-
-	return updatedProject, nil
+	return nil
 }

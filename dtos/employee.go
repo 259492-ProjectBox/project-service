@@ -6,4 +6,6 @@ type Employee struct {
 	FirstName string `json:"first_name"` // First Name
 	LastName  string `json:"last_name"`  // Last Name
 	Email     string `json:"email"`      // Unique Email
+	MajorID   int    `json:"major_id"`
+	Major     Major  `json:"major"`
 }
