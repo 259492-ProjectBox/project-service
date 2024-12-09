@@ -1,12 +1,14 @@
 package models
 
-// PDF represents the entire PDF document.
 type PDF struct {
-	Pages []PDFPage `json:"pages"` // List of pages in the PDF
+	ID         int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	ResourceID int       `json:"resource_id"` 
+	Pages      []PDFPage `json:"pages" gorm:"constraint:OnDelete:CASCADE"`
 }
 
-// PDFPage represents a single page in the PDF.
 type PDFPage struct {
-	PageNumber int    `json:"page_number"` // The page number
-	Content    string `json:"content"`     // The text or content of the page
+	ID         int    `gorm:"primaryKey" json:"id"`
+	PDFID      int    `json:"pdf_id"` // Foreign key
+	PageNumber int    `json:"page_number"`
+	Content    string `json:"content"`
 }

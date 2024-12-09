@@ -139,7 +139,6 @@ package handlers
 // 		return
 // 	}
 
-// 	// fmt.Println(*resource.Title)
 // 	response := models.UploadResourceResponse{
 // 		ID:             resource.ID,
 // 		Title:          resource.Title,

@@ -47,6 +47,8 @@ func migrateModel(db *gorm.DB) error {
 		&models.Section{},
 		&models.Major{},
 		&models.Calendar{},
+		&models.PDF{},
+		&models.PDFPage{},
 	); err != nil {
 		return fmt.Errorf("migration error: %w", err)
 	}

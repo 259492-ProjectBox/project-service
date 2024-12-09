@@ -7,8 +7,8 @@ type Resource struct {
 	Title             string       `json:"title"`
 	URL               string       `json:"url"`
 	CreatedAt         time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	PDF               *PDF         `json:"pdf" gorm:"constraint:OnDelete:CASCADE"`
 	ProjectResourceID *int         `json:"-"`
-	PDF               *PDF         `json:"pdf"`
 	AssetResourceID   *int         `json:"-"`
 	ResourceTypeID    int          `json:"resource_type_id" gorm:"not null"`
 	ResourceType      ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`

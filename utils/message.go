@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/project-box/dtos"
 	dto "github.com/project-box/dtos"
 	"github.com/project-box/models"
@@ -75,7 +73,6 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 	}
 
 	for _, projectResource := range project.ProjectResources {
-		fmt.Println(projectResource.Resource.ResourceType.MimeType)
 		resourceType := dtos.ResourceType{
 			ID:       projectResource.Resource.ResourceTypeID,
 			MimeType: projectResource.Resource.ResourceType.MimeType,
