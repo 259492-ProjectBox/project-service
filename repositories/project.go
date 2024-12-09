@@ -22,7 +22,6 @@ type ProjectRepository interface {
 	UpdateProject(ctx context.Context, id int, project *models.Project) error
 }
 
-// ProjectHandler implementation
 type projectRepositoryImpl struct {
 	db          *gorm.DB
 	minioClient *minio.Client
@@ -109,9 +108,8 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 	return nil
 }
 
-func isPdfFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
+func isPDFFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
 
-// handleFiles processes and uploads all files, and creates associated resources.
 func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, projectID int, files []*multipart.FileHeader, titles []string) ([]string, error) {
 	var uploadedFilePaths []string
 
@@ -131,12 +129,11 @@ func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, pr
 		}
 
 		pdf := &models.PDF{}
-		if isPdfFile(resourceType.MimeType) {
+		if isPDFFile(resourceType.MimeType) {
 			if pdf, err = utils.ReadPdf(file); err != nil {
 				tx.Rollback()
 				return uploadedFilePaths, err
 			}
-
 		}
 
 		if err := r.createProjectResourceAndResource(ctx, tx, projectID, fileURL, titles[i], pdf, resourceType.ID); err != nil {
@@ -149,7 +146,6 @@ func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, pr
 	return uploadedFilePaths, nil
 }
 
-// uploadFileToMinio handles the file upload to MinIO and returns the file path and URL.
 func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, file *multipart.FileHeader) (string, string, error) {
 	fileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
 	filePath := fmt.Sprintf("uploads/%s", fileName)

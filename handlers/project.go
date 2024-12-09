@@ -79,7 +79,7 @@ func (h *projectHandler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	err = h.projectService.UpdateProject(c, id, project)
+	_, err = h.projectService.UpdateProject(c, id, project)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
