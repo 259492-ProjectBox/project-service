@@ -5,6 +5,7 @@ type Resource struct {
 	Title          string       `json:"title"`
 	URL            string       `json:"url"`
 	CreatedAt      string       `json:"created_at"`
+	PDF            PDF          `json:"pdf"`
 	ResourceTypeID int          `json:"resource_type_id"`
 	ResourceType   ResourceType `json:"resource_type"`
 }

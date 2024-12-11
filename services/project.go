@@ -17,6 +17,7 @@ type ProjectService interface {
 	ValidateProject(ctx context.Context, project *models.Project) error
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
+	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 	DeleteProject(ctx context.Context, id int) error
@@ -51,7 +52,7 @@ func NewProjectService(
 
 func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project) {
 	go func() {
-		project, err := s.GetProjectById(ctx, project.ID)
+		project, err := s.GetProjectWithPDFByID(ctx, project.ID)
 		if err != nil {
 			log.Printf("Failed to fetch project by ID: %v", err)
 			return
@@ -63,7 +64,7 @@ func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Co
 		}
 
 		projectMessage := utils.SanitizeProjectMessage(project)
-		fmt.Printf("%+v\n", projectMessage)
+		fmt.Printf("+%v", projectMessage)
 		if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
 			log.Printf("Failed to publish message to RabbitMQ for action %s: %v", action, err)
 		}
@@ -116,7 +117,6 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	}
 	return nil
 }
-
 func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
@@ -139,6 +139,14 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 
 func (s *projectServiceImpl) GetProjectById(ctx context.Context, id int) (*models.Project, error) {
 	project, err := s.projectRepo.GetProjectByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
+}
+func (s *projectServiceImpl) GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error) {
+	project, err := s.projectRepo.GetProjectWithPDFByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}

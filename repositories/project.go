@@ -17,6 +17,7 @@ import (
 type ProjectRepository interface {
 	repository[models.Project]
 	GetProjectByID(ctx context.Context, id int) (*models.Project, error)
+	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	UpdateProject(ctx context.Context, id int, project *models.Project) error
@@ -44,6 +45,21 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*mo
 		Preload("Employees.Major").
 		Preload("Members.Major").
 		Preload("ProjectResources.Resource.ResourceType").
+		First(project, "projects.id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return project, nil
+}
+
+func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error) {
+	project := &models.Project{}
+	if err := r.db.WithContext(ctx).
+		Preload("Major").
+		Preload("Course.Major").
+		Preload("Employees.Major").
+		Preload("Members.Major").
+		Preload("ProjectResources.Resource.ResourceType").
+		Preload("ProjectResources.Resource.PDF.Pages").
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}
@@ -97,7 +113,7 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 		return nil, err
 	}
 
-	return r.GetProjectByID(ctx, project.ID)
+	return r.GetProjectWithPDFByID(ctx, project.ID)
 }
 
 func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, project *models.Project) error {

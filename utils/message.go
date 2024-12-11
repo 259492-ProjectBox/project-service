@@ -87,6 +87,25 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 			ResourceType:   resourceType,
 		}
 
+		pages := []dtos.PDFPage{}
+		if projectResource.Resource.PDF != nil {
+			for _, page := range projectResource.Resource.PDF.Pages {
+				pageObj := dtos.PDFPage{
+					ID:         page.ID,
+					PDFID:      page.PDFID,
+					PageNumber: page.PageNumber,
+					Content:    page.Content,
+				}
+				pages = append(pages, pageObj)
+			}
+
+			resource.PDF = dtos.PDF{
+				ID:         projectResource.Resource.PDF.ID,
+				ResourceID: projectResource.Resource.PDF.ResourceID,
+				Pages:      pages,
+			}
+		}
+
 		projectData.ProjectResources = append(projectData.ProjectResources, dtos.ProjectResource{
 			ID:       projectResource.ID,
 			Resource: resource,

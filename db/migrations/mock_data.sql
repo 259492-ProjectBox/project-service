@@ -5,6 +5,13 @@ INSERT INTO "majors" ("major_name") VALUES
   ('Mechanical Engineering'),
   ('Civil Engineering');
 
+INSERT INTO project_status (status_name, major_id) VALUES 
+('Pending', 1),
+('Approved', 2),
+('Rejected', 3),
+('In Progress', 1),
+('Completed', 4);
+
 INSERT INTO "configs" ("config_name", "value", "major_id")
 VALUES 
     ('academic year', '2025', 1),
@@ -27,9 +34,9 @@ INSERT INTO "students" ("id", "prefix", "first_name", "last_name", "email", "maj
   ('640610307', 'Ms.', 'Emily', 'Davis', 'emily.davis@example.com', 4);
 
 -- Insert Projects
-INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract_text", "academic_year", "semester", "section_id", "is_approved", "course_id", "major_id") VALUES
-  ('P002', 'โครงการศึกษา', 'Study Project', 'Abstract of Study Project', 2024, 1, 'A', true, 1, 1),
-  ('P004', 'โครงการวิศวกรรม', 'Engineering Project', 'Abstract of Engineering Project', 2024, 2, 'B', false, 2, 2);
+INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract_text", "academic_year", "semester", "section_id", "status_id", "course_id", "major_id") VALUES
+  ('P002', 'โครงการศึกษา', 'Study Project', 'Abstract of Study Project', 2024, 1, 'A', 1, 1, 1),
+  ('P004', 'โครงการวิศวกรรม', 'Engineering Project', 'Abstract of Engineering Project', 2024, 2, 'B', 2, 2, 2);
 
 -- Insert Project Students
 INSERT INTO "project_students" ("project_id", "student_id") VALUES
@@ -38,11 +45,6 @@ INSERT INTO "project_students" ("project_id", "student_id") VALUES
   (2, '640610306'),
   (2, '640610307');
 
--- Insert Project Employee Types
-INSERT INTO "project_employee_types" ("type_name") VALUES
-  ('Manager'),
-  ('Developer'),
-  ('Designer');
 
 -- Insert Employees
 INSERT INTO "employees" ("prefix", "first_name", "last_name", "email", "major_id") VALUES
