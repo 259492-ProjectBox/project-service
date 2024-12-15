@@ -130,7 +130,7 @@ func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, pr
 	var uploadedFilePaths []string
 
 	for i, file := range files {
-		filePath, fileURL, err := r.uploadFileToMinio(ctx, file)
+		filePath, err := r.uploadFileToMinio(ctx, file)
 		if err != nil {
 			tx.Rollback()
 			return uploadedFilePaths, err
@@ -152,7 +152,7 @@ func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, pr
 			}
 		}
 
-		if err := r.createProjectResourceAndResource(ctx, tx, projectID, fileURL, titles[i], pdf, resourceType.ID); err != nil {
+		if err := r.createProjectResourceAndResource(ctx, tx, projectID, titles[i], pdf, resourceType.ID); err != nil {
 			r.deleteUploadedFiles(ctx, uploadedFilePaths)
 			tx.Rollback()
 			return uploadedFilePaths, err
@@ -162,13 +162,13 @@ func (r *projectRepositoryImpl) handleFiles(ctx context.Context, tx *gorm.DB, pr
 	return uploadedFilePaths, nil
 }
 
-func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, file *multipart.FileHeader) (string, string, error) {
+func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, file *multipart.FileHeader) (string, error) {
 	fileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
 	filePath := fmt.Sprintf("uploads/%s", fileName)
 
 	src, err := file.Open()
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	defer src.Close()
 
@@ -176,11 +176,10 @@ func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, file *mul
 		ContentType: file.Header.Get("Content-Type"),
 	})
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
-	fileURL := fmt.Sprintf("http://localhost:9000/projects/%s", filePath)
-	return filePath, fileURL, nil
+	return filePath, nil
 }
 
 func (r *projectRepositoryImpl) getResourceType(ctx context.Context, tx *gorm.DB, file *multipart.FileHeader) (*models.ResourceType, error) {
@@ -197,7 +196,7 @@ func (r *projectRepositoryImpl) getResourceType(ctx context.Context, tx *gorm.DB
 	return resourceType, nil
 }
 
-func (r *projectRepositoryImpl) createProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectID int, fileURL string, title string, pdf *models.PDF, resourceTypeID int) error {
+func (r *projectRepositoryImpl) createProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectID int, title string, pdf *models.PDF, resourceTypeID int) error {
 	projectResource := &models.ProjectResource{
 		ProjectID: projectID,
 	}
@@ -208,7 +207,6 @@ func (r *projectRepositoryImpl) createProjectResourceAndResource(ctx context.Con
 
 	resource := &models.Resource{
 		Title:             title,
-		URL:               fileURL,
 		ProjectResourceID: &projectResource.ID,
 		PDF:               pdf,
 		ResourceTypeID:    resourceTypeID,

@@ -15,7 +15,7 @@ func NewMinIOConnection() (*minio.Client, error) {
 
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: false, // Change to true if you are using HTTPS
+		Secure: false,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to MinIO: %w", err)

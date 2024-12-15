@@ -5,7 +5,6 @@ import "time"
 type Resource struct {
 	ID                int          `json:"id" gorm:"primaryKey;autoIncrement"`
 	Title             string       `json:"title"`
-	URL               string       `json:"url"`
 	CreatedAt         time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	PDF               *PDF         `json:"pdf" gorm:"constraint:OnDelete:CASCADE"`
 	ProjectResourceID *int         `json:"-"`
