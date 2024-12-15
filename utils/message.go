@@ -81,6 +81,8 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 		resource := dtos.Resource{
 			ID:             projectResource.Resource.ID,
 			Title:          projectResource.Resource.Title,
+			ResourceName:   projectResource.Resource.ResourceName,
+			Path:           projectResource.Resource.Path,
 			CreatedAt:      projectResource.Resource.CreatedAt.Format("2006-01-02"),
 			ResourceTypeID: projectResource.Resource.ResourceTypeID,
 			ResourceType:   resourceType,

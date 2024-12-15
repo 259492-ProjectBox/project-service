@@ -6,12 +6,12 @@ import (
 )
 
 func SetupProjectRouter(r *gin.RouterGroup, handler handlers.ProjectHandler) {
-	projectRoute := r.Group("/v1/projects")
+	projectRouteV1 := r.Group("/v1/projects")
 	{
-		projectRoute.GET("/:id", handler.GetProjectById)
-		projectRoute.GET("/student/:student_id", handler.GetProjectsByStudentId)
-		projectRoute.POST("", handler.CreateProject)
-		projectRoute.PUT("/:id", handler.UpdateProject)
-		projectRoute.DELETE("/:id", handler.DeleteProject)
+		projectRouteV1.GET("/:id", handler.GetProjectById)
+		projectRouteV1.GET("/student/:student_id", handler.GetProjectsByStudentId)
+		projectRouteV1.POST("", handler.CreateProject)
+		projectRouteV1.PUT("/:id", handler.UpdateProject)
+		projectRouteV1.DELETE("/:id", handler.DeleteProject)
 	}
 }

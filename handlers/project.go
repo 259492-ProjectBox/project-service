@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,7 +44,6 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Printf("%+v\n", req.Titles)
 	project, err := h.projectService.CreateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -72,13 +70,11 @@ func (h *projectHandler) UpdateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
 		return
 	}
-
 	project := &models.Project{}
 	if err := c.ShouldBindJSON(&project); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	_, err = h.projectService.UpdateProject(c, id, project)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

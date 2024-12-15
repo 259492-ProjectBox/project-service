@@ -127,7 +127,12 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 		return nil, err
 	}
 
-	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles)
+	major, err := s.majorRepo.Get(ctx, project.MajorID)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, major, files, titles)
 	if err != nil {
 		return nil, err
 	}
