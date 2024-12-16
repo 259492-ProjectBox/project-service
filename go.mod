@@ -8,7 +8,6 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/heussd/pdftotext-go v0.0.0-20240804143356-fe57a0d73567
 	github.com/joho/godotenv v1.5.1
-	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06
 	github.com/minio/minio-go/v7 v7.0.80
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/swaggo/files v1.0.1
