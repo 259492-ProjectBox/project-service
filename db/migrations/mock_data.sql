@@ -5,7 +5,7 @@ INSERT INTO "majors" ("major_name") VALUES
   ('Mechanical Engineering'),
   ('Civil Engineering');
 
-INSERT INTO project_status (status_name, major_id) VALUES 
+INSERT INTO "project_status" ("status_name", "major_id") VALUES 
 ('Pending', 1),
 ('Approved', 2),
 ('Rejected', 3),

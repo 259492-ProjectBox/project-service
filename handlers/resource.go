@@ -1,54 +1,52 @@
 package handlers
 
-// import (
-// 	"context"
-// 	"fmt"
-// 	"net/http"
-// 	"os"
-// 	"strconv"
-// 	"time"
+import (
+	"fmt"
+	"net/http"
+	"os"
 
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/minio/minio-go/v7"
-// 	"github.com/project-box/models"
-// 	"github.com/project-box/services"
-// )
+	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
+	"github.com/project-box/models"
+	"github.com/project-box/services"
+)
 
-// type ResourceHandler interface {
-// 	UploadResource(c *gin.Context)
-// 	GetResourceByID(c *gin.Context)
-// 	DeleteResource(c *gin.Context)
-// 	GetResourcesByProjectID(c *gin.Context)
-// }
+type ResourceHandler interface {
+	// UploadResource(c *gin.Context)
+	// GetResourceByID(c *gin.Context)
+	DeleteResource(c *gin.Context)
+	// GetResourcesByProjectID(c *gin.Context)
+}
 
-// type resourceHandler struct {
-// 	minioClient     *minio.Client
-// 	bucketName      string
-// 	resourceService services.ResourceService
-// }
+type resourceHandler struct {
+	minioClient     *minio.Client
+	bucketName      string
+	resourceService services.ResourceService
+	projectService  services.ProjectService
+}
 
-// func NewResourceHandler(minioClient *minio.Client, resourceService services.ResourceService) ResourceHandler {
-// 	return &resourceHandler{
-// 		minioClient:     minioClient,
-// 		bucketName:      os.Getenv("MINIO_BUCKET"),
-// 		resourceService: resourceService,
-// 	}
-// }
+func NewResourceHandler(minioClient *minio.Client, resourceService services.ResourceService, projectService services.ProjectService) ResourceHandler {
+	return &resourceHandler{
+		minioClient:     minioClient,
+		bucketName:      os.Getenv("MINIO_BUCKET"),
+		resourceService: resourceService,
+		projectService:  projectService,
+	}
+}
 
-// // @Summary Upload a file and create a resource
-// // @Description Upload a file to MinIO and save its information as a resource
-// // @Tags Resource
-// // @Accept multipart/form-data
-// // @Produce json
-// // @Param file formData file true "File to upload"
-// // @Param project_id formData int true "Project ID"
-// // @Param resource_type_id formData int true "Resource Type ID"
-// // @Success 201 {object} models.UploadResourceResponse
-// // @Failure 400 {object} map[string]string
-// // @Failure 500 {object} map[string]string
-// // @Router /resource [post]
+// @Summary Upload a file and create a resource
+// @Description Upload a file to MinIO and save its information as a resource
+// @Tags Resource
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "File to upload"
+// @Param project_id formData int true "Project ID"
+// @Param resource_type_id formData int true "Resource Type ID"
+// @Success 201 {object} models.UploadResourceResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /resource [post]
 // func (h *resourceHandler) UploadResource(c *gin.Context) {
-// 	// Parse form data
 // 	projectID, err := strconv.Atoi(c.PostForm("project_id"))
 // 	if err != nil {
 // 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project_id"})
@@ -61,7 +59,6 @@ package handlers
 // 		return
 // 	}
 
-// 	// Get the file
 // 	file, header, err := c.Request.FormFile("file")
 // 	if err != nil {
 // 		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
@@ -69,10 +66,8 @@ package handlers
 // 	}
 // 	defer file.Close()
 
-// 	// Generate unique filename
 // 	filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), header.Filename)
 
-// 	// Upload to MinIO
 // 	contentType := "application/pdf" // You might want to make this dynamic based on file type
 // 	_, err = h.minioClient.PutObject(
 // 		context.Background(),
@@ -121,18 +116,17 @@ package handlers
 // 	c.JSON(http.StatusCreated, response)
 // }
 
-// // GetResourceByID godoc
-// // @Summary Get a resource by ID
-// // @Description Get a resource by its ID
-// // @Tags Resource
-// // @Produce json
-// // @Param id path int true "Resource ID"
-// // @Success 200 {object} models.UploadResourceResponse
-// // @Failure 404 {object} map[string]string
-// // @Router /resource/{id} [get]
+// GetResourceByID godoc
+// @Summary Get a resource by ID
+// @Description Get a resource by its ID
+// @Tags Resource
+// @Produce json
+// @Param id path int true "Resource ID"
+// @Success 200 {object} models.UploadResourceResponse
+// @Failure 404 {object} map[string]string
+// @Router /resource/{id} [get]
 // func (h *resourceHandler) GetResourceByID(c *gin.Context) {
 // 	id := c.Param("id")
-
 // 	resource, err := h.resourceService.GetResourceByID(c, id)
 // 	if err != nil {
 // 		c.JSON(http.StatusNotFound, gin.H{"error": "Resource not found"})
@@ -150,56 +144,52 @@ package handlers
 // 	c.JSON(http.StatusOK, response)
 // }
 
-// // DeleteResource godoc
-// // @Summary Delete a resource
-// // @Description Delete a resource and its file
-// // @Tags Resource
-// // @Param id path int true "Resource ID"
-// // @Success 200 {object} models.ResponseMessage
-// // @Failure 500 {object} models.ResponseMessage
-// // @Router /resource/{id} [delete]
-// func (h *resourceHandler) DeleteResource(c *gin.Context) {
-// 	id := c.Param("id")
+// DeleteResource godoc
+// @Summary Delete a resource
+// @Description Delete a resource and its file
+// @Tags Resource
+// @Param id path int true "Resource ID"
+// @Success 200 {object} models.ResponseMessage
+// @Failure 500 {object} models.ResponseMessage
+// @Router /resource/{id} [delete]
+func (h *resourceHandler) DeleteResource(c *gin.Context) {
+	id := c.Param("id")
 
-// 	// Get resource to get the file URL
-// 	resource, err := h.resourceService.GetResourceByID(c, id)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "Resource not found"})
-// 		return
-// 	}
+	detailedResource, err := h.resourceService.GetDetailedResourceByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Resource not found"})
+		return
+	}
+	fmt.Printf("%+v\n", detailedResource)
+	if err := h.resourceService.DeleteResource(c, id); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: "Failed to delete resource record"})
+		return
+	}
 
-// 	// Extract filename from URL
-// 	// filename := filepath.Base(resource.URL)
-// 	filename := resource.Title
+	filePath := detailedResource.Resource.Path
+	if err := h.minioClient.RemoveObject(c, os.Getenv("MINIO_PROJECT_BUCKET"), filePath, minio.RemoveObjectOptions{}); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: err.Error()})
+		return
+	}
 
-// 	// Delete from MinIO first
-// 	err = h.minioClient.RemoveObject(context.Background(), h.bucketName, filename, minio.RemoveObjectOptions{})
+	project := detailedResource.Project
+	projectId := project.ID
+	if projectId != 0 {
+		h.projectService.PublishProjectMessageToElasticSearch(c, "update", &project)
+	}
 
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: "Failed to delete file"})
-// 		return
-// 	}
+	c.JSON(http.StatusOK, models.ResponseMessage{Message: "Resource deleted successfully"})
+}
 
-// 	// Then delete from database
-// 	if err := h.resourceService.DeleteResource(c, id); err != nil {
-// 		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: "Failed to delete resource record"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, models.ResponseMessage{Message: "Resource deleted successfully"})
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "Resource deleted successfully"})
-// }
-
-// // GetResourcesByProjectID godoc
-// // @Summary Get resources by project ID
-// // @Description Get all resources associated with a project
-// // @Tags Resource
-// // @Produce json
-// // @Param project_id path int true "Project ID"
-// // @Success 200 {array} models.UploadResourceResponse
-// // @Failure 404 {object} map[string]string
-// // @Router /resource/project/{project_id} [get]
+// GetResourcesByProjectID godoc
+// @Summary Get resources by project ID
+// @Description Get all resources associated with a project
+// @Tags Resource
+// @Produce json
+// @Param project_id path int true "Project ID"
+// @Success 200 {array} models.UploadResourceResponse
+// @Failure 404 {object} map[string]string
+// @Router /resource/project/{project_id} [get]
 // func (h *resourceHandler) GetResourcesByProjectID(c *gin.Context) {
 // 	projectID := c.Param("project_id")
 

@@ -33,7 +33,10 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
 	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, courseRepository, projectNumberCounterRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
-	engine, err := NewApp(projectHandler)
+	resourceRepository := repositories.NewResourceRepository(gormDB)
+	resourceService := services.NewResourceService(resourceRepository)
+	resourceHandler := handlers.NewResourceHandler(client, resourceService, projectService)
+	engine, err := NewApp(projectHandler, resourceHandler)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -47,9 +50,9 @@ var AppSet = wire.NewSet(
 	NewApp, db2.NewPostgresDatabase, db3.NewMinIOConnection, db.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewResourceHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService)
+var ServiceSet = wire.NewSet(services.NewProjectService, services.NewResourceService)
 
 var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository)
 

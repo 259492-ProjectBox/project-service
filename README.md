@@ -58,6 +58,11 @@ gorm.io/gorm
 https://github.com/air-verse/air
 go install github.com/air-verse/air@latest
 
+# PDF To Text
+
+1. Install Scoop Cli
+2. `scoop install poppler`
+
 air init
 
 air
