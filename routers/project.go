@@ -6,7 +6,7 @@ import (
 )
 
 func SetupProjectRouter(r *gin.RouterGroup, handler handlers.ProjectHandler) {
-	projectRouteV1 := r.Group("/v1/projects")
+	projectRouteV1 := r.Group("/projects")
 	{
 		projectRouteV1.GET("/:id", handler.GetProjectById)
 		projectRouteV1.GET("/student/:student_id", handler.GetProjectsByStudentId)

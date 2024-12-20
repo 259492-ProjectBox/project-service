@@ -1,4 +1,32 @@
 definitions:
+  dtos.CalendarResponse:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: integer
+      major_id:
+        type: integer
+      start_date:
+        type: string
+      title:
+        type: string
+    type: object
+  dtos.CreateCalendarRequest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      major_id:
+        type: integer
+      start_date:
+        type: string
+      title:
+        type: string
+    type: object
   models.Course:
     properties:
       course_name:
@@ -28,10 +56,10 @@ definitions:
         type: integer
       prefix:
         type: string
-      role:
-        $ref: '#/definitions/models.Role'
-      role_id:
-        type: integer
+      projects:
+        items:
+          $ref: '#/definitions/models.Project'
+        type: array
     type: object
   models.Major:
     properties:
@@ -39,6 +67,29 @@ definitions:
         type: integer
       major_name:
         type: string
+    type: object
+  models.PDF:
+    properties:
+      id:
+        type: integer
+      pages:
+        items:
+          $ref: '#/definitions/models.PDFPage'
+        type: array
+      resource_id:
+        type: integer
+    type: object
+  models.PDFPage:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      page_number:
+        type: integer
+      pdf_id:
+        description: Foreign key
+        type: integer
     type: object
   models.Project:
     properties:
@@ -68,12 +119,12 @@ definitions:
         items:
           $ref: '#/definitions/models.Student'
         type: array
-      old_project_no:
-        type: string
       project_no:
         type: string
-      relation_description:
-        type: string
+      project_resources:
+        items:
+          $ref: '#/definitions/models.ProjectResource'
+        type: array
       section_id:
         type: string
       semester:
@@ -83,11 +134,37 @@ definitions:
       title_th:
         type: string
     type: object
-  models.Role:
+  models.ProjectResource:
     properties:
       id:
         type: integer
-      role_name:
+      resource:
+        $ref: '#/definitions/models.Resource'
+    type: object
+  models.Resource:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      path:
+        type: string
+      pdf:
+        $ref: '#/definitions/models.PDF'
+      resource_name:
+        type: string
+      resource_type:
+        $ref: '#/definitions/models.ResourceType'
+      resource_type_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  models.ResourceType:
+    properties:
+      id:
+        type: integer
+      mime_type:
         type: string
     type: object
   models.Student:
@@ -129,6 +206,38 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /calendar:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new calendarof that major
+      parameters:
+      - description: Calendar Data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateCalendarRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created calendar
+          schema:
+            $ref: '#/definitions/dtos.CalendarResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new Calendar
+      tags:
+      - Calendar
   /projects:
     post:
       consumes:

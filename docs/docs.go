@@ -24,6 +24,54 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/calendar": {
+            "post": {
+                "description": "Creates a new calendarof that major",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "Create a new Calendar",
+                "parameters": [
+                    {
+                        "description": "Calendar Data",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateCalendarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created calendar",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CalendarResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/projects": {
             "post": {
                 "description": "Creates a new project with the provided data",
@@ -258,6 +306,49 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dtos.CalendarResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.CreateCalendarRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Course": {
             "type": "object",
             "properties": {
@@ -302,11 +393,11 @@ const docTemplate = `{
                 "prefix": {
                     "type": "string"
                 },
-                "role": {
-                    "$ref": "#/definitions/models.Role"
-                },
-                "role_id": {
-                    "type": "integer"
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Project"
+                    }
                 }
             }
         },
@@ -318,6 +409,41 @@ const docTemplate = `{
                 },
                 "major_name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.PDF": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "pages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PDFPage"
+                    }
+                },
+                "resource_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.PDFPage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "page_number": {
+                    "type": "integer"
+                },
+                "pdf_id": {
+                    "description": "Foreign key",
+                    "type": "integer"
                 }
             }
         },
@@ -363,14 +489,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Student"
                     }
                 },
-                "old_project_no": {
-                    "type": "string"
-                },
                 "project_no": {
                     "type": "string"
                 },
-                "relation_description": {
-                    "type": "string"
+                "project_resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProjectResource"
+                    }
                 },
                 "section_id": {
                     "type": "string"
@@ -386,13 +512,53 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Role": {
+        "models.ProjectResource": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "role_name": {
+                "resource": {
+                    "$ref": "#/definitions/models.Resource"
+                }
+            }
+        },
+        "models.Resource": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "pdf": {
+                    "$ref": "#/definitions/models.PDF"
+                },
+                "resource_name": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/models.ResourceType"
+                },
+                "resource_type_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResourceType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "mime_type": {
                     "type": "string"
                 }
             }
