@@ -1,20 +1,18 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
-	"github.com/project-box/models"
 	"github.com/project-box/services"
 )
 
 type ResourceHandler interface {
 	// UploadResource(c *gin.Context)
 	// GetResourceByID(c *gin.Context)
-	DeleteResource(c *gin.Context)
+	DeleteProjectResource(c *gin.Context)
 	// GetResourcesByProjectID(c *gin.Context)
 }
 
@@ -151,8 +149,8 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 // @Param id path int true "Resource ID"
 // @Success 200 {object} models.ResponseMessage
 // @Failure 500 {object} models.ResponseMessage
-// @Router /resource/{id} [delete]
-func (h *resourceHandler) DeleteResource(c *gin.Context) {
+// @Router /projectResource/{id} [delete]
+func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	id := c.Param("id")
 
 	detailedResource, err := h.resourceService.GetDetailedResourceByID(c, id)
@@ -160,25 +158,16 @@ func (h *resourceHandler) DeleteResource(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Resource not found"})
 		return
 	}
-	fmt.Printf("%+v\n", detailedResource)
-	if err := h.resourceService.DeleteResource(c, id); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: "Failed to delete resource record"})
-		return
-	}
 
 	filePath := detailedResource.Resource.Path
-	if err := h.minioClient.RemoveObject(c, os.Getenv("MINIO_PROJECT_BUCKET"), filePath, minio.RemoveObjectOptions{}); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ResponseMessage{Message: err.Error()})
+	if err := h.resourceService.DeleteProjectResourceByID(c, id, filePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete resource record"})
 		return
 	}
 
-	project := detailedResource.Project
-	projectId := project.ID
-	if projectId != 0 {
-		h.projectService.PublishProjectMessageToElasticSearch(c, "update", &project)
-	}
+	h.projectService.PublishProjectMessageToElasticSearch(c, "update", &detailedResource.Project)
 
-	c.JSON(http.StatusOK, models.ResponseMessage{Message: "Resource deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Project Resource deleted successfully"})
 }
 
 // GetResourcesByProjectID godoc

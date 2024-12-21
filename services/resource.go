@@ -10,7 +10,7 @@ import (
 type ResourceService interface {
 	// CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error)
 	GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
-	DeleteResource(ctx context.Context, id string) error
+	DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error
 	GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
 }
 
@@ -42,8 +42,9 @@ func (s *resourceService) GetDetailedResourceByID(ctx context.Context, id string
 	return s.resourceRepository.FindDetailedResourceByID(ctx, id)
 }
 
-func (s *resourceService) DeleteResource(ctx context.Context, id string) error {
-	return s.resourceRepository.DeleteResourceByID(ctx, id)
+func (s *resourceService) DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error {
+
+	return s.resourceRepository.DeleteProjectResourceByID(ctx, id, filePath)
 }
 
 func (s *resourceService) GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error) {

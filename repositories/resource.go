@@ -3,8 +3,9 @@ package repositories
 import (
 	"context"
 	"errors"
-	"fmt"
+	"os"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/project-box/models"
 	"gorm.io/gorm"
 )
@@ -12,16 +13,20 @@ import (
 type ResourceRepository interface {
 	CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error)
 	FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
-	DeleteResourceByID(ctx context.Context, id string) error
+	DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error
 	FindByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
 }
 
 type resourceRepository struct {
-	db *gorm.DB
+	db          *gorm.DB
+	minioClient *minio.Client
 }
 
-func NewResourceRepository(db *gorm.DB) ResourceRepository {
-	return &resourceRepository{db: db}
+func NewResourceRepository(db *gorm.DB, minioClient *minio.Client) ResourceRepository {
+	return &resourceRepository{
+		db:          db,
+		minioClient: minioClient,
+	}
 }
 
 func (r *resourceRepository) CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error) {
@@ -32,31 +37,54 @@ func (r *resourceRepository) CreateResource(ctx context.Context, resource *model
 }
 func (r *resourceRepository) FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error) {
 	var detailedResource models.DetailedResource
-	if err := r.db.WithContext(ctx).
+
+	// Start building the query
+	query := r.db.WithContext(ctx).
 		Table("resources").
-		Select("projects.*,resources.*,project_resources.*,asset_resources.*").
-		Joins("LEFT JOIN project_resources ON project_resources.id = resources.project_resource_id").
-		Joins("LEFT JOIN asset_resources ON asset_resources.id = resources.asset_resource_id").
-		Joins("LEFT JOIN projects ON projects.id = project_resources.project_id").
-		Where("resources.id = ?", id).
+		Select(`
+			projects.id AS project_id,
+			project_resources.id AS project_resource_id,
+			asset_resources.id AS asset_resource_id,
+			projects.*,
+			resources.*,
+			project_resources.*,
+			asset_resources.*
+		`).
+		Joins("LEFT JOIN project_resources ON resources.project_resource_id IS NOT NULL AND project_resources.id = resources.project_resource_id").
+		Joins("LEFT JOIN asset_resources ON resources.asset_resource_id IS NOT NULL AND asset_resources.id = resources.asset_resource_id").
+		Joins("LEFT JOIN projects ON project_resources.project_id IS NOT NULL AND projects.id = project_resources.project_id")
+
+	if err := query.Where("resources.id = ?", id).
 		Scan(&detailedResource).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("resource not found")
 		}
 		return nil, err
 	}
-	fmt.Println(detailedResource)
+
 	return &detailedResource, nil
 }
 
-func (r *resourceRepository) DeleteResourceByID(ctx context.Context, id string) error {
-	result := r.db.WithContext(ctx).Delete(&models.Resource{}, id)
-	if result.Error != nil {
+func (r *resourceRepository) DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error {
+	tx := r.db.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if result := tx.Delete(&models.ProjectResource{}, id); result.Error != nil {
+		tx.Rollback()
 		return result.Error
 	}
-	if result.RowsAffected == 0 {
-		return errors.New("resource not found")
+
+	if err := r.minioClient.RemoveObject(ctx, os.Getenv("MINIO_PROJECT_BUCKET"), filePath, minio.RemoveObjectOptions{}); err != nil {
+		tx.Rollback()
+		return err
 	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 

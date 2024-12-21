@@ -33,7 +33,7 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
 	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, courseRepository, projectNumberCounterRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
-	resourceRepository := repositories.NewResourceRepository(gormDB)
+	resourceRepository := repositories.NewResourceRepository(gormDB, client)
 	resourceService := services.NewResourceService(resourceRepository)
 	resourceHandler := handlers.NewResourceHandler(client, resourceService, projectService)
 	engine, err := NewApp(projectHandler, resourceHandler)
