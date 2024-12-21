@@ -16,7 +16,6 @@ func SetupResourceRouter(r *gin.RouterGroup, handler handlers.ResourceHandler) {
 
 	projectResourceRouteV1 := r.Group("/v1/projects/projectResource")
 	{
-		projectResourceRouteV1.PUT("", handler.UploadProjectResource)
 		projectResourceRouteV1.DELETE("/:id", handler.DeleteProjectResource)
 	}
 

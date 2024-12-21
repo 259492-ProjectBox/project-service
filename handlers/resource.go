@@ -6,13 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
-	"github.com/project-box/dtos"
 	"github.com/project-box/services"
 )
 
 type ResourceHandler interface {
 	// UploadResource(c *gin.Context)
-	UploadProjectResource(c *gin.Context)
+	// UploadAssetResource(c *gin.Context)
 	// GetResourceByID(c *gin.Context)
 	DeleteProjectResource(c *gin.Context)
 	// GetResourcesByProjectID(c *gin.Context)
@@ -172,21 +171,21 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Project Resource deleted successfully"})
 }
 
-func (h *resourceHandler) UploadProjectResource(c *gin.Context) {
-	req := &dtos.UpdateProjectRequest{}
-	if err := c.ShouldBind(req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	project, err := h.projectService.UpdateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	h.projectService.PublishProjectMessageToElasticSearch(c, "update", project)
+// func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
+// 	req := &dtos.UpdateProjectRequest{}
+// 	if err := c.ShouldBind(req); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	project, err := h.projectService.UpdateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	h.projectService.PublishProjectMessageToElasticSearch(c, "update", project)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Project File Upload successfully"})
-}
+// 	c.JSON(http.StatusOK, gin.H{"message": "Project File Upload successfully"})
+// }
 
 // GetResourcesByProjectID godoc
 // @Summary Get resources by project ID
