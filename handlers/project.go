@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/project-box/dtos"
-	"github.com/project-box/models"
 	"github.com/project-box/services"
 )
 
@@ -40,7 +39,7 @@ func NewProjectHandler(projectService services.ProjectService) ProjectHandler {
 // @Router /projects [post]
 func (h *projectHandler) CreateProject(c *gin.Context) {
 	req := &dtos.CreateProjectRequest{}
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -65,23 +64,19 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /projects/{id} [put]
 func (h *projectHandler) UpdateProject(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
-		return
-	}
-	project := &models.Project{}
-	if err := c.ShouldBindJSON(&project); err != nil {
+	req := &dtos.UpdateProjectRequest{}
+	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	_, err = h.projectService.UpdateProject(c, id, project)
+
+	project, err := h.projectService.UpdateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, *project)
+	c.JSON(http.StatusOK, project)
 }
 
 // GetProjectByID retrieves a project by its ID
