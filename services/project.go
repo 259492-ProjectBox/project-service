@@ -14,12 +14,13 @@ import (
 )
 
 type ProjectService interface {
+	PublishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project)
 	ValidateProject(ctx context.Context, project *models.Project) error
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
+	UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error)
 	DeleteProject(ctx context.Context, id int) error
 }
 
@@ -50,7 +51,7 @@ func NewProjectService(
 	}
 }
 
-func (s *projectServiceImpl) publishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project) {
+func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project) {
 	go func() {
 		project, err := s.GetProjectWithPDFByID(ctx, project.ID)
 		if err != nil {
@@ -137,7 +138,7 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 		return nil, err
 	}
 
-	s.publishProjectMessageToElasticSearch(ctx, "create", project)
+	s.PublishProjectMessageToElasticSearch(ctx, "create", project)
 
 	return project, nil
 }
@@ -168,22 +169,22 @@ func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, student
 	return project, nil
 }
 
-func (s *projectServiceImpl) UpdateProject(ctx context.Context, id int, project *models.Project) (*models.Project, error) {
+func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
 	}
 
-	err := s.projectRepo.UpdateProject(ctx, id, project)
+	major, err := s.majorRepo.Get(ctx, project.MajorID)
 	if err != nil {
 		return nil, err
 	}
 
-	project, err = s.GetProjectById(ctx, id)
+	project, err = s.projectRepo.UpdateProjectWithFiles(ctx, project, major, files, titles)
 	if err != nil {
 		return nil, err
 	}
 
-	s.publishProjectMessageToElasticSearch(ctx, "update", project)
+	s.PublishProjectMessageToElasticSearch(ctx, "update", project)
 
 	return project, nil
 }
@@ -198,7 +199,7 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 		return err
 	}
 
-	s.publishProjectMessageToElasticSearch(ctx, "delete", project)
+	s.PublishProjectMessageToElasticSearch(ctx, "delete", project)
 
 	return nil
 }

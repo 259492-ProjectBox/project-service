@@ -34,12 +34,11 @@ var AppSet = wire.NewSet(
 var HandlerSet = wire.NewSet(
 	handlers.NewProjectHandler,
 	handlers.NewCalendarHandler,
-	// handlers.NewResourceHandler,
+	handlers.NewResourceHandler,
 )
 
 var ServiceSet = wire.NewSet(
 	services.NewProjectService,
-	services.NewCalendarService,
 	// services.NewResourceService,
 )
 

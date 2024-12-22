@@ -9,15 +9,15 @@ type Resource struct {
 	Path              string       `json:"path"`
 	CreatedAt         time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	PDF               *PDF         `json:"pdf" gorm:"constraint:OnDelete:CASCADE"`
-	ProjectResourceID *int         `json:"-"`
-	AssetResourceID   *int         `json:"-"`
+	ProjectResourceID *int         `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	AssetResourceID   *int         `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	ResourceTypeID    int          `json:"resource_type_id" gorm:"not null"`
 	ResourceType      ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
 }
 
 type ProjectResource struct {
 	ID        int      `json:"id" gorm:"primaryKey;autoIncrement"`
-	ProjectID int      `json:"-"`
+	ProjectID int      `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	Resource  Resource `json:"resource"`
 }
 

@@ -21,7 +21,7 @@ type ProjectRepository interface {
 	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, major *models.Major, files []*multipart.FileHeader, titles []string) (*models.Project, error)
-	UpdateProject(ctx context.Context, id int, project *models.Project) error
+	UpdateProjectWithFiles(ctx context.Context, project *models.Project, major *models.Major, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 }
 
 type projectRepositoryImpl struct {
@@ -117,8 +117,66 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 	return r.GetProjectWithPDFByID(ctx, project.ID)
 }
 
+func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, project *models.Project, major *models.Major, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	if err := r.deleteProjectAssociations(ctx, tx, project.ID); err != nil {
+		return nil, err
+	}
+	if err := r.updateProject(ctx, tx, project); err != nil {
+		return nil, err
+	}
+	uploadedFilePaths, err := r.handleFilesUpload(ctx, tx, project, major, files, titles)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		return nil, err
+	}
+
+	return r.GetProjectWithPDFByID(ctx, project.ID)
+}
+
+func (r *projectRepositoryImpl) deleteProjectAssociations(ctx context.Context, tx *gorm.DB, projectID int) error {
+	if err := r.deleteProjectStudents(ctx, tx, projectID); err != nil {
+		return fmt.Errorf("failed to delete project students: %w", err)
+	}
+
+	if err := r.deleteProjectEmployees(ctx, tx, projectID); err != nil {
+		return fmt.Errorf("failed to delete project employees: %w", err)
+	}
+
+	return nil
+}
+
+func (r *projectRepositoryImpl) deleteProjectStudents(ctx context.Context, tx *gorm.DB, projectID int) error {
+	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Delete(&models.ProjectStudent{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *projectRepositoryImpl) deleteProjectEmployees(ctx context.Context, tx *gorm.DB, projectID int) error {
+	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Delete(&models.ProjectEmployee{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, project *models.Project) error {
 	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	return nil
+}
+
+func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, project *models.Project) error {
+	if err := tx.WithContext(ctx).Save(project).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

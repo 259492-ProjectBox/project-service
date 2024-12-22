@@ -33,10 +33,13 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
 	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, courseRepository, projectNumberCounterRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
+	resourceRepository := repositories.NewResourceRepository(gormDB, client)
+	resourceService := services.NewResourceService(resourceRepository)
+	resourceHandler := handlers.NewResourceHandler(client, resourceService, projectService)
 	calendarRepository := repositories.NewCalendarRepository(gormDB)
 	calendarService := services.NewCalendarService(calendarRepository, majorRepository)
 	calendarHandler := handlers.NewCalendarHandler(calendarService)
-	engine, err := NewApp(projectHandler, calendarHandler)
+	engine, err := NewApp(projectHandler, resourceHandler, calendarHandler)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -50,9 +53,9 @@ var AppSet = wire.NewSet(
 	NewApp, db2.NewPostgresDatabase, db3.NewMinIOConnection, db.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService)
+var ServiceSet = wire.NewSet(services.NewProjectService)
 
 var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewCalendarRepository)
 

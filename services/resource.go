@@ -1,29 +1,28 @@
 package services
 
-// import (
-// 	"context"
-// 	"errors"
+import (
+	"context"
 
-// 	"github.com/project-box/models"
-// 	"github.com/project-box/repositories"
-// )
+	"github.com/project-box/models"
+	"github.com/project-box/repositories"
+)
 
-// type ResourceService interface {
-// 	CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error)
-// 	GetResourceByID(ctx context.Context, id string) (*models.Resource, error)
-// 	DeleteResource(ctx context.Context, id string) error
-// 	GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
-// }
+type ResourceService interface {
+	// CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error)
+	GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
+	DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error
+	GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
+}
 
-// type resourceService struct {
-// 	resourceRepository repositories.ResourceRepository
-// }
+type resourceService struct {
+	resourceRepository repositories.ResourceRepository
+}
 
-// func NewResourceService(resourceRepository repositories.ResourceRepository) ResourceService {
-// 	return &resourceService{
-// 		resourceRepository: resourceRepository,
-// 	}
-// }
+func NewResourceService(resourceRepository repositories.ResourceRepository) ResourceService {
+	return &resourceService{
+		resourceRepository: resourceRepository,
+	}
+}
 
 // func (s *resourceService) CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error) {
 // 	if resource.ProjectID == 0 {
@@ -39,14 +38,15 @@ package services
 // 	return s.resourceRepository.CreateResource(ctx, resource)
 // }
 
-// func (s *resourceService) GetResourceByID(ctx context.Context, id string) (*models.Resource, error) {
-// 	return s.resourceRepository.FindResourceByID(ctx, id)
-// }
+func (s *resourceService) GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error) {
+	return s.resourceRepository.FindDetailedResourceByID(ctx, id)
+}
 
-// func (s *resourceService) DeleteResource(ctx context.Context, id string) error {
-// 	return s.resourceRepository.DeleteResource(ctx, id)
-// }
+func (s *resourceService) DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error {
 
-// func (s *resourceService) GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error) {
-// 	return s.resourceRepository.FindByProjectID(ctx, projectID)
-// }
+	return s.resourceRepository.DeleteProjectResourceByID(ctx, id, filePath)
+}
+
+func (s *resourceService) GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error) {
+	return s.resourceRepository.FindByProjectID(ctx, projectID)
+}

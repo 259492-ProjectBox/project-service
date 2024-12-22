@@ -10,7 +10,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, calendarHandler handlers.CalendarHandler) {
+func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resourceHandler handlers.ResourceHandler, calendarHandler handlers.CalendarHandler) {
 	r.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Welcome to the api",
@@ -19,6 +19,5 @@ func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, calendar
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router := r.Group("")
 	SetupProjectRouter(router, projectHandler)
-	SetupCalendarRouter(router, calendarHandler)
 	// SetupResourceRouter(router, resourceHandler)
 }

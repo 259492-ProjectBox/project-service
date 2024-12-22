@@ -12,6 +12,12 @@ type CreateProjectRequest struct {
 	Project models.Project          `form:"project"`
 }
 
+type UpdateProjectRequest struct {
+	Files   []*multipart.FileHeader `form:"files"`
+	Titles  []string                `form:"titles[]"`
+	Project models.Project          `form:"project"`
+}
+
 type ProjectData struct {
 	ID               int               `json:"id"`
 	ProjectNo        string            `json:"project_no"`

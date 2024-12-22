@@ -15,7 +15,9 @@ import (
 )
 
 func NewApp(
-	projectHandler handlers.ProjectHandler, calendarHandler handlers.CalendarHandler,
+	projectHandler handlers.ProjectHandler,
+	calendarHandler handlers.CalendarHandler,
+	resourceHandler handlers.ResourceHandler,
 ) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -32,7 +34,6 @@ func NewApp(
 	routers.SetupRoutes(
 		r,
 		projectHandler,
-		calendarHandler,
 	)
 
 	return r, nil
@@ -57,7 +58,6 @@ func NewApp(
 func main() {
 
 	configs.InitialEnv(".env")
-
 	app, cleanup, err := InitializeApp()
 	if err != nil {
 		log.Print(err)
