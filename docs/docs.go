@@ -318,8 +318,8 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "major_id": {
-                    "type": "integer"
+                "major_name": {
+                    "type": "string"
                 },
                 "start_date": {
                     "type": "string"

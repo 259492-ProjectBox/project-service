@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/project-box/models"
 	"gorm.io/gorm"
@@ -25,10 +26,18 @@ func NewMajorRepository(db *gorm.DB) MajorRepository {
 }
 
 func (r *majorRepositoryImpl) GetByMajorID(ctx context.Context, majorID int) (*models.Major, error) {
-	filters := map[string]interface{}{"major_id": majorID}
 	var major models.Major
-	if err := r.db.WithContext(ctx).Where(filters).First(&major).Error; err != nil {
+
+	// Use the correct field name for filtering (ID column corresponds to "id")
+	if err := r.db.WithContext(ctx).
+		Where("id = ?", majorID).
+		First(&major).
+		Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("major ID does not exist")
+		}
 		return nil, err
 	}
+
 	return &major, nil
 }

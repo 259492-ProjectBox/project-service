@@ -3,10 +3,12 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
+	"github.com/project-box/utils"
 )
 
 type CalendarService interface {
@@ -27,21 +29,35 @@ func NewCalendarService(calendarRepo repositories.CalendarRepository, majorRepo 
 
 func (s *calendarServiceImpl) CreateCalendar(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error) {
 	// Check if the major ID exists
-	_, err := s.majorRepo.GetByMajorID(ctx, calendar.MajorID)
+	major, err := s.majorRepo.GetByMajorID(ctx, calendar.MajorID)
 	if err != nil {
 		return dtos.CalendarResponse{}, errors.New("major ID does not exist")
 	}
 
+	startDate, err := utils.ParseDateTime(calendar.StartDate)
+	if err != nil {
+		return dtos.CalendarResponse{}, fmt.Errorf("failed to parse start_date: %w", err)
+	}
+	endDate, err := utils.ParseDateTime(calendar.EndDate)
+	if err != nil {
+		return dtos.CalendarResponse{}, fmt.Errorf("failed to parse end_date: %w", err)
+	}
 	// Check if the start date already exists for the given major
-	existingCalendar, err := s.calendarRepo.GetByTitleAndDateRange(ctx, calendar.Title, calendar.StartDate, calendar.EndDate)
-	if err == nil && existingCalendar != nil {
-		return dtos.CalendarResponse{}, errors.New("a calendar event with the same start date already exists for this major")
+	existingCalendars, err := s.calendarRepo.GetByMajorAndDateRange(ctx, calendar.MajorID, startDate, endDate)
+	fmt.Print(existingCalendars)
+	if err != nil {
+		return dtos.CalendarResponse{}, err // handle error
+	}
+
+	// If any overlapping events are found, return an error
+	if len(existingCalendars) > 0 {
+		return dtos.CalendarResponse{}, errors.New("a calendar event with the same date range already exists for this major")
 	}
 
 	// Convert DTO to model
 	newCalendar := &models.Calendar{
-		StartDate:   calendar.StartDate,
-		EndDate:     calendar.EndDate,
+		StartDate:   startDate,
+		EndDate:     endDate,
 		Title:       calendar.Title,
 		Description: calendar.Description,
 		MajorID:     calendar.MajorID,
@@ -60,7 +76,7 @@ func (s *calendarServiceImpl) CreateCalendar(ctx context.Context, calendar *dtos
 		EndDate:     newCalendar.EndDate,
 		Title:       newCalendar.Title,
 		Description: newCalendar.Description,
-		MajorID:     newCalendar.MajorID,
+		Major:       major.MajorName,
 	}
 
 	return response, nil

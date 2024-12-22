@@ -10,7 +10,7 @@ import (
 
 type CalendarRepository interface {
 	repository[models.Calendar]
-	GetByTitleAndDateRange(ctx context.Context, title string, startDate, endDate time.Time) (*models.Calendar, error)
+	GetByMajorAndDateRange(ctx context.Context, majorID int, startDate, endDate time.Time) ([]models.Calendar, error)
 	CreateCalendar(ctx context.Context, calendar *models.Calendar) error
 }
 
@@ -26,13 +26,17 @@ func NewCalendarRepository(db *gorm.DB) CalendarRepository {
 	}
 }
 
-func (r *calendarRepositoryImpl) GetByTitleAndDateRange(ctx context.Context, title string, startDate, endDate time.Time) (*models.Calendar, error) {
-	filters := map[string]interface{}{"title": title, "start_date": startDate, "end_date": endDate}
-	var calendar models.Calendar
-	if err := r.db.WithContext(ctx).Where(filters).First(&calendar).Error; err != nil {
-		return nil, err
+func (r *calendarRepositoryImpl) GetByMajorAndDateRange(ctx context.Context, majorID int, startDate, endDate time.Time) ([]models.Calendar, error) {
+	var calendars []models.Calendar
+
+	// Query for overlapping events for the same major_id
+	if err := r.db.WithContext(ctx).Debug().
+		Where("major_id = ? AND NOT (start_date > ? OR end_date < ?)", majorID, endDate, startDate).
+		Find(&calendars).Error; err != nil {
+		return nil, err // handle errors
 	}
-	return &calendar, nil
+
+	return calendars, nil
 }
 
 func (r *calendarRepositoryImpl) CreateCalendar(ctx context.Context, calendar *models.Calendar) error {
