@@ -167,6 +167,11 @@ definitions:
       mime_type:
         type: string
     type: object
+  models.ResponseMessage:
+    properties:
+      message:
+        type: string
+    type: object
   models.Student:
     properties:
       email:
@@ -238,6 +243,58 @@ paths:
       summary: Create a new Calendar
       tags:
       - Calendar
+  /calendar/{major_id}:
+    get:
+      description: Fetches all calendar events for a given major
+      parameters:
+      - description: Major ID
+        in: path
+        name: major_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved calendar events
+          schema:
+            items:
+              $ref: '#/definitions/dtos.CalendarResponse'
+            type: array
+        "400":
+          description: Invalid major ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Calendar events not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get calendar by major ID
+      tags:
+      - Calendar
+  /projectResource/{id}:
+    delete:
+      description: Delete a resource and its file
+      parameters:
+      - description: Resource ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseMessage'
+      summary: Delete a resource
+      tags:
+      - Resource
   /projects:
     post:
       consumes:

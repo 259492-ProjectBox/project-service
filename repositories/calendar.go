@@ -12,6 +12,7 @@ type CalendarRepository interface {
 	repository[models.Calendar]
 	GetByMajorAndDateRange(ctx context.Context, majorID int, startDate, endDate time.Time) ([]models.Calendar, error)
 	CreateCalendar(ctx context.Context, calendar *models.Calendar) error
+	GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error)
 }
 
 type calendarRepositoryImpl struct {
@@ -44,4 +45,14 @@ func (r *calendarRepositoryImpl) CreateCalendar(ctx context.Context, calendar *m
 		return err
 	}
 	return nil
+}
+
+func (r *calendarRepositoryImpl) GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error) {
+	var calendars []models.Calendar
+
+	if err := r.db.WithContext(ctx).Where("major_id = ?", majorID).Find(&calendars).Error; err != nil {
+		return nil, err
+	}
+
+	return calendars, nil
 }

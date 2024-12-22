@@ -39,7 +39,8 @@ var HandlerSet = wire.NewSet(
 
 var ServiceSet = wire.NewSet(
 	services.NewProjectService,
-	// services.NewResourceService,
+	services.NewCalendarService,
+	services.NewResourceService,
 )
 
 var RepositorySet = wire.NewSet(

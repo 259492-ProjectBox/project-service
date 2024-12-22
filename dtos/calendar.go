@@ -1,22 +1,18 @@
 package dtos
 
-import (
-	"time"
-)
-
 type CreateCalendarRequest struct {
-	StartDate   string `json:"start_date"`
-	EndDate     string `json:"end_date" `
+	MajorID     int    `json:"major_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	MajorID     int    `json:"major_id"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date" `
 }
 
 type CalendarResponse struct {
-	ID          int       `json:"id"`
-	StartDate   time.Time `json:"start_date" gorm:"default:CURRENT_TIMESTAMP"`
-	EndDate     time.Time `json:"end_date" gorm:"default:CURRENT_TIMESTAMP"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Major       string    `json:"major_name"`
+	ID          int    `json:"id"`
+	StartDate   string `json:"start_date" `
+	EndDate     string `json:"end_date" `
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Major       string `json:"major_name"`
 }

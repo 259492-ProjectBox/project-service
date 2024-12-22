@@ -12,7 +12,8 @@ import (
 )
 
 type CalendarService interface {
-	CreateCalendar(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error)
+	CreateCalendarService(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error)
+	GetCalendarByMajorIDService(ctx context.Context, majorID int) ([]dtos.CalendarResponse, error)
 }
 
 type calendarServiceImpl struct {
@@ -27,7 +28,7 @@ func NewCalendarService(calendarRepo repositories.CalendarRepository, majorRepo 
 	}
 }
 
-func (s *calendarServiceImpl) CreateCalendar(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error) {
+func (s *calendarServiceImpl) CreateCalendarService(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error) {
 	// Check if the major ID exists
 	major, err := s.majorRepo.GetByMajorID(ctx, calendar.MajorID)
 	if err != nil {
@@ -72,12 +73,34 @@ func (s *calendarServiceImpl) CreateCalendar(ctx context.Context, calendar *dtos
 	// Convert model to DTO response
 	response := dtos.CalendarResponse{
 		ID:          newCalendar.ID,
-		StartDate:   newCalendar.StartDate,
-		EndDate:     newCalendar.EndDate,
+		StartDate:   utils.FormatDate(newCalendar.StartDate),
+		EndDate:     utils.FormatDate(newCalendar.EndDate),
 		Title:       newCalendar.Title,
 		Description: newCalendar.Description,
 		Major:       major.MajorName,
 	}
 
 	return response, nil
+}
+
+func (s *calendarServiceImpl) GetCalendarByMajorIDService(ctx context.Context, majorID int) ([]dtos.CalendarResponse, error) {
+	calendars, err := s.calendarRepo.GetCalendarByMajorID(ctx, majorID)
+	if err != nil {
+		return nil, err
+	}
+
+	var calendarResponses []dtos.CalendarResponse
+	for _, calendar := range calendars {
+		calendarResponse := dtos.CalendarResponse{
+			ID:          calendar.ID,
+			StartDate:   utils.FormatDate(calendar.StartDate),
+			EndDate:     utils.FormatDate(calendar.EndDate),
+			Title:       calendar.Title,
+			Description: calendar.Description,
+			Major:       fmt.Sprintf("%d", calendar.MajorID),
+		}
+		calendarResponses = append(calendarResponses, calendarResponse)
+	}
+
+	return calendarResponses, nil
 }

@@ -34,6 +34,8 @@ func NewApp(
 	routers.SetupRoutes(
 		r,
 		projectHandler,
+		resourceHandler,
+		calendarHandler,
 	)
 
 	return r, nil

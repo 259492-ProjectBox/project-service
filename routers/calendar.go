@@ -9,7 +9,7 @@ func SetupCalendarRouter(r *gin.RouterGroup, handler handlers.CalendarHandler) {
 	calendarRouteV1 := r.Group("/calendar")
 	{
 
-		calendarRouteV1.POST("", handler.CreateCalendar)
-
+		calendarRouteV1.POST("", handler.CreateCalendarHandler)
+		calendarRouteV1.GET("/:major_id", handler.GetCalendarByMajorIDHandler)
 	}
 }

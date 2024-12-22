@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/project-box/dtos"
@@ -9,7 +10,8 @@ import (
 )
 
 type CalendarHandler interface {
-	CreateCalendar(c *gin.Context)
+	CreateCalendarHandler(c *gin.Context)
+	GetCalendarByMajorIDHandler(c *gin.Context)
 }
 
 type calendarHandler struct {
@@ -32,13 +34,13 @@ func NewCalendarHandler(calendarService services.CalendarService) CalendarHandle
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /calendar [post]
-func (h *calendarHandler) CreateCalendar(c *gin.Context) {
+func (h *calendarHandler) CreateCalendarHandler(c *gin.Context) {
 	req := &dtos.CreateCalendarRequest{}
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	event, err := h.calendarService.CreateCalendar(c, req)
+	event, err := h.calendarService.CreateCalendarService(c, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -49,6 +51,29 @@ func (h *calendarHandler) CreateCalendar(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, event)
+}
+
+// @Summary Get calendar by major ID
+// @Description Fetches all calendar events for a given major
+// @Tags Calendar
+// @Produce  json
+// @Param major_id path int true "Major ID"
+// @Success 200 {object} []dtos.CalendarResponse "Successfully retrieved calendar events"
+// @Failure 400 {object} map[string]interface{} "Invalid major ID"
+// @Failure 404 {object} map[string]interface{} "Calendar events not found"
+// @Router /calendar/{major_id} [get]
+func (h *calendarHandler) GetCalendarByMajorIDHandler(c *gin.Context) {
+	majorID, err := strconv.Atoi(c.Param("major_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid major ID"})
+		return
+	}
+	events, err := h.calendarService.GetCalendarByMajorIDService(c, majorID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Calendar events not found"})
+		return
+	}
+	c.JSON(http.StatusOK, events)
 }
 
 // @Summary Update an existing event
@@ -106,28 +131,6 @@ func (h *calendarHandler) CreateCalendar(c *gin.Context) {
 // 	}
 
 // 	c.JSON(http.StatusOK, *event)
-// }
-
-// GetEventsByUserID retrieves events by User ID
-// @Summary Get events by User ID
-// @Description Fetches events by user ID
-// @Tags Calendar
-// @Produce  json
-// @Param user_id path string true "User ID"
-// @Success 200 {object} []models.Event "Successfully retrieved events"
-// @Failure 400 {object} map[string]interface{} "Invalid user ID"
-// @Failure 404 {object} map[string]interface{} "Events not found"
-// @Router /events/user/{user_id} [get]
-// func (h *calendarHandler) GetEventsByUserId(c *gin.Context) {
-// 	userId := c.Param("user_id")
-
-// 	events, err := h.calendarService.GetEventsByUserId(c, userId)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "Events not found"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, events)
 // }
 
 // DeleteEvent deletes an event by its ID

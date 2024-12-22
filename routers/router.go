@@ -19,5 +19,6 @@ func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resource
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router := r.Group("")
 	SetupProjectRouter(router, projectHandler)
-	// SetupResourceRouter(router, resourceHandler)
+	SetupResourceRouter(router, resourceHandler)
+	SetupCalendarRouter(router, calendarHandler)
 }

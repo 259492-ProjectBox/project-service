@@ -72,6 +72,84 @@ const docTemplate = `{
                 }
             }
         },
+        "/calendar/{major_id}": {
+            "get": {
+                "description": "Fetches all calendar events for a given major",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "Get calendar by major ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Major ID",
+                        "name": "major_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved calendar events",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.CalendarResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid major ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Calendar events not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/projectResource/{id}": {
+            "delete": {
+                "description": "Delete a resource and its file",
+                "tags": [
+                    "Resource"
+                ],
+                "summary": "Delete a resource",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resource ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseMessage"
+                        }
+                    }
+                }
+            }
+        },
         "/projects": {
             "post": {
                 "description": "Creates a new project with the provided data",
@@ -559,6 +637,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "mime_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseMessage": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
