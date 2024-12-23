@@ -35,12 +35,14 @@ var HandlerSet = wire.NewSet(
 	handlers.NewProjectHandler,
 	handlers.NewCalendarHandler,
 	handlers.NewResourceHandler,
+	handlers.NewEmployeeHandler,
 )
 
 var ServiceSet = wire.NewSet(
 	services.NewProjectService,
 	services.NewCalendarService,
 	services.NewResourceService,
+	services.NewEmployeeService,
 )
 
 var RepositorySet = wire.NewSet(
