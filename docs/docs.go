@@ -164,6 +164,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/calendar/{id}": {
+            "delete": {
+                "description": "Deletes the specified event using its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "Delete an event by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid event ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/projectResource/{id}": {
             "delete": {
                 "description": "Delete a resource and its file",

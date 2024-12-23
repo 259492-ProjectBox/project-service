@@ -15,6 +15,7 @@ type CalendarService interface {
 	CreateCalendarService(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error)
 	GetCalendarByMajorIDService(ctx context.Context, majorID int) ([]dtos.CalendarResponse, error)
 	UpdateCalendarService(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error)
+	DeleteCalendarService(ctx context.Context, id int) error
 }
 
 type calendarServiceImpl struct {
@@ -148,4 +149,20 @@ func (s *calendarServiceImpl) UpdateCalendarService(ctx context.Context, calenda
 	}
 
 	return &response, nil
+}
+
+func (s *calendarServiceImpl) DeleteCalendarService(ctx context.Context, id int) error {
+	// Check if the calendar ID exists
+	_, err := s.calendarRepo.GetCalendarByID(ctx, id)
+	if err != nil {
+		return errors.New("calendar ID does not exist")
+	}
+
+	// Delete the calendar
+	err = s.calendarRepo.DeleteCalendar(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -13,6 +13,7 @@ type CalendarHandler interface {
 	CreateCalendarHandler(c *gin.Context)
 	GetCalendarByMajorIDHandler(c *gin.Context)
 	UpdateCalendarHandler(c *gin.Context)
+	DeleteCalendarHandler(c *gin.Context)
 }
 
 type calendarHandler struct {
@@ -103,32 +104,6 @@ func (h *calendarHandler) UpdateCalendarHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedCalendar)
 }
 
-// GetEventByID retrieves an event by its ID
-// @Summary Get an event by ID
-// @Description Fetches an event by its unique ID
-// @Tags Calendar
-// @Produce  json
-// @Param id path int true "Event ID"
-// @Success 200 {object} models.Event "Successfully retrieved event"
-// @Failure 400 {object} map[string]interface{} "Invalid event ID"
-// @Failure 404 {object} map[string]interface{} "Event not found"
-// @Router /events/{id} [get]
-// func (h *calendarHandler) GetEventById(c *gin.Context) {
-// 	id, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
-// 		return
-// 	}
-
-// 	event, err := h.calendarService.GetEventById(c, id)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, *event)
-// }
-
 // DeleteEvent deletes an event by its ID
 // @Summary Delete an event by ID
 // @Description Deletes the specified event using its ID
@@ -138,18 +113,18 @@ func (h *calendarHandler) UpdateCalendarHandler(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Event deleted successfully"
 // @Failure 400 {object} map[string]interface{} "Invalid event ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /events/{id} [delete]
-// func (h *calendarHandler) DeleteEvent(c *gin.Context) {
-// 	id, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
-// 		return
-// 	}
+// @Router /calendar/{id} [delete]
+func (h *calendarHandler) DeleteCalendarHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
 
-// 	if err := h.calendarService.DeleteEvent(c, id); err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete event"})
-// 		return
-// 	}
+	if err := h.calendarService.DeleteCalendarService(c, id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete event"})
+		return
+	}
 
-// 	c.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully"})
-// }
+	c.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully"})
+}

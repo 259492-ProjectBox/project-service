@@ -15,6 +15,7 @@ type CalendarRepository interface {
 	GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error)
 	UpdateCalendar(ctx context.Context, updatedCalendar *models.Calendar) (*models.Calendar, error)
 	GetCalendarByID(ctx context.Context, id int) (*models.Calendar, error)
+	DeleteCalendar(ctx context.Context, id int) error
 }
 
 type calendarRepositoryImpl struct {
@@ -85,4 +86,11 @@ func (r *calendarRepositoryImpl) UpdateCalendar(ctx context.Context, updatedCale
 	}
 
 	return &calendar, nil
+}
+
+func (r *calendarRepositoryImpl) DeleteCalendar(ctx context.Context, id int) error {
+	if err := r.db.WithContext(ctx).Where("id = ?", id).Delete(&models.Calendar{}).Error; err != nil {
+		return err
+	}
+	return nil
 }

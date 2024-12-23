@@ -289,6 +289,36 @@ paths:
       summary: Update an existing event
       tags:
       - Calendar
+  /calendar/{id}:
+    delete:
+      description: Deletes the specified event using its ID
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Event deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid event ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an event by ID
+      tags:
+      - Calendar
   /calendar/GetByMajorID/{major_id}:
     get:
       description: Fetches all calendar events for a given major
