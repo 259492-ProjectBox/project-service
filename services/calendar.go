@@ -14,6 +14,7 @@ import (
 type CalendarService interface {
 	CreateCalendarService(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error)
 	GetCalendarByMajorIDService(ctx context.Context, majorID int) ([]dtos.CalendarResponse, error)
+	UpdateCalendarService(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error)
 }
 
 type calendarServiceImpl struct {
@@ -103,4 +104,48 @@ func (s *calendarServiceImpl) GetCalendarByMajorIDService(ctx context.Context, m
 	}
 
 	return calendarResponses, nil
+}
+
+func (s *calendarServiceImpl) UpdateCalendarService(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error) {
+	// Check if the calendar ID exists
+	_, err := s.calendarRepo.GetCalendarByID(ctx, calendar.ID)
+	if err != nil {
+		return nil, errors.New("calendar ID does not exist")
+	}
+
+	startDate, err := utils.ParseDateTime(calendar.StartDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse start_date: %w", err)
+	}
+	endDate, err := utils.ParseDateTime(calendar.EndDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse end_date: %w", err)
+	}
+	// Convert DTO to model
+	updatedCalendar := &models.Calendar{
+		ID:          calendar.ID,
+		StartDate:   startDate,
+		EndDate:     endDate,
+		Title:       calendar.Title,
+		Description: calendar.Description,
+		MajorID:     calendar.MajorID,
+	}
+
+	// Update the calendar
+	updatedCalendar, err = s.calendarRepo.UpdateCalendar(ctx, updatedCalendar)
+	if err != nil {
+		return nil, err
+	}
+
+	// convert to calendar response
+	response := dtos.CalendarResponse{
+		ID:          updatedCalendar.ID,
+		StartDate:   utils.FormatDate(updatedCalendar.StartDate),
+		EndDate:     utils.FormatDate(updatedCalendar.EndDate),
+		Title:       updatedCalendar.Title,
+		Description: updatedCalendar.Description,
+		Major:       fmt.Sprintf("%d", updatedCalendar.MajorID),
+	}
+
+	return &response, nil
 }

@@ -27,6 +27,21 @@ definitions:
       title:
         type: string
     type: object
+  dtos.UpdateCalendarRequest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: integer
+      major_id:
+        type: integer
+      start_date:
+        type: string
+      title:
+        type: string
+    type: object
   models.Course:
     properties:
       course_name:
@@ -243,7 +258,38 @@ paths:
       summary: Create a new Calendar
       tags:
       - Calendar
-  /calendar/{major_id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates an event by its ID with the provided data
+      parameters:
+      - description: Updated Event Data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateCalendarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated event
+          schema:
+            $ref: '#/definitions/dtos.CalendarResponse'
+        "400":
+          description: Invalid event ID or request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing event
+      tags:
+      - Calendar
+  /calendar/GetByMajorID/{major_id}:
     get:
       description: Fetches all calendar events for a given major
       parameters:

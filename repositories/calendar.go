@@ -13,6 +13,8 @@ type CalendarRepository interface {
 	GetByMajorAndDateRange(ctx context.Context, majorID int, startDate, endDate time.Time) ([]models.Calendar, error)
 	CreateCalendar(ctx context.Context, calendar *models.Calendar) error
 	GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error)
+	UpdateCalendar(ctx context.Context, updatedCalendar *models.Calendar) (*models.Calendar, error)
+	GetCalendarByID(ctx context.Context, id int) (*models.Calendar, error)
 }
 
 type calendarRepositoryImpl struct {
@@ -46,6 +48,15 @@ func (r *calendarRepositoryImpl) CreateCalendar(ctx context.Context, calendar *m
 	}
 	return nil
 }
+func (r *calendarRepositoryImpl) GetCalendarByID(ctx context.Context, id int) (*models.Calendar, error) {
+
+	var calendars *models.Calendar
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&calendars).Error; err != nil {
+		return nil, err
+	}
+
+	return calendars, nil
+}
 
 func (r *calendarRepositoryImpl) GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error) {
 	var calendars []models.Calendar
@@ -55,4 +66,23 @@ func (r *calendarRepositoryImpl) GetCalendarByMajorID(ctx context.Context, major
 	}
 
 	return calendars, nil
+}
+
+func (r *calendarRepositoryImpl) UpdateCalendar(ctx context.Context, updatedCalendar *models.Calendar) (*models.Calendar, error) {
+	var calendar models.Calendar
+	if err := r.db.WithContext(ctx).Model(&models.Calendar{}).Where("id = ?", updatedCalendar.ID).First(&calendar).Error; err != nil {
+		return nil, err
+	}
+
+	calendar.StartDate = updatedCalendar.StartDate
+	calendar.EndDate = updatedCalendar.EndDate
+	calendar.Title = updatedCalendar.Title
+	calendar.Description = updatedCalendar.Description
+	calendar.MajorID = updatedCalendar.MajorID
+
+	if err := r.db.WithContext(ctx).Save(&calendar).Error; err != nil {
+		return nil, err
+	}
+
+	return &calendar, nil
 }

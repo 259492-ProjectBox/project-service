@@ -12,6 +12,7 @@ import (
 type CalendarHandler interface {
 	CreateCalendarHandler(c *gin.Context)
 	GetCalendarByMajorIDHandler(c *gin.Context)
+	UpdateCalendarHandler(c *gin.Context)
 }
 
 type calendarHandler struct {
@@ -61,7 +62,7 @@ func (h *calendarHandler) CreateCalendarHandler(c *gin.Context) {
 // @Success 200 {object} []dtos.CalendarResponse "Successfully retrieved calendar events"
 // @Failure 400 {object} map[string]interface{} "Invalid major ID"
 // @Failure 404 {object} map[string]interface{} "Calendar events not found"
-// @Router /calendar/{major_id} [get]
+// @Router /calendar/GetByMajorID/{major_id} [get]
 func (h *calendarHandler) GetCalendarByMajorIDHandler(c *gin.Context) {
 	majorID, err := strconv.Atoi(c.Param("major_id"))
 	if err != nil {
@@ -81,31 +82,26 @@ func (h *calendarHandler) GetCalendarByMajorIDHandler(c *gin.Context) {
 // @Tags Calendar
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Event ID"
-// @Param event body models.Event true "Updated Event Data"
-// @Success 200 {object} models.Event "Successfully updated event"
+// @Param event body dtos.UpdateCalendarRequest true "Updated Event Data"
+// @Success 200 {object} dtos.CalendarResponse "Successfully updated event"
 // @Failure 400 {object} map[string]interface{} "Invalid event ID or request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /events/{id} [put]
-// func (h *calendarHandler) UpdateEvent(c *gin.Context) {
-// 	id, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
-// 		return
-// 	}
-// 	event := &models.Event{}
-// 	if err := c.ShouldBindJSON(&event); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	_, err = h.calendarService.UpdateEvent(c, id, event)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
+// @Router /calendar [put]
+func (h *calendarHandler) UpdateCalendarHandler(c *gin.Context) {
+	calendar := &dtos.UpdateCalendarRequest{}
+	if err := c.ShouldBindJSON(&calendar); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	c.JSON(http.StatusOK, *event)
-// }
+	updatedCalendar, err := h.calendarService.UpdateCalendarService(c, calendar)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedCalendar)
+}
 
 // GetEventByID retrieves an event by its ID
 // @Summary Get an event by ID

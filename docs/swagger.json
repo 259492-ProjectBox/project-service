@@ -18,6 +18,52 @@
     "host": "localhost:8080",
     "paths": {
         "/calendar": {
+            "put": {
+                "description": "Updates an event by its ID with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "Update an existing event",
+                "parameters": [
+                    {
+                        "description": "Updated Event Data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UpdateCalendarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated event",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CalendarResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid event ID or request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new calendarof that major",
                 "consumes": [
@@ -65,7 +111,7 @@
                 }
             }
         },
-        "/calendar/{major_id}": {
+        "/calendar/GetByMajorID/{major_id}": {
             "get": {
                 "description": "Fetches all calendar events for a given major",
                 "produces": [
@@ -408,6 +454,29 @@
                 },
                 "end_date": {
                     "type": "string"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.UpdateCalendarRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "major_id": {
                     "type": "integer"
