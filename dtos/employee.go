@@ -9,3 +9,28 @@ type Employee struct {
 	MajorID   int    `json:"major_id"`
 	Major     Major  `json:"major"`
 }
+
+type CreateEmployeeRequest struct {
+	Prefix    string `json:"prefix"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email" gorm:"unique"`
+	MajorID   int    `json:"major_id"`
+}
+type UpdateEmployeeRequest struct {
+	ID        int    `json:"id"`
+	Prefix    string `json:"prefix"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email" gorm:"unique"`
+	MajorID   int    `json:"major_id"`
+}
+
+type EmployeeResponse struct {
+	ID        int    `json:"id"`
+	Prefix    string `json:"prefix"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email" gorm:"unique"`
+	MajorID   int    `json:"major_id"`
+}

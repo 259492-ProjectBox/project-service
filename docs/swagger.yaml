@@ -27,6 +27,34 @@ definitions:
       title:
         type: string
     type: object
+  dtos.CreateEmployeeRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      major_id:
+        type: integer
+      prefix:
+        type: string
+    type: object
+  dtos.EmployeeResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      major_id:
+        type: integer
+      prefix:
+        type: string
+    type: object
   dtos.UpdateCalendarRequest:
     properties:
       description:
@@ -40,6 +68,21 @@ definitions:
       start_date:
         type: string
       title:
+        type: string
+    type: object
+  dtos.UpdateEmployeeRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      major_id:
+        type: integer
+      prefix:
         type: string
     type: object
   models.Course:
@@ -350,6 +393,129 @@ paths:
       summary: Get calendar by major ID
       tags:
       - Calendar
+  /employee:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new employee
+      parameters:
+      - description: Employee Data
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created employee
+          schema:
+            $ref: '#/definitions/dtos.EmployeeResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new employee
+      tags:
+      - Employee
+    put:
+      consumes:
+      - application/json
+      description: Updates an employee by their ID with the provided data
+      parameters:
+      - description: Updated Employee Data
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated employee
+          schema:
+            $ref: '#/definitions/dtos.EmployeeResponse'
+        "400":
+          description: Invalid employee ID or request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing employee
+      tags:
+      - Employee
+  /employee/{id}:
+    get:
+      description: Fetches an employee by their ID
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved employee
+          schema:
+            $ref: '#/definitions/dtos.EmployeeResponse'
+        "400":
+          description: Invalid employee ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Employee not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get employee by ID
+      tags:
+      - Employee
+  /employee/GetByMajorID/{major_id}:
+    get:
+      description: Fetches all employees for a given major
+      parameters:
+      - description: Major ID
+        in: path
+        name: major_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved employees
+          schema:
+            items:
+              $ref: '#/definitions/dtos.EmployeeResponse'
+            type: array
+        "400":
+          description: Invalid major ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Employees not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get employees by major ID
+      tags:
+      - Employee
   /projectResource/{id}:
     delete:
       description: Delete a resource and its file
