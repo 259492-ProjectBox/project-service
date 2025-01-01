@@ -1,8 +1,8 @@
-FROM golang:latest
-
+# FROM golang:latest
+FROM golang:alpine
 # Install Poppler (includes pdftotext)
-RUN apt-get update && apt-get install -y poppler-utils
-
+# RUN apt-get update && apt-get install -y poppler-utils
+RUN apk add --no-cache poppler-utils
 # Install air for hot-reloading
 RUN go install github.com/air-verse/air@latest
 
