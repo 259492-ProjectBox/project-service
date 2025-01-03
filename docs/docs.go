@@ -208,6 +208,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/config/GetByMajorId/{major_id}": {
+            "get": {
+                "description": "Fetches all config for a given major",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config"
+                ],
+                "summary": "Get config by major ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Major ID",
+                        "name": "major_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully fetched config",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.ConfigReponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid major ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Major not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/employee": {
             "put": {
                 "description": "Updates an employee by their ID with the provided data",
@@ -383,6 +436,118 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Employee not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/projectConfig": {
+            "post": {
+                "description": "Update all project config if ID is provided, otherwise insert new project config",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectConfig"
+                ],
+                "summary": "Upsert project config",
+                "parameters": [
+                    {
+                        "description": "Configurations",
+                        "name": "configs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.ProjectConfigUpsertRequest"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated config",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid major ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Major not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/projectConfig/GetByMajorId/{major_id}": {
+            "get": {
+                "description": "Fetches all config for a given major",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectConfig"
+                ],
+                "summary": "Get config by major ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Major ID",
+                        "name": "major_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully fetched config",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.ProjectConfigResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid major ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Major not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -680,6 +845,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.ConfigReponse": {
+            "type": "object",
+            "properties": {
+                "config_name": {
+                    "type": "string"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.CreateCalendarRequest": {
             "type": "object",
             "properties": {
@@ -739,6 +918,40 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "prefix": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ProjectConfigResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ProjectConfigUpsertRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "major_id": {
+                    "type": "integer"
+                },
+                "title": {
                     "type": "string"
                 }
             }

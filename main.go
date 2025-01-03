@@ -19,6 +19,8 @@ func NewApp(
 	calendarHandler handlers.CalendarHandler,
 	resourceHandler handlers.ResourceHandler,
 	employeeHandler handlers.EmployeeHandler,
+	configHanler handlers.ConfigHandler,
+	projectconfigHandler handlers.ProjectConfigHandler,
 ) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -38,6 +40,8 @@ func NewApp(
 		resourceHandler,
 		calendarHandler,
 		employeeHandler,
+		configHanler,
+		projectconfigHandler,
 	)
 
 	return r, nil
