@@ -41,7 +41,13 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	resourceHandler := handlers.NewResourceHandler(client, resourceService, projectService)
 	employeeService := services.NewEmployeeService(employeeRepository)
 	employeeHandler := handlers.NewEmployeeHandler(employeeService)
-	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, employeeHandler)
+	configRepository := repositories.NewConfigRepository(gormDB)
+	configService := services.NewConfigService(configRepository)
+	configHandler := handlers.NewConfigHandler(configService)
+	projectConfigRepository := repositories.NewProjectConfigRepository(gormDB)
+	projectConfigService := services.NewProjectConfigService(projectConfigRepository)
+	projectConfigHandler := handlers.NewProjectConfigHandler(projectConfigService)
+	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, employeeHandler, configHandler, projectConfigHandler)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -55,10 +61,10 @@ var AppSet = wire.NewSet(
 	NewApp, db2.NewPostgresDatabase, db3.NewMinIOConnection, db.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHandler, handlers.NewResourceHandler, handlers.NewEmployeeHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHandler, handlers.NewResourceHandler, handlers.NewEmployeeHandler, handlers.NewConfigHandler, handlers.NewProjectConfigHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewEmployeeService)
+var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewEmployeeService, services.NewConfigService, services.NewProjectConfigService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewCalendarRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
 
 var RedisSet = wire.NewSet()

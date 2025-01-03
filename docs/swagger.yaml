@@ -14,6 +14,15 @@ definitions:
       title:
         type: string
     type: object
+  dtos.ConfigReponse:
+    properties:
+      config_name:
+        type: string
+      major_id:
+        type: integer
+      value:
+        type: string
+    type: object
   dtos.CreateCalendarRequest:
     properties:
       description:
@@ -53,6 +62,28 @@ definitions:
       major_id:
         type: integer
       prefix:
+        type: string
+    type: object
+  dtos.ProjectConfigResponse:
+    properties:
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      major_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  dtos.ProjectConfigUpsertRequest:
+    properties:
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      major_id:
+        type: integer
+      title:
         type: string
     type: object
   dtos.UpdateCalendarRequest:
@@ -393,6 +424,42 @@ paths:
       summary: Get calendar by major ID
       tags:
       - Calendar
+  /config/GetByMajorId/{major_id}:
+    get:
+      description: Fetches all config for a given major
+      parameters:
+      - description: Major ID
+        in: path
+        name: major_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully fetched config
+          schema:
+            items:
+              $ref: '#/definitions/dtos.ConfigReponse'
+            type: array
+        "400":
+          description: Invalid major ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Major not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get config by major ID
+      tags:
+      - Config
   /employee:
     post:
       consumes:
@@ -516,6 +583,83 @@ paths:
       summary: Get employees by major ID
       tags:
       - Employee
+  /projectConfig:
+    post:
+      consumes:
+      - application/json
+      description: Update all project config if ID is provided, otherwise insert new
+        project config
+      parameters:
+      - description: Configurations
+        in: body
+        name: configs
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/dtos.ProjectConfigUpsertRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated config
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid major ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Major not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upsert project config
+      tags:
+      - ProjectConfig
+  /projectConfig/GetByMajorId/{major_id}:
+    get:
+      description: Fetches all config for a given major
+      parameters:
+      - description: Major ID
+        in: path
+        name: major_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully fetched config
+          schema:
+            items:
+              $ref: '#/definitions/dtos.ProjectConfigResponse'
+            type: array
+        "400":
+          description: Invalid major ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Major not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get config by major ID
+      tags:
+      - ProjectConfig
   /projectResource/{id}:
     delete:
       description: Delete a resource and its file
