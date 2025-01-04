@@ -47,7 +47,9 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectConfigRepository := repositories.NewProjectConfigRepository(gormDB)
 	projectConfigService := services.NewProjectConfigService(projectConfigRepository)
 	projectConfigHandler := handlers.NewProjectConfigHandler(projectConfigService)
-	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, employeeHandler, configHandler, projectConfigHandler)
+	majorService := services.NewMajorService(majorRepository)
+	majorHandler := handlers.NewMajorHandler(majorService)
+	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, employeeHandler, configHandler, projectConfigHandler, majorHandler)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -61,9 +63,9 @@ var AppSet = wire.NewSet(
 	NewApp, db2.NewPostgresDatabase, db3.NewMinIOConnection, db.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHandler, handlers.NewResourceHandler, handlers.NewEmployeeHandler, handlers.NewConfigHandler, handlers.NewProjectConfigHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHandler, handlers.NewResourceHandler, handlers.NewEmployeeHandler, handlers.NewConfigHandler, handlers.NewProjectConfigHandler, handlers.NewMajorHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewEmployeeService, services.NewConfigService, services.NewProjectConfigService)
+var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewEmployeeService, services.NewConfigService, services.NewProjectConfigService, services.NewMajorService)
 
 var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewEmployeeRepository, repositories.NewMajorRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
 

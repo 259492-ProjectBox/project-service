@@ -437,6 +437,132 @@
                 }
             }
         },
+        "/major": {
+            "post": {
+                "description": "Create a new major",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Major"
+                ],
+                "summary": "Create major",
+                "parameters": [
+                    {
+                        "description": "Major object",
+                        "name": "major",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateMajorRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created major",
+                        "schema": {
+                            "$ref": "#/definitions/models.Major"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/major/GetAllMajor": {
+            "get": {
+                "description": "Fetches all major",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Major"
+                ],
+                "summary": "Get all major",
+                "responses": {
+                    "200": {
+                        "description": "Successfully fetched major",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Major"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/major/UpdateMajorName": {
+            "put": {
+                "description": "Update major name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Major"
+                ],
+                "summary": "Update major name",
+                "parameters": [
+                    {
+                        "description": "Major object",
+                        "name": "major",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Major"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated major name",
+                        "schema": {
+                            "$ref": "#/definitions/models.Major"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid major ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/projectConfig": {
             "post": {
                 "description": "Update all project config if ID is provided, otherwise insert new project config",
@@ -892,6 +1018,17 @@
                 }
             }
         },
+        "dtos.CreateMajorRequest": {
+            "type": "object",
+            "required": [
+                "major_name"
+            ],
+            "properties": {
+                "major_name": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.EmployeeResponse": {
             "type": "object",
             "properties": {
@@ -911,6 +1048,17 @@
                     "type": "integer"
                 },
                 "prefix": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.Major": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "major_name": {
                     "type": "string"
                 }
             }

@@ -38,6 +38,7 @@ var HandlerSet = wire.NewSet(
 	handlers.NewEmployeeHandler,
 	handlers.NewConfigHandler,
 	handlers.NewProjectConfigHandler,
+	handlers.NewMajorHandler,
 )
 
 var ServiceSet = wire.NewSet(
@@ -47,6 +48,7 @@ var ServiceSet = wire.NewSet(
 	services.NewEmployeeService,
 	services.NewConfigService,
 	services.NewProjectConfigService,
+	services.NewMajorService,
 )
 
 var RepositorySet = wire.NewSet(

@@ -49,6 +49,13 @@ definitions:
       prefix:
         type: string
     type: object
+  dtos.CreateMajorRequest:
+    properties:
+      major_name:
+        type: string
+    required:
+    - major_name
+    type: object
   dtos.EmployeeResponse:
     properties:
       email:
@@ -62,6 +69,13 @@ definitions:
       major_id:
         type: integer
       prefix:
+        type: string
+    type: object
+  dtos.Major:
+    properties:
+      id:
+        type: integer
+      major_name:
         type: string
     type: object
   dtos.ProjectConfigResponse:
@@ -583,6 +597,90 @@ paths:
       summary: Get employees by major ID
       tags:
       - Employee
+  /major:
+    post:
+      consumes:
+      - application/json
+      description: Create a new major
+      parameters:
+      - description: Major object
+        in: body
+        name: major
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateMajorRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created major
+          schema:
+            $ref: '#/definitions/models.Major'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create major
+      tags:
+      - Major
+  /major/GetAllMajor:
+    get:
+      description: Fetches all major
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully fetched major
+          schema:
+            items:
+              $ref: '#/definitions/models.Major'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all major
+      tags:
+      - Major
+  /major/UpdateMajorName:
+    put:
+      consumes:
+      - application/json
+      description: Update major name
+      parameters:
+      - description: Major object
+        in: body
+        name: major
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.Major'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated major name
+          schema:
+            $ref: '#/definitions/models.Major'
+        "400":
+          description: Invalid major ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update major name
+      tags:
+      - Major
   /projectConfig:
     post:
       consumes:
