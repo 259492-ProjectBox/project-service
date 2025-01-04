@@ -1,7 +1,7 @@
 services:
-  golang:
+  project_service:
     # build: .
-    image: kunmhing/projectservice:1.0
+    image: kunmhing/projectservice:latest
     container_name: project_service
     restart: unless-stopped
     ports:
@@ -10,7 +10,7 @@ services:
       - .env.prod
     volumes:
       # - .:/app
-      - project_service:data:/app
+      - project_service_data:/app
     working_dir: /app
     depends_on:
       - rabbitmq
@@ -88,6 +88,7 @@ volumes:
   minio_data:
   rabbitmq_data:
   rabbitmq_log:
+  project_service_data:
 
 networks:
   project_box_net:
