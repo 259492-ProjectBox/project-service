@@ -18,6 +18,18 @@ func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resource
 		})
 	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Dynamically set Swagger URL based on the request
+	// NOT WORKING YET when build go to main and change the host instead for now
+	// r.GET("/swagger/*any", func(c *gin.Context) {
+	// 	scheme := "http"
+	// 	if c.Request.TLS != nil {
+	// 		scheme = "https"
+	// 	}
+	// 	host := c.Request.Host
+	// 	swaggerURL := fmt.Sprintf("%s://%s/swagger/doc.json", scheme, host)
+	// 	ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL(swaggerURL))(c)
+	// })
 	router := r.Group("")
 	SetupProjectRouter(router, projectHandler)
 	SetupResourceRouter(router, resourceHandler)
