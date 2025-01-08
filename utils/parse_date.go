@@ -6,7 +6,7 @@ import (
 )
 
 func ParseDateTime(dateStr string) (time.Time, error) {
-	const dateFormat = "2006-01-02" // Reference format for "YYYY-MM-DD"
+	const dateFormat = "02-01-2006" // Reference format for "DD-MM-YYYY"
 	parsedDate, err := time.Parse(dateFormat, dateStr)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("invalid date format: %w", err)

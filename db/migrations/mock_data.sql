@@ -97,6 +97,8 @@ INSERT INTO "project_configs" ("title", "is_active", "major_id") VALUES
   ('course_id', true, 2);
 
 -- Insert Calendar Events
-INSERT INTO "calendar" ("major_id", "start_date", "end_date", "description") VALUES
-  (1, '2024-01-15', '2024-01-15', 'Final exam for CS 101 course'),
-  (2, '2024-02-20', '2024-02-20', 'Electrical Engineering Lab practical session');
+INSERT INTO "calendar" ("major_id", "start_date", "end_date", "description" , "title") VALUES
+  (1, '2024-01-15', '2024-01-15', 'Final exam for CS 101 course' , 'CS 101 Final Exam'),
+  (2, '2024-02-20', '2024-02-20', 'Electrical Engineering Lab practical session' , 'EE Lab Practical'),
+  (3, '2024-03-25', '2024-03-25', 'Mechanical Engineering project presentation' , 'ME Project Presentation'),
+  (4, '2024-04-30', '2024-04-30', 'Civil Engineering project submission' , 'CE Project Submission');

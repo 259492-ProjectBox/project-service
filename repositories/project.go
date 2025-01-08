@@ -22,6 +22,7 @@ type ProjectRepository interface {
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	CreateProjectWithFiles(ctx context.Context, project *models.Project, major *models.Major, files []*multipart.FileHeader, titles []string) (*models.Project, error)
 	UpdateProjectWithFiles(ctx context.Context, project *models.Project, major *models.Major, files []*multipart.FileHeader, titles []string) (*models.Project, error)
+	GetProjectsByAdvisorId(ctx context.Context, advisorId int) ([]models.Project, error)
 }
 
 type projectRepositoryImpl struct {
@@ -322,4 +323,20 @@ func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, proje
 	}
 
 	return nil
+}
+
+func (r *projectRepositoryImpl) GetProjectsByAdvisorId(ctx context.Context, advisorId int) ([]models.Project, error) {
+	var projects []models.Project
+
+	fmt.Println("advisorId", advisorId)
+	if err := r.db.WithContext(ctx).
+		Table("projects as p").
+		Select("p.*").
+		Joins("JOIN project_employees as pe ON pe.project_id = p.id").
+		Where("pe.employee_id = ?", advisorId).
+		Find(&projects).Error; err != nil {
+		return nil, fmt.Errorf("failed to get projects for advisor_id %d: %w", advisorId, err)
+	}
+
+	return projects, nil
 }

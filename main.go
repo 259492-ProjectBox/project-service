@@ -28,8 +28,10 @@ func NewApp(
 
 	r.Use(
 		cors.New(cors.Config{
-			AllowOrigins:     []string{"*"},
+			AllowOrigins:     []string{"https://project-service.kunmhing.me", "http://localhost:3000"},
 			AllowCredentials: true,
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		}),
 	)
 
@@ -58,7 +60,6 @@ func NewApp(
 // @contact.email  support@swagger.io
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-// @host      localhost:8080
 // @SecurityDefinitions.apikey BearerAuth
 // @In header
 // @Name Authorization

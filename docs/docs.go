@@ -524,7 +524,7 @@ const docTemplate = `{
         },
         "/major/UpdateMajorName": {
             "put": {
-                "description": "Update major name",
+                "description": "Update the name of a major",
                 "consumes": [
                     "application/json"
                 ],
@@ -537,12 +537,12 @@ const docTemplate = `{
                 "summary": "Update major name",
                 "parameters": [
                     {
-                        "description": "Major object",
+                        "description": "Major object containing ID and name",
                         "name": "major",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.Major"
+                            "$ref": "#/definitions/models.Major"
                         }
                     }
                 ],
@@ -554,7 +554,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid request body or parameters",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -754,6 +754,52 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/advisor/{advisor_id}": {
+            "get": {
+                "description": "Fetches a project by its advisor ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get a project by Advisor ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "advisor_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved project",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Project"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid advisor ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1055,17 +1101,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "prefix": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.Major": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "major_name": {
                     "type": "string"
                 }
             }
@@ -1423,7 +1458,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",

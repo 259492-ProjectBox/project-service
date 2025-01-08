@@ -21,7 +21,7 @@ func DeclareExchange(channel *rabbitmq.Channel) *rabbitmq.Channel {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	fmt.Println("Successfully connected to RabbitMQ")
 	return channel
 }

@@ -69,7 +69,7 @@ func NewPostgresDatabase() *gorm.DB {
 		log.Println(err)
 		return nil
 	}
-
+	fmt.Println("Successfully connected to PostgreSQL!")
 	if err = migrateModel(db); err != nil {
 		log.Println(err)
 		return nil

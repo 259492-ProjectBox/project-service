@@ -13,5 +13,6 @@ func SetupProjectRouter(r *gin.RouterGroup, handler handlers.ProjectHandler) {
 		projectRouteV1.POST("", handler.CreateProject)
 		projectRouteV1.PUT("", handler.UpdateProject)
 		projectRouteV1.DELETE("/:id", handler.DeleteProject)
+		projectRouteV1.GET("/advisor/:advisor_id", handler.GetProjectByAdvisorIDHandler)
 	}
 }
