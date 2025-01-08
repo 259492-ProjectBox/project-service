@@ -71,13 +71,6 @@ definitions:
       prefix:
         type: string
     type: object
-  dtos.Major:
-    properties:
-      id:
-        type: integer
-      major_name:
-        type: string
-    type: object
   dtos.ProjectConfigResponse:
     properties:
       id:
@@ -300,7 +293,6 @@ definitions:
         description: Optional field for title (e.g., Mr., Ms., etc.)
         type: string
     type: object
-host: localhost:8080
 info:
   contact:
     email: support@swagger.io
@@ -653,14 +645,14 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update major name
+      description: Update the name of a major
       parameters:
-      - description: Major object
+      - description: Major object containing ID and name
         in: body
         name: major
         required: true
         schema:
-          $ref: '#/definitions/dtos.Major'
+          $ref: '#/definitions/models.Major'
       produces:
       - application/json
       responses:
@@ -669,7 +661,7 @@ paths:
           schema:
             $ref: '#/definitions/models.Major'
         "400":
-          description: Invalid major ID
+          description: Invalid request body or parameters
           schema:
             additionalProperties: true
             type: object
@@ -903,6 +895,37 @@ paths:
             additionalProperties: true
             type: object
       summary: Update an existing project
+      tags:
+      - Project
+  /projects/advisor/{advisor_id}:
+    get:
+      description: Fetches a project by its advisor ID
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: advisor_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved project
+          schema:
+            items:
+              $ref: '#/definitions/models.Project'
+            type: array
+        "400":
+          description: Invalid advisor ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Project not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a project by Advisor ID
       tags:
       - Project
   /projects/student/{student_id}:

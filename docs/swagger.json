@@ -15,7 +15,6 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
     "paths": {
         "/calendar": {
             "put": {
@@ -517,7 +516,7 @@
         },
         "/major/UpdateMajorName": {
             "put": {
-                "description": "Update major name",
+                "description": "Update the name of a major",
                 "consumes": [
                     "application/json"
                 ],
@@ -530,12 +529,12 @@
                 "summary": "Update major name",
                 "parameters": [
                     {
-                        "description": "Major object",
+                        "description": "Major object containing ID and name",
                         "name": "major",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.Major"
+                            "$ref": "#/definitions/models.Major"
                         }
                     }
                 ],
@@ -547,7 +546,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid request body or parameters",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -747,6 +746,52 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/advisor/{advisor_id}": {
+            "get": {
+                "description": "Fetches a project by its advisor ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get a project by Advisor ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "advisor_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved project",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Project"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid advisor ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1048,17 +1093,6 @@
                     "type": "integer"
                 },
                 "prefix": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.Major": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "major_name": {
                     "type": "string"
                 }
             }

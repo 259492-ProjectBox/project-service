@@ -22,6 +22,7 @@ type ProjectService interface {
 	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	DeleteProject(ctx context.Context, id int) error
+	GetProjectsByAdvisorIdService(ctx context.Context, advisorId int) ([]models.Project, error)
 }
 
 type projectServiceImpl struct {
@@ -202,4 +203,14 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 	s.PublishProjectMessageToElasticSearch(ctx, "delete", project)
 
 	return nil
+}
+
+// get project relate to advisor from advisor id
+func (s *projectServiceImpl) GetProjectsByAdvisorIdService(ctx context.Context, advisorId int) ([]models.Project, error) {
+	project, err := s.projectRepo.GetProjectsByAdvisorId(ctx, advisorId)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
 }

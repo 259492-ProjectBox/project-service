@@ -11,3 +11,7 @@ type Calendar struct {
 	Major       Major     `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:CASCADE"`
 	MajorID     int       `json:"major_id"`
 }
+
+func (Calendar) TableName() string {
+	return "calendar"
+}
