@@ -7,8 +7,8 @@ import (
 )
 
 type ProjectConfigService interface {
-	GetProjectConfigByMajorIDService(majorID int) ([]dtos.ProjectConfigResponse, error)
-	UpdateProjectConfigService(configs []dtos.ProjectConfigUpsertRequest) error
+	GetProjectConfigByProgramId(programId int) ([]dtos.ProjectConfigResponse, error)
+	UpdateProjectConfig(configs []dtos.ProjectConfigUpsertRequest) error
 }
 
 type projectconfigServiceImpl struct {
@@ -21,17 +21,17 @@ func NewProjectConfigService(projectconfigRepo repositories.ProjectConfigReposit
 	}
 }
 
-func (s *projectconfigServiceImpl) GetProjectConfigByMajorIDService(majorID int) ([]dtos.ProjectConfigResponse, error) {
-	configs, err := s.projectconfigRepo.GetProjectConfigByMajorID(majorID)
+func (s *projectconfigServiceImpl) GetProjectConfigByProgramId(programId int) ([]dtos.ProjectConfigResponse, error) {
+	configs, err := s.projectconfigRepo.GetProjectConfigByProgramID(programId)
 
 	var configDtos []dtos.ProjectConfigResponse
 
 	for _, config := range configs {
 		configDtos = append(configDtos, dtos.ProjectConfigResponse{
-			ID:       config.ID,
-			Title:    config.Title,
-			MajorID:  config.MajorID,
-			IsActive: config.IsActive,
+			ID:        config.ID,
+			Title:     config.Title,
+			ProgramID: config.ProgramID,
+			IsActive:  config.IsActive,
 		})
 
 	}
@@ -39,17 +39,17 @@ func (s *projectconfigServiceImpl) GetProjectConfigByMajorIDService(majorID int)
 
 }
 
-func (s *projectconfigServiceImpl) UpdateProjectConfigService(configs []dtos.ProjectConfigUpsertRequest) error {
+func (s *projectconfigServiceImpl) UpdateProjectConfig(configs []dtos.ProjectConfigUpsertRequest) error {
 	var updateProjectConfigs []models.ProjectConfig
 	var insertProjectConfigs []models.ProjectConfig
 
 	// Separate configs into update and insert arrays based on ID
 	for _, config := range configs {
 		projectConfig := models.ProjectConfig{
-			ID:       config.ID,
-			Title:    config.Title,
-			MajorID:  config.MajorID,
-			IsActive: config.IsActive,
+			ID:        config.ID,
+			Title:     config.Title,
+			ProgramID: config.ProgramID,
+			IsActive:  config.IsActive,
 		}
 
 		if config.ID > 0 {

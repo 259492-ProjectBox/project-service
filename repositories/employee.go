@@ -8,7 +8,7 @@ import (
 type EmployeeRepository interface {
 	repository[models.Employee]
 	GetEmployeeByID(id int) (*models.Employee, error)
-	GetEmployeeByMajorID(majorID int) ([]models.Employee, error)
+	GetEmployeeByProgramID(programId int) ([]models.Employee, error)
 	CreateEmployee(employee *models.Employee) error
 	UpdateEmployee(updatedEmployee *models.Employee) (*models.Employee, error)
 }
@@ -35,11 +35,11 @@ func (r *employeeRepositoryImpl) GetEmployeeByID(id int) (*models.Employee, erro
 	return employee, nil
 }
 
-// get employee by major id
-func (r *employeeRepositoryImpl) GetEmployeeByMajorID(majorID int) ([]models.Employee, error) {
+// get employee by program id
+func (r *employeeRepositoryImpl) GetEmployeeByProgramID(programId int) ([]models.Employee, error) {
 	var employees []models.Employee
 
-	if err := r.db.Where("major_id = ?", majorID).Find(&employees).Error; err != nil {
+	if err := r.db.Where("program_id = ?", programId).Find(&employees).Error; err != nil {
 		return nil, err
 	}
 

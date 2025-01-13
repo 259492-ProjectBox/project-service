@@ -10,10 +10,10 @@ import (
 )
 
 type EmployeeHandler interface {
-	GetEmployeeByIDHandler(c *gin.Context)
-	GetEmployeeByMajorIDHandler(c *gin.Context)
-	CreateEmployeeHandler(c *gin.Context)
-	UpdateEmployeeHandler(c *gin.Context)
+	GetEmployeeById(c *gin.Context)
+	GetEmployeeByProgramId(c *gin.Context)
+	CreateEmployee(c *gin.Context)
+	UpdateEmployee(c *gin.Context)
 }
 
 type employeeHandler struct {
@@ -35,13 +35,13 @@ func NewEmployeeHandler(employeeService services.EmployeeService) EmployeeHandle
 // @Failure 400 {object} map[string]interface{} "Invalid employee ID"
 // @Failure 404 {object} map[string]interface{} "Employee not found"
 // @Router /employee/{id} [get]
-func (h *employeeHandler) GetEmployeeByIDHandler(c *gin.Context) {
+func (h *employeeHandler) GetEmployeeById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
 		return
 	}
-	employee, err := h.employeeService.GetEmployeeByIDService(c, id)
+	employee, err := h.employeeService.GetEmployeeByID(c, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Employee not found"})
 		return
@@ -49,22 +49,22 @@ func (h *employeeHandler) GetEmployeeByIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, employee)
 }
 
-// @Summary Get employees by major ID
-// @Description Fetches all employees for a given major
+// @Summary Get employees by program ID
+// @Description Fetches all employees for a given program
 // @Tags Employee
 // @Produce  json
-// @Param major_id path int true "Major ID"
+// @Param program_id path int true "Program ID"
 // @Success 200 {object} []dtos.EmployeeResponse "Successfully retrieved employees"
-// @Failure 400 {object} map[string]interface{} "Invalid major ID"
+// @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Employees not found"
-// @Router /employee/GetByMajorID/{major_id} [get]
-func (h *employeeHandler) GetEmployeeByMajorIDHandler(c *gin.Context) {
-	majorID, err := strconv.Atoi(c.Param("major_id"))
+// @Router /employee/program/{program_id} [get]
+func (h *employeeHandler) GetEmployeeByProgramId(c *gin.Context) {
+	programId, err := strconv.Atoi(c.Param("program_id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid major ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
 		return
 	}
-	employees, err := h.employeeService.GetEmployeeByMajorIDService(c, majorID)
+	employees, err := h.employeeService.GetEmployeeByProgramId(c, programId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Employees not found"})
 		return
@@ -82,13 +82,13 @@ func (h *employeeHandler) GetEmployeeByMajorIDHandler(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /employee [post]
-func (h *employeeHandler) CreateEmployeeHandler(c *gin.Context) {
+func (h *employeeHandler) CreateEmployee(c *gin.Context) {
 	req := &dtos.CreateEmployeeRequest{}
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	employee, err := h.employeeService.CreateEmployeeService(c, req)
+	employee, err := h.employeeService.CreateEmployee(c, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -106,14 +106,14 @@ func (h *employeeHandler) CreateEmployeeHandler(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Invalid employee ID or request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /employee [put]
-func (h *employeeHandler) UpdateEmployeeHandler(c *gin.Context) {
+func (h *employeeHandler) UpdateEmployee(c *gin.Context) {
 	employee := &dtos.UpdateEmployeeRequest{}
 	if err := c.ShouldBindJSON(&employee); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updatedEmployee, err := h.employeeService.UpdateEmployeeService(c, employee)
+	updatedEmployee, err := h.employeeService.UpdateEmployee(c, employee)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

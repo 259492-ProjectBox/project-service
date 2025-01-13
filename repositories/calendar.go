@@ -10,9 +10,9 @@ import (
 
 type CalendarRepository interface {
 	repository[models.Calendar]
-	GetByMajorAndDateRange(ctx context.Context, majorID int, startDate, endDate time.Time) ([]models.Calendar, error)
+	GetByProgramAndDateRange(ctx context.Context, programId int, startDate, endDate time.Time) ([]models.Calendar, error)
 	CreateCalendar(ctx context.Context, calendar *models.Calendar) error
-	GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error)
+	GetCalendarByProgramID(ctx context.Context, programId int) ([]models.Calendar, error)
 	UpdateCalendar(ctx context.Context, updatedCalendar *models.Calendar) (*models.Calendar, error)
 	GetCalendarByID(ctx context.Context, id int) (*models.Calendar, error)
 	DeleteCalendar(ctx context.Context, id int) error
@@ -30,12 +30,12 @@ func NewCalendarRepository(db *gorm.DB) CalendarRepository {
 	}
 }
 
-func (r *calendarRepositoryImpl) GetByMajorAndDateRange(ctx context.Context, majorID int, startDate, endDate time.Time) ([]models.Calendar, error) {
+func (r *calendarRepositoryImpl) GetByProgramAndDateRange(ctx context.Context, programId int, startDate, endDate time.Time) ([]models.Calendar, error) {
 	var calendars []models.Calendar
 
-	// Query for overlapping events for the same major_id
+	// Query for overlapping events for the same program_id
 	if err := r.db.WithContext(ctx).Debug().
-		Where("major_id = ? AND NOT (start_date > ? OR end_date < ?)", majorID, endDate, startDate).
+		Where("program_id = ? AND NOT (start_date > ? OR end_date < ?)", programId, endDate, startDate).
 		Find(&calendars).Error; err != nil {
 		return nil, err // handle errors
 	}
@@ -59,10 +59,10 @@ func (r *calendarRepositoryImpl) GetCalendarByID(ctx context.Context, id int) (*
 	return calendars, nil
 }
 
-func (r *calendarRepositoryImpl) GetCalendarByMajorID(ctx context.Context, majorID int) ([]models.Calendar, error) {
+func (r *calendarRepositoryImpl) GetCalendarByProgramID(ctx context.Context, programId int) ([]models.Calendar, error) {
 	var calendars []models.Calendar
 
-	if err := r.db.WithContext(ctx).Where("major_id = ?", majorID).Find(&calendars).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("program_id = ?", programId).Find(&calendars).Error; err != nil {
 		return nil, err
 	}
 
@@ -79,7 +79,7 @@ func (r *calendarRepositoryImpl) UpdateCalendar(ctx context.Context, updatedCale
 	calendar.EndDate = updatedCalendar.EndDate
 	calendar.Title = updatedCalendar.Title
 	calendar.Description = updatedCalendar.Description
-	calendar.MajorID = updatedCalendar.MajorID
+	calendar.ProgramID = updatedCalendar.ProgramID
 
 	if err := r.db.WithContext(ctx).Save(&calendar).Error; err != nil {
 		return nil, err

@@ -8,9 +8,9 @@ import (
 func SetupEmployeeRouter(r *gin.RouterGroup, handler handlers.EmployeeHandler) {
 	employeeRouteV1 := r.Group("/employee")
 	{
-		employeeRouteV1.GET("/:id", handler.GetEmployeeByIDHandler)
-		employeeRouteV1.GET("/GetByMajorID/:major_id", handler.GetEmployeeByMajorIDHandler)
-		employeeRouteV1.POST("", handler.CreateEmployeeHandler)
-		employeeRouteV1.PUT("", handler.UpdateEmployeeHandler)
+		employeeRouteV1.GET("/:id", handler.GetEmployeeById)
+		employeeRouteV1.GET("/program/:program_id", handler.GetEmployeeByProgramId)
+		employeeRouteV1.POST("", handler.CreateEmployee)
+		employeeRouteV1.PUT("", handler.UpdateEmployee)
 	}
 }

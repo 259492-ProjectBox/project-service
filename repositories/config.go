@@ -7,7 +7,7 @@ import (
 
 type ConfigRepository interface {
 	repository[models.Config]
-	GetConfigByMajorID(majorID int) ([]models.Config, error)
+	GetConfigByProgramId(programId int) ([]models.Config, error)
 }
 
 type configRepositoryImpl struct {
@@ -22,10 +22,10 @@ func NewConfigRepository(db *gorm.DB) ConfigRepository {
 	}
 }
 
-// get all config from major id
-func (r *configRepositoryImpl) GetConfigByMajorID(majorID int) ([]models.Config, error) {
+// get all config from program id
+func (r *configRepositoryImpl) GetConfigByProgramId(programId int) ([]models.Config, error) {
 	var configs []models.Config
-	if err := r.db.Where("major_id = ?", majorID).Find(&configs).Error; err != nil {
+	if err := r.db.Where("program_id = ?", programId).Find(&configs).Error; err != nil {
 		return nil, err
 	}
 	if len(configs) == 0 {

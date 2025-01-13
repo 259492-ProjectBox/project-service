@@ -72,7 +72,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Creates a new calendarof that major",
+                "description": "Creates a new calendarof that program",
                 "consumes": [
                     "application/json"
                 ],
@@ -118,21 +118,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/calendar/GetByMajorID/{major_id}": {
+        "/calendar/GetByMajorID/{program_id}": {
             "get": {
-                "description": "Fetches all calendar events for a given major",
+                "description": "Fetches all calendar events for a given program",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Calendar"
                 ],
-                "summary": "Get calendar by major ID",
+                "summary": "Get calendar by program ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Major ID",
-                        "name": "major_id",
+                        "description": "Program ID",
+                        "name": "program_id",
                         "in": "path",
                         "required": true
                     }
@@ -148,7 +148,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid program ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -208,21 +208,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/config/GetByMajorId/{major_id}": {
+        "/config/GetByMajorId/{program_id}": {
             "get": {
-                "description": "Fetches all config for a given major",
+                "description": "Fetches all config for a given program",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Config"
                 ],
-                "summary": "Get config by major ID",
+                "summary": "Get config by program ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Major ID",
-                        "name": "major_id",
+                        "description": "Program ID",
+                        "name": "program_id",
                         "in": "path",
                         "required": true
                     }
@@ -238,14 +238,14 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid program ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Major not found",
+                        "description": "Program not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -355,21 +355,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/employee/GetByMajorID/{major_id}": {
+        "/employee/GetByMajorID/{program_id}": {
             "get": {
-                "description": "Fetches all employees for a given major",
+                "description": "Fetches all employees for a given program",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Employee"
                 ],
-                "summary": "Get employees by major ID",
+                "summary": "Get employees by program ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Major ID",
-                        "name": "major_id",
+                        "description": "Program ID",
+                        "name": "program_id",
                         "in": "path",
                         "required": true
                     }
@@ -385,7 +385,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid program ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -444,9 +444,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/major": {
+        "/program": {
             "post": {
-                "description": "Create a new major",
+                "description": "Create a new program",
                 "consumes": [
                     "application/json"
                 ],
@@ -454,13 +454,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Major"
+                    "Program"
                 ],
-                "summary": "Create major",
+                "summary": "Create program",
                 "parameters": [
                     {
-                        "description": "Major object",
-                        "name": "major",
+                        "description": "Program object",
+                        "name": "program",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -470,9 +470,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Successfully created major",
+                        "description": "Successfully created program",
                         "schema": {
-                            "$ref": "#/definitions/models.Major"
+                            "$ref": "#/definitions/models.Program"
                         }
                     },
                     "400": {
@@ -492,23 +492,23 @@ const docTemplate = `{
                 }
             }
         },
-        "/major/GetAllMajor": {
+        "/program/GetAllMajor": {
             "get": {
-                "description": "Fetches all major",
+                "description": "Fetches all program",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Major"
+                    "Program"
                 ],
-                "summary": "Get all major",
+                "summary": "Get all program",
                 "responses": {
                     "200": {
-                        "description": "Successfully fetched major",
+                        "description": "Successfully fetched program",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Major"
+                                "$ref": "#/definitions/models.Program"
                             }
                         }
                     },
@@ -522,9 +522,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/major/UpdateMajorName": {
+        "/program/UpdateMajorName": {
             "put": {
-                "description": "Update the name of a major",
+                "description": "Update the name of a program",
                 "consumes": [
                     "application/json"
                 ],
@@ -532,25 +532,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Major"
+                    "Program"
                 ],
-                "summary": "Update major name",
+                "summary": "Update program name",
                 "parameters": [
                     {
-                        "description": "Major object containing ID and name",
-                        "name": "major",
+                        "description": "Program object containing ID and name",
+                        "name": "program",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Major"
+                            "$ref": "#/definitions/models.Program"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully updated major name",
+                        "description": "Successfully updated program name",
                         "schema": {
-                            "$ref": "#/definitions/models.Major"
+                            "$ref": "#/definitions/models.Program"
                         }
                     },
                     "400": {
@@ -606,14 +606,14 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid program ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Major not found",
+                        "description": "Program not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -629,21 +629,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/projectConfig/GetByMajorId/{major_id}": {
+        "/projectConfig/GetByMajorId/{program_id}": {
             "get": {
-                "description": "Fetches all config for a given major",
+                "description": "Fetches all config for a given program",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ProjectConfig"
                 ],
-                "summary": "Get config by major ID",
+                "summary": "Get config by program ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Major ID",
-                        "name": "major_id",
+                        "description": "Program ID",
+                        "name": "program_id",
                         "in": "path",
                         "required": true
                     }
@@ -659,14 +659,14 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid major ID",
+                        "description": "Invalid program ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Major not found",
+                        "description": "Program not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1006,7 +1006,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "major_name": {
+                "program_name": {
                     "type": "string"
                 },
                 "start_date": {
@@ -1023,7 +1023,7 @@ const docTemplate = `{
                 "config_name": {
                     "type": "string"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "value": {
@@ -1040,7 +1040,7 @@ const docTemplate = `{
                 "end_date": {
                     "type": "string"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "start_date": {
@@ -1063,7 +1063,7 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "prefix": {
@@ -1074,10 +1074,10 @@ const docTemplate = `{
         "dtos.CreateMajorRequest": {
             "type": "object",
             "required": [
-                "major_name"
+                "program_name"
             ],
             "properties": {
-                "major_name": {
+                "program_name": {
                     "type": "string"
                 }
             }
@@ -1097,7 +1097,7 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "prefix": {
@@ -1114,7 +1114,7 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "title": {
@@ -1131,7 +1131,7 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "title": {
@@ -1151,7 +1151,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "start_date": {
@@ -1177,7 +1177,7 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "prefix": {
@@ -1197,10 +1197,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "major": {
-                    "$ref": "#/definitions/models.Major"
+                "program": {
+                    "$ref": "#/definitions/models.Program"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 }
             }
@@ -1220,10 +1220,10 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "major": {
-                    "$ref": "#/definitions/models.Major"
+                "program": {
+                    "$ref": "#/definitions/models.Program"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "prefix": {
@@ -1237,13 +1237,13 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Major": {
+        "models.Program": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "major_name": {
+                "program_name": {
                     "type": "string"
                 }
             }
@@ -1313,10 +1313,10 @@ const docTemplate = `{
                 "is_approved": {
                     "type": "boolean"
                 },
-                "major": {
-                    "$ref": "#/definitions/models.Major"
+                "program": {
+                    "$ref": "#/definitions/models.Program"
                 },
-                "major_id": {
+                "program_id": {
                     "type": "integer"
                 },
                 "members": {
@@ -1426,16 +1426,16 @@ const docTemplate = `{
                     "description": "Last name of the student",
                     "type": "string"
                 },
-                "major": {
-                    "description": "Major related to student",
+                "program": {
+                    "description": "Program related to student",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Major"
+                            "$ref": "#/definitions/models.Program"
                         }
                     ]
                 },
-                "major_id": {
-                    "description": "Major ID, not null",
+                "program_id": {
+                    "description": "Program ID, not null",
                     "type": "integer"
                 },
                 "prefix": {

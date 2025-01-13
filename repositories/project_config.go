@@ -7,7 +7,7 @@ import (
 
 type ProjectConfigRepository interface {
 	repository[models.ProjectConfig]
-	GetProjectConfigByMajorID(majorID int) ([]models.ProjectConfig, error)
+	GetProjectConfigByProgramID(programId int) ([]models.ProjectConfig, error)
 	UpdateProjectConfig(configs []models.ProjectConfig) error
 	InsertProjectConfig(configs []models.ProjectConfig) error
 }
@@ -24,11 +24,11 @@ func NewProjectConfigRepository(db *gorm.DB) ProjectConfigRepository {
 	}
 }
 
-func (r *projectconfigRepositoryImpl) GetProjectConfigByMajorID(majorID int) ([]models.ProjectConfig, error) {
+func (r *projectconfigRepositoryImpl) GetProjectConfigByProgramID(programId int) ([]models.ProjectConfig, error) {
 	var configs []models.ProjectConfig
 
 	if err := r.db.
-		Where("major_id = ?", majorID).
+		Where("program_id = ?", programId).
 		Find(&configs).
 		Error; err != nil {
 		return nil, err

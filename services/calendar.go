@@ -12,29 +12,29 @@ import (
 )
 
 type CalendarService interface {
-	CreateCalendarService(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error)
-	GetCalendarByMajorIDService(ctx context.Context, majorID int) ([]dtos.CalendarResponse, error)
-	UpdateCalendarService(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error)
-	DeleteCalendarService(ctx context.Context, id int) error
+	CreateCalendar(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error)
+	GetCalendarByProgramId(ctx context.Context, programId int) ([]dtos.CalendarResponse, error)
+	UpdateCalendar(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error)
+	DeleteCalendar(ctx context.Context, id int) error
 }
 
 type calendarServiceImpl struct {
 	calendarRepo repositories.CalendarRepository
-	majorRepo    repositories.MajorRepository
+	programRepo  repositories.ProgramRepository
 }
 
-func NewCalendarService(calendarRepo repositories.CalendarRepository, majorRepo repositories.MajorRepository) CalendarService {
+func NewCalendarService(calendarRepo repositories.CalendarRepository, programRepo repositories.ProgramRepository) CalendarService {
 	return &calendarServiceImpl{
 		calendarRepo: calendarRepo,
-		majorRepo:    majorRepo,
+		programRepo:  programRepo,
 	}
 }
 
-func (s *calendarServiceImpl) CreateCalendarService(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error) {
-	// Check if the major ID exists
-	major, err := s.majorRepo.GetByMajorID(ctx, calendar.MajorID)
+func (s *calendarServiceImpl) CreateCalendar(ctx context.Context, calendar *dtos.CreateCalendarRequest) (dtos.CalendarResponse, error) {
+	// Check if the program ID exists
+	program, err := s.programRepo.GetProgramById(ctx, calendar.ProgramID)
 	if err != nil {
-		return dtos.CalendarResponse{}, errors.New("major ID does not exist")
+		return dtos.CalendarResponse{}, errors.New("program ID does not exist")
 	}
 
 	startDate, err := utils.ParseDateTime(calendar.StartDate)
@@ -45,8 +45,8 @@ func (s *calendarServiceImpl) CreateCalendarService(ctx context.Context, calenda
 	if err != nil {
 		return dtos.CalendarResponse{}, fmt.Errorf("failed to parse end_date: %w", err)
 	}
-	// Check if the start date already exists for the given major
-	existingCalendars, err := s.calendarRepo.GetByMajorAndDateRange(ctx, calendar.MajorID, startDate, endDate)
+	// Check if the start date already exists for the given program
+	existingCalendars, err := s.calendarRepo.GetByProgramAndDateRange(ctx, calendar.ProgramID, startDate, endDate)
 	fmt.Print(existingCalendars)
 	if err != nil {
 		return dtos.CalendarResponse{}, err // handle error
@@ -54,7 +54,7 @@ func (s *calendarServiceImpl) CreateCalendarService(ctx context.Context, calenda
 
 	// If any overlapping events are found, return an error
 	if len(existingCalendars) > 0 {
-		return dtos.CalendarResponse{}, errors.New("a calendar event with the same date range already exists for this major")
+		return dtos.CalendarResponse{}, errors.New("a calendar event with the same date range already exists for this program")
 	}
 
 	// Convert DTO to model
@@ -63,7 +63,7 @@ func (s *calendarServiceImpl) CreateCalendarService(ctx context.Context, calenda
 		EndDate:     endDate,
 		Title:       calendar.Title,
 		Description: calendar.Description,
-		MajorID:     calendar.MajorID,
+		ProgramID:   calendar.ProgramID,
 	}
 
 	// Create the calendar event
@@ -79,14 +79,14 @@ func (s *calendarServiceImpl) CreateCalendarService(ctx context.Context, calenda
 		EndDate:     utils.FormatDate(newCalendar.EndDate),
 		Title:       newCalendar.Title,
 		Description: newCalendar.Description,
-		Major:       major.MajorName,
+		Program:     program.ProgramName,
 	}
 
 	return response, nil
 }
 
-func (s *calendarServiceImpl) GetCalendarByMajorIDService(ctx context.Context, majorID int) ([]dtos.CalendarResponse, error) {
-	calendars, err := s.calendarRepo.GetCalendarByMajorID(ctx, majorID)
+func (s *calendarServiceImpl) GetCalendarByProgramId(ctx context.Context, programId int) ([]dtos.CalendarResponse, error) {
+	calendars, err := s.calendarRepo.GetCalendarByProgramID(ctx, programId)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (s *calendarServiceImpl) GetCalendarByMajorIDService(ctx context.Context, m
 			EndDate:     utils.FormatDate(calendar.EndDate),
 			Title:       calendar.Title,
 			Description: calendar.Description,
-			Major:       fmt.Sprintf("%d", calendar.MajorID),
+			Program:     fmt.Sprintf("%d", calendar.ProgramID),
 		}
 		calendarResponses = append(calendarResponses, calendarResponse)
 	}
@@ -107,7 +107,7 @@ func (s *calendarServiceImpl) GetCalendarByMajorIDService(ctx context.Context, m
 	return calendarResponses, nil
 }
 
-func (s *calendarServiceImpl) UpdateCalendarService(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error) {
+func (s *calendarServiceImpl) UpdateCalendar(ctx context.Context, calendar *dtos.UpdateCalendarRequest) (*dtos.CalendarResponse, error) {
 	// Check if the calendar ID exists
 	_, err := s.calendarRepo.GetCalendarByID(ctx, calendar.ID)
 	if err != nil {
@@ -129,7 +129,7 @@ func (s *calendarServiceImpl) UpdateCalendarService(ctx context.Context, calenda
 		EndDate:     endDate,
 		Title:       calendar.Title,
 		Description: calendar.Description,
-		MajorID:     calendar.MajorID,
+		ProgramID:   calendar.ProgramID,
 	}
 
 	// Update the calendar
@@ -145,13 +145,13 @@ func (s *calendarServiceImpl) UpdateCalendarService(ctx context.Context, calenda
 		EndDate:     utils.FormatDate(updatedCalendar.EndDate),
 		Title:       updatedCalendar.Title,
 		Description: updatedCalendar.Description,
-		Major:       fmt.Sprintf("%d", updatedCalendar.MajorID),
+		Program:     fmt.Sprintf("%d", updatedCalendar.ProgramID),
 	}
 
 	return &response, nil
 }
 
-func (s *calendarServiceImpl) DeleteCalendarService(ctx context.Context, id int) error {
+func (s *calendarServiceImpl) DeleteCalendar(ctx context.Context, id int) error {
 	// Check if the calendar ID exists
 	_, err := s.calendarRepo.GetCalendarByID(ctx, id)
 	if err != nil {

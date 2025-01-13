@@ -9,9 +9,6 @@ func SetupConfigRouter(r *gin.RouterGroup, handler handlers.ConfigHandler) {
 	configRouteV1 := r.Group("/config")
 	{
 
-		// configRouteV1.POST("", handler.CreateCalendarHandler)
-		configRouteV1.GET("/GetByMajorId/:major_id", handler.GetConfigByMajorIDHandler)
-		// configRouteV1.PUT("", handler.UpdateCalendarHandler)
-		// configRouteV1.DELETE("/:id", handler.DeleteCalendarHandler)
+		configRouteV1.GET("/program/:program_id", handler.GetConfigByProgramId)
 	}
 }

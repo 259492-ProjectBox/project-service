@@ -6,12 +6,10 @@ import (
 )
 
 func SetupProjectConfigRouter(r *gin.RouterGroup, handler handlers.ProjectConfigHandler) {
-	projectconfigRouteV1 := r.Group("/projectConfig")
+	projectconfigRouteV1 := r.Group("/projectConfigs")
 	{
 
-		// configRouteV1.POST("", handler.CreateCalendarHandler)
-		projectconfigRouteV1.GET("/GetByMajorId/:major_id", handler.GetProjectConfigByMajorIDHandler)
-		projectconfigRouteV1.POST("", handler.UpsertProjectConfigHandler)
-		// configRouteV1.DELETE("/:id", handler.DeleteCalendarHandler)
+		projectconfigRouteV1.GET("/program/:program_id", handler.GetProjectConfigByProgramId)
+		projectconfigRouteV1.POST("", handler.UpsertProjectConfig)
 	}
 }

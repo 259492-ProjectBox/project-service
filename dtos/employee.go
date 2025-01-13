@@ -15,7 +15,7 @@ type CreateEmployeeRequest struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email" gorm:"unique"`
-	MajorID   int    `json:"major_id"`
+	ProgramID int    `json:"program_id"`
 }
 type UpdateEmployeeRequest struct {
 	ID        int    `json:"id"`
@@ -23,7 +23,7 @@ type UpdateEmployeeRequest struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email" gorm:"unique"`
-	MajorID   int    `json:"major_id"`
+	ProgramID int    `json:"program_id"`
 }
 
 type EmployeeResponse struct {
@@ -32,5 +32,5 @@ type EmployeeResponse struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email" gorm:"unique"`
-	MajorID   int    `json:"major_id"`
+	ProgramID int    `json:"program_id"`
 }

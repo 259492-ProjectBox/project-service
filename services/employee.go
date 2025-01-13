@@ -9,11 +9,11 @@ import (
 )
 
 type EmployeeService interface {
-	CreateEmployeeService(ctx context.Context, employee *dtos.CreateEmployeeRequest) (*dtos.EmployeeResponse, error)
-	GetEmployeeByIDService(ctx context.Context, id int) (*dtos.EmployeeResponse, error)
-	UpdateEmployeeService(ctx context.Context, employee *dtos.UpdateEmployeeRequest) (*dtos.EmployeeResponse, error)
-	DeleteEmployeeService(ctx context.Context, id int) error
-	GetEmployeeByMajorIDService(ctx context.Context, majorID int) ([]dtos.EmployeeResponse, error)
+	CreateEmployee(ctx context.Context, employee *dtos.CreateEmployeeRequest) (*dtos.EmployeeResponse, error)
+	GetEmployeeByID(ctx context.Context, id int) (*dtos.EmployeeResponse, error)
+	UpdateEmployee(ctx context.Context, employee *dtos.UpdateEmployeeRequest) (*dtos.EmployeeResponse, error)
+	DeleteEmployee(ctx context.Context, id int) error
+	GetEmployeeByProgramId(ctx context.Context, programId int) ([]dtos.EmployeeResponse, error)
 }
 
 type employeeServiceImpl struct {
@@ -26,14 +26,14 @@ func NewEmployeeService(employeeRepo repositories.EmployeeRepository) EmployeeSe
 	}
 }
 
-func (s *employeeServiceImpl) CreateEmployeeService(ctx context.Context, employee *dtos.CreateEmployeeRequest) (*dtos.EmployeeResponse, error) {
+func (s *employeeServiceImpl) CreateEmployee(ctx context.Context, employee *dtos.CreateEmployeeRequest) (*dtos.EmployeeResponse, error) {
 
 	employeeModel := &models.Employee{
 		Prefix:    employee.Prefix,
 		FirstName: employee.FirstName,
 		LastName:  employee.LastName,
 		Email:     employee.Email,
-		MajorID:   employee.MajorID,
+		ProgramID: employee.ProgramID,
 	}
 
 	employeeModel, err := s.employeeRepo.Create(ctx, employeeModel)
@@ -47,12 +47,12 @@ func (s *employeeServiceImpl) CreateEmployeeService(ctx context.Context, employe
 		FirstName: employeeModel.FirstName,
 		LastName:  employeeModel.LastName,
 		Email:     employeeModel.Email,
-		MajorID:   employeeModel.MajorID,
+		ProgramID: employeeModel.ProgramID,
 	}, nil
 
 }
 
-func (s *employeeServiceImpl) GetEmployeeByIDService(ctx context.Context, id int) (*dtos.EmployeeResponse, error) {
+func (s *employeeServiceImpl) GetEmployeeByID(ctx context.Context, id int) (*dtos.EmployeeResponse, error) {
 	employee, err := s.employeeRepo.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -64,11 +64,11 @@ func (s *employeeServiceImpl) GetEmployeeByIDService(ctx context.Context, id int
 		FirstName: employee.FirstName,
 		LastName:  employee.LastName,
 		Email:     employee.Email,
-		MajorID:   employee.MajorID,
+		ProgramID: employee.ProgramID,
 	}, nil
 }
 
-func (s *employeeServiceImpl) UpdateEmployeeService(ctx context.Context, employee *dtos.UpdateEmployeeRequest) (*dtos.EmployeeResponse, error) {
+func (s *employeeServiceImpl) UpdateEmployee(ctx context.Context, employee *dtos.UpdateEmployeeRequest) (*dtos.EmployeeResponse, error) {
 	// convert from dto to model
 	updatedEmployee := &models.Employee{
 		ID:        employee.ID,
@@ -76,7 +76,7 @@ func (s *employeeServiceImpl) UpdateEmployeeService(ctx context.Context, employe
 		FirstName: employee.FirstName,
 		LastName:  employee.LastName,
 		Email:     employee.Email,
-		MajorID:   employee.MajorID,
+		ProgramID: employee.ProgramID,
 	}
 	updatedEmployee, err := s.employeeRepo.Update(ctx, employee.ID, updatedEmployee)
 	if err != nil {
@@ -90,17 +90,17 @@ func (s *employeeServiceImpl) UpdateEmployeeService(ctx context.Context, employe
 		FirstName: updatedEmployee.FirstName,
 		LastName:  updatedEmployee.LastName,
 		Email:     updatedEmployee.Email,
-		MajorID:   updatedEmployee.MajorID,
+		ProgramID: updatedEmployee.ProgramID,
 	}, nil
 
 }
 
-func (s *employeeServiceImpl) DeleteEmployeeService(ctx context.Context, id int) error {
+func (s *employeeServiceImpl) DeleteEmployee(ctx context.Context, id int) error {
 	return s.employeeRepo.Delete(ctx, id)
 }
 
-func (s *employeeServiceImpl) GetEmployeeByMajorIDService(ctx context.Context, majorID int) ([]dtos.EmployeeResponse, error) {
-	employees, err := s.employeeRepo.GetEmployeeByMajorID(majorID)
+func (s *employeeServiceImpl) GetEmployeeByProgramId(ctx context.Context, programId int) ([]dtos.EmployeeResponse, error) {
+	employees, err := s.employeeRepo.GetEmployeeByProgramID(programId)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (s *employeeServiceImpl) GetEmployeeByMajorIDService(ctx context.Context, m
 			FirstName: employee.FirstName,
 			LastName:  employee.LastName,
 			Email:     employee.Email,
-			MajorID:   employee.MajorID,
+			ProgramID: employee.ProgramID,
 		})
 	}
 

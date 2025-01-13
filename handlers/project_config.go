@@ -10,8 +10,8 @@ import (
 )
 
 type ProjectConfigHandler interface {
-	GetProjectConfigByMajorIDHandler(c *gin.Context)
-	UpsertProjectConfigHandler(c *gin.Context)
+	GetProjectConfigByProgramId(c *gin.Context)
+	UpsertProjectConfig(c *gin.Context)
 }
 
 type projectconfigHandler struct {
@@ -24,31 +24,31 @@ func NewProjectConfigHandler(projectconfigService services.ProjectConfigService)
 	}
 }
 
-// @Summary Get config by major ID
-// @Description Fetches all config for a given major
+// @Summary Get config by program ID
+// @Description Fetches all config for a given program
 // @Tags ProjectConfig
 // @Produce json
-// @Param major_id path int true "Major ID"
+// @Param program_id path int true "Program ID"
 // @Success 200 {object} []dtos.ProjectConfigResponse "Successfully fetched config"
-// @Failure 400 {object} map[string]interface{} "Invalid major ID"
-// @Failure 404 {object} map[string]interface{} "Major not found"
+// @Failure 400 {object} map[string]interface{} "Invalid program ID"
+// @Failure 404 {object} map[string]interface{} "Program not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /projectConfig/GetByMajorId/{major_id} [get]
-func (h *projectconfigHandler) GetProjectConfigByMajorIDHandler(c *gin.Context) {
-	majorID, err := strconv.Atoi(c.Param("major_id"))
+// @Router /projectConfigs/program/{program_id} [get]
+func (h *projectconfigHandler) GetProjectConfigByProgramId(c *gin.Context) {
+	programId, err := strconv.Atoi(c.Param("program_id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid major ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
 		return
 	}
 
-	configs, err := h.projectconfigService.GetProjectConfigByMajorIDService(majorID)
+	configs, err := h.projectconfigService.GetProjectConfigByProgramId(programId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	if len(configs) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No configurations found for the given major ID"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "No configurations found for the given program ID"})
 		return
 	}
 
@@ -62,18 +62,18 @@ func (h *projectconfigHandler) GetProjectConfigByMajorIDHandler(c *gin.Context) 
 // @Produce json
 // @Param configs body []dtos.ProjectConfigUpsertRequest true "Configurations"
 // @Success 200 {object} map[string]interface{} "Successfully updated config"
-// @Failure 400 {object} map[string]interface{} "Invalid major ID"
-// @Failure 404 {object} map[string]interface{} "Major not found"
+// @Failure 400 {object} map[string]interface{} "Invalid program ID"
+// @Failure 404 {object} map[string]interface{} "Program not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /projectConfig [post]
-func (h *projectconfigHandler) UpsertProjectConfigHandler(c *gin.Context) {
+func (h *projectconfigHandler) UpsertProjectConfig(c *gin.Context) {
 	var configs []dtos.ProjectConfigUpsertRequest
 	if err := c.ShouldBindJSON(&configs); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.projectconfigService.UpdateProjectConfigService(configs)
+	err := h.projectconfigService.UpdateProjectConfig(configs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
