@@ -15,7 +15,7 @@ type Project struct {
 	ProgramID        int               `json:"program_id"`
 	CourseID         int               `json:"course_id"`
 	Course           Course            `json:"course" gorm:"foreignKey:CourseID;constraint:OnDelete:SET NULL"`
-	Employees        []Employee        `json:"employees" gorm:"many2many:project_employees;constraint:OnDelete:CASCADE;"`
+	Staffs           []Staff           `json:"staffs" gorm:"many2many:project_staffs;constraint:OnDelete:CASCADE;"`
 	Members          []Student         `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 	ProjectResources []ProjectResource `json:"project_resources"`
 	CreatedAt        time.Time         `json:"created_at" gorm:"default:CURRENT_DATE"`

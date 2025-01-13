@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/project-box/dtos"
-	dto "github.com/project-box/dtos"
 	"github.com/project-box/models"
 )
 
@@ -12,9 +11,9 @@ func getStringValue(ptr *string) string {
 	}
 	return *ptr
 }
-func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
+func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 
-	projectData := dto.ProjectData{
+	projectData := dtos.ProjectData{
 		ID:           project.ID,
 		ProjectNo:    project.ProjectNo,
 		TitleTH:      getStringValue(project.TitleTH),
@@ -41,17 +40,21 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 		},
 	}
 
-	for _, committee := range project.Employees {
-		projectData.Employees = append(projectData.Employees, dtos.Employee{
-			ID:        committee.ID,
-			Prefix:    committee.Prefix,
-			FirstName: committee.FirstName,
-			LastName:  committee.LastName,
-			Email:     committee.Email,
-			ProgramID: committee.ProgramID,
+	for _, staff := range project.Staffs {
+		projectData.Staffs = append(projectData.Staffs, dtos.ProjectStaff{
+			ID:        staff.ID,
+			Prefix:    staff.Prefix,
+			FirstName: staff.FirstName,
+			LastName:  staff.LastName,
+			Email:     staff.Email,
+			ProgramID: staff.ProgramID,
 			Program: dtos.Program{
-				ID:          committee.Program.ID,
-				ProgramName: committee.Program.ProgramName,
+				ID:          staff.Program.ID,
+				ProgramName: staff.Program.ProgramName,
+			},
+			ProjectRole: dtos.ProjectRole{
+				ID:       1,
+				RoleName: "Advisor",
 			},
 		})
 	}

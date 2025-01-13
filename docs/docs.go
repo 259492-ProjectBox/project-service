@@ -261,9 +261,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/employee": {
+        "/staff": {
             "put": {
-                "description": "Updates an employee by their ID with the provided data",
+                "description": "Updates an staff by their ID with the provided data",
                 "consumes": [
                     "application/json"
                 ],
@@ -271,29 +271,29 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Employee"
+                    "Staff"
                 ],
-                "summary": "Update an existing employee",
+                "summary": "Update an existing staff",
                 "parameters": [
                     {
-                        "description": "Updated Employee Data",
-                        "name": "employee",
+                        "description": "Updated Staff Data",
+                        "name": "staff",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UpdateEmployeeRequest"
+                            "$ref": "#/definitions/dtos.UpdateStaffRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully updated employee",
+                        "description": "Successfully updated staff",
                         "schema": {
-                            "$ref": "#/definitions/dtos.EmployeeResponse"
+                            "$ref": "#/definitions/dtos.StaffResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid employee ID or request",
+                        "description": "Invalid staff ID or request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -309,7 +309,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Creates a new employee",
+                "description": "Creates a new staff",
                 "consumes": [
                     "application/json"
                 ],
@@ -317,25 +317,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Employee"
+                    "Staff"
                 ],
-                "summary": "Create a new employee",
+                "summary": "Create a new staff",
                 "parameters": [
                     {
-                        "description": "Employee Data",
-                        "name": "employee",
+                        "description": "Staff Data",
+                        "name": "staff",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.CreateEmployeeRequest"
+                            "$ref": "#/definitions/dtos.CreateStaffRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Successfully created employee",
+                        "description": "Successfully created staff",
                         "schema": {
-                            "$ref": "#/definitions/dtos.EmployeeResponse"
+                            "$ref": "#/definitions/dtos.StaffResponse"
                         }
                     },
                     "400": {
@@ -355,16 +355,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/employee/GetByMajorID/{program_id}": {
+        "/staff/GetByMajorID/{program_id}": {
             "get": {
-                "description": "Fetches all employees for a given program",
+                "description": "Fetches all staffs for a given program",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Employee"
+                    "Staff"
                 ],
-                "summary": "Get employees by program ID",
+                "summary": "Get staffs by program ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -376,11 +376,11 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved employees",
+                        "description": "Successfully retrieved staffs",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dtos.EmployeeResponse"
+                                "$ref": "#/definitions/dtos.StaffResponse"
                             }
                         }
                     },
@@ -392,7 +392,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Employees not found",
+                        "description": "Staffs not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -401,20 +401,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/employee/{id}": {
+        "/staff/{id}": {
             "get": {
-                "description": "Fetches an employee by their ID",
+                "description": "Fetches an staff by their ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Employee"
+                    "Staff"
                 ],
-                "summary": "Get employee by ID",
+                "summary": "Get staff by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Employee ID",
+                        "description": "Staff ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -422,20 +422,20 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved employee",
+                        "description": "Successfully retrieved staff",
                         "schema": {
-                            "$ref": "#/definitions/dtos.EmployeeResponse"
+                            "$ref": "#/definitions/dtos.StaffResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid employee ID",
+                        "description": "Invalid staff ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Employee not found",
+                        "description": "Staff not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1051,7 +1051,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.CreateEmployeeRequest": {
+        "dtos.CreateStaffRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1082,7 +1082,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.EmployeeResponse": {
+        "dtos.StaffResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1162,7 +1162,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.UpdateEmployeeRequest": {
+        "dtos.UpdateStaffRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1205,7 +1205,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Employee": {
+        "models.Staff": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1301,10 +1301,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "employees": {
+                "staffs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Employee"
+                        "$ref": "#/definitions/models.Staff"
                     }
                 },
                 "id": {

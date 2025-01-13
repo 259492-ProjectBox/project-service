@@ -33,7 +33,7 @@ type ProjectData struct {
 	Program          Program           `json:"program"`
 	CourseID         int               `json:"course_id"`
 	Course           Course            `json:"course"`
-	Employees        []Employee        `json:"employees"`
+	Staffs           []ProjectStaff    `json:"staffs"`
 	Members          []Student         `json:"members"`
 	ProjectResources []ProjectResource `json:"project_resources"`
 }

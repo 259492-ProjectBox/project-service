@@ -33,12 +33,12 @@ func GetPostgresConfig() *PostgresConfig {
 func migrateModel(db *gorm.DB) error {
 	if err := db.AutoMigrate(
 		&models.Config{},
-		&models.ProjectEmployeeType{},
+		&models.ProjectRole{},
 		&models.ProjectResource{},
 		&models.AssetResource{},
 		&models.ResourceType{},
 		&models.Resource{},
-		&models.Employee{},
+		&models.Staff{},
 		&models.Student{},
 		&models.Course{},
 		&models.Project{},

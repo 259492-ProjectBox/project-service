@@ -44,7 +44,7 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*mo
 	if err := r.db.WithContext(ctx).
 		Preload("Program").
 		Preload("Course.Program").
-		Preload("Employees.Program").
+		Preload("Staffs.Program").
 		Preload("Members.Program").
 		Preload("ProjectResources.Resource.ResourceType").
 		First(project, "projects.id = ?", id).Error; err != nil {
@@ -58,7 +58,7 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 	if err := r.db.WithContext(ctx).
 		Preload("Program").
 		Preload("Course.Program").
-		Preload("Employees.Program").
+		Preload("Staffs.Program").
 		Preload("Members.Program").
 		Preload("ProjectResources.Resource.ResourceType").
 		Preload("ProjectResources.Resource.PDF.Pages").
@@ -86,7 +86,7 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 		Where("id IN ?", projectIds).
 		Preload("Program").
 		Preload("Course").
-		Preload("Employees.Program").
+		Preload("Staffs.Program").
 		Preload("Members.Program").
 		Preload("ProjectResources.Resource.ResourceType").
 		Find(&projects).Error; err != nil {
@@ -147,8 +147,8 @@ func (r *projectRepositoryImpl) deleteProjectAssociations(ctx context.Context, t
 		return fmt.Errorf("failed to delete project students: %w", err)
 	}
 
-	if err := r.deleteProjectEmployees(ctx, tx, projectID); err != nil {
-		return fmt.Errorf("failed to delete project employees: %w", err)
+	if err := r.deleteProjectStaffs(ctx, tx, projectID); err != nil {
+		return fmt.Errorf("failed to delete project staffs: %w", err)
 	}
 
 	return nil
@@ -161,8 +161,8 @@ func (r *projectRepositoryImpl) deleteProjectStudents(ctx context.Context, tx *g
 	return nil
 }
 
-func (r *projectRepositoryImpl) deleteProjectEmployees(ctx context.Context, tx *gorm.DB, projectID int) error {
-	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Delete(&models.ProjectEmployee{}).Error; err != nil {
+func (r *projectRepositoryImpl) deleteProjectStaffs(ctx context.Context, tx *gorm.DB, projectID int) error {
+	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Delete(&models.ProjectStaff{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -173,6 +173,12 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		tx.Rollback()
 		return err
 	}
+
+	if err := tx.WithContext(ctx).Preload("Program").First(project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return nil
 }
 
@@ -301,7 +307,7 @@ func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, proje
 		tx.Rollback()
 		return errors.New("project not found")
 	}
-	if err := tx.Where("project_id = ?", id).Delete(&models.ProjectEmployee{}).Error; err != nil {
+	if err := tx.Where("project_id = ?", id).Delete(&models.ProjectStaff{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -328,12 +334,11 @@ func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, proje
 func (r *projectRepositoryImpl) GetProjectsByAdvisorId(ctx context.Context, advisorId int) ([]models.Project, error) {
 	var projects []models.Project
 
-	fmt.Println("advisorId", advisorId)
 	if err := r.db.WithContext(ctx).
 		Table("projects as p").
 		Select("p.*").
-		Joins("JOIN project_employees as pe ON pe.project_id = p.id").
-		Where("pe.employee_id = ?", advisorId).
+		Joins("JOIN project_staffs as pe ON pe.project_id = p.id").
+		Where("pe.staff_id = ?", advisorId).
 		Find(&projects).Error; err != nil {
 		return nil, fmt.Errorf("failed to get projects for advisor_id %d: %w", advisorId, err)
 	}

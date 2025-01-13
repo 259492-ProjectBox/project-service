@@ -28,7 +28,7 @@ type ProjectService interface {
 type projectServiceImpl struct {
 	rabbitMQChannel          *rabbitmq.Channel
 	projectRepo              repositories.ProjectRepository
-	committeeRepo            repositories.EmployeeRepository
+	committeeRepo            repositories.StaffRepository
 	programRepo              repositories.ProgramRepository
 	courseRepo               repositories.CourseRepository
 	projectNumberCounterRepo repositories.ProjectNumberCounterRepository
@@ -37,7 +37,7 @@ type projectServiceImpl struct {
 func NewProjectService(
 	rabbitMQChannel *rabbitmq.Channel,
 	projectRepo repositories.ProjectRepository,
-	committeeRepo repositories.EmployeeRepository,
+	committeeRepo repositories.StaffRepository,
 	programRepo repositories.ProgramRepository,
 	courseRepo repositories.CourseRepository,
 	projectNumberCounterRepo repositories.ProjectNumberCounterRepository,
@@ -66,7 +66,7 @@ func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Co
 		}
 
 		projectMessage := utils.SanitizeProjectMessage(project)
-		fmt.Printf("+%v", projectMessage)
+		fmt.Printf("%v", projectMessage)
 		if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
 			log.Printf("Failed to publish message to RabbitMQ for action %s: %v", action, err)
 		}
