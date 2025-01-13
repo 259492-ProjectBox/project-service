@@ -8,8 +8,8 @@ type Calendar struct {
 	EndDate     time.Time `json:"end_date"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Major       Major     `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:CASCADE"`
-	MajorID     int       `json:"major_id"`
+	Program     Program   `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	ProgramID   int       `json:"program_id"`
 }
 
 func (Calendar) TableName() string {

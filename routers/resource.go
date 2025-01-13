@@ -6,13 +6,11 @@ import (
 )
 
 func SetupResourceRouter(r *gin.RouterGroup, handler handlers.ResourceHandler) {
-	// resourceRouteV1 := r.Group("/v1/projects/resource")
-	// {
-	// resourceRouteV1.POST("/resource", handler.UploadResource)
-	// resourceRouteV1.GET("/resource/:id", handler.GetResourceByID)
-
-	// resourceRouteV1.GET("/resource/project/:project_id", handler.GetResourcesByProjectID)
-	// }
+	assetResourceRouteV1 := r.Group("/v1/projects/assetResource")
+	{
+		assetResourceRouteV1.POST("", handler.UploadAssetResource)
+		assetResourceRouteV1.GET("/program/:program_id", handler.GetAssetResourceByProgramID)
+	}
 
 	projectResourceRouteV1 := r.Group("/v1/projects/projectResource")
 	{

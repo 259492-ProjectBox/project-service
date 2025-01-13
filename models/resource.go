@@ -24,8 +24,8 @@ type ProjectResource struct {
 type AssetResource struct {
 	ID          int      `json:"id" gorm:"primaryKey;autoIncrement"`
 	Description string   `json:"description"`
-	MajorID     int      `json:"major_id"`
-	Major       Major    `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
+	Program     Program  `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	ProgramID   int      `json:"program_id"`
 	Resource    Resource `json:"resource"`
 }
 

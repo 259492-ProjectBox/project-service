@@ -16,15 +16,15 @@ type MajorRepository interface {
 	CreateMajor(ctx context.Context, major *models.Major) error
 }
 
-type majorRepositoryImpl struct {
+type programRepositoryImpl struct {
 	db *gorm.DB
-	*repositoryImpl[models.Major]
+	*repositoryImpl[models.Program]
 }
 
-func NewMajorRepository(db *gorm.DB) MajorRepository {
-	return &majorRepositoryImpl{
+func NewProgramRepository(db *gorm.DB) ProgramRepository {
+	return &programRepositoryImpl{
 		db:             db,
-		repositoryImpl: newRepository[models.Major](db),
+		repositoryImpl: newRepository[models.Program](db),
 	}
 }
 

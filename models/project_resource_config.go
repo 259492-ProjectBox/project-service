@@ -5,6 +5,6 @@ type ProjectResourceConfig struct {
 	Title          string       `json:"title"`
 	ResourceTypeID int          `json:"resource_type_id"`
 	ResourceType   ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
-	MajorID        int          `json:"major_id"`
-	Major          Major        `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:CASCADE"`
+	Program        Program      `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	ProgramID      int          `json:"program_id"`
 }

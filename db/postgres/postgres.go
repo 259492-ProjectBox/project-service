@@ -44,7 +44,7 @@ func migrateModel(db *gorm.DB) error {
 		&models.Project{},
 		&models.ProjectNumberCounter{},
 		&models.Section{},
-		&models.Major{},
+		&models.Program{},
 		&models.Calendar{},
 		&models.PDF{},
 		&models.PDFPage{},

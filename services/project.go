@@ -29,7 +29,7 @@ type projectServiceImpl struct {
 	rabbitMQChannel          *rabbitmq.Channel
 	projectRepo              repositories.ProjectRepository
 	committeeRepo            repositories.EmployeeRepository
-	majorRepo                repositories.MajorRepository
+	programRepo              repositories.ProgramRepository
 	courseRepo               repositories.CourseRepository
 	projectNumberCounterRepo repositories.ProjectNumberCounterRepository
 }
@@ -38,7 +38,7 @@ func NewProjectService(
 	rabbitMQChannel *rabbitmq.Channel,
 	projectRepo repositories.ProjectRepository,
 	committeeRepo repositories.EmployeeRepository,
-	majorRepo repositories.MajorRepository,
+	programRepo repositories.ProgramRepository,
 	courseRepo repositories.CourseRepository,
 	projectNumberCounterRepo repositories.ProjectNumberCounterRepository,
 ) ProjectService {
@@ -47,7 +47,7 @@ func NewProjectService(
 		projectRepo:              projectRepo,
 		courseRepo:               courseRepo,
 		committeeRepo:            committeeRepo,
-		majorRepo:                majorRepo,
+		programRepo:              programRepo,
 		projectNumberCounterRepo: projectNumberCounterRepo,
 	}
 }
@@ -94,27 +94,27 @@ func (s *projectServiceImpl) validateCourse(ctx context.Context, courseID int, s
 	return nil
 }
 
-func (s *projectServiceImpl) validateMajor(ctx context.Context, majorID int) error {
-	major, err := s.majorRepo.Get(ctx, majorID)
-	if err != nil || major == nil {
-		return fmt.Errorf("major not found")
+func (s *projectServiceImpl) validateProgram(ctx context.Context, programId int) error {
+	program, err := s.programRepo.Get(ctx, programId)
+	if err != nil || program == nil {
+		return fmt.Errorf("program not found")
 	}
 	return nil
 }
 
-func (s *projectServiceImpl) validateAdvisor(ctx context.Context, advisorID int) error {
-	advisor, err := s.committeeRepo.Get(ctx, advisorID)
-	if err != nil || advisor == nil {
-		return fmt.Errorf("advisor not found")
-	}
-	return nil
-}
+// func (s *projectServiceImpl) validateAdvisor(ctx context.Context, advisorID int) error {
+// 	advisor, err := s.committeeRepo.Get(ctx, advisorID)
+// 	if err != nil || advisor == nil {
+// 		return fmt.Errorf("advisor not found")
+// 	}
+// 	return nil
+// }
 
 func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
 	if err := s.validateCourse(ctx, project.CourseID, project.Semester); err != nil {
 		return err
 	}
-	if err := s.validateMajor(ctx, project.MajorID); err != nil {
+	if err := s.validateProgram(ctx, project.ProgramID); err != nil {
 		return err
 	}
 	return nil
@@ -129,12 +129,7 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 		return nil, err
 	}
 
-	major, err := s.majorRepo.Get(ctx, project.MajorID)
-	if err != nil {
-		return nil, err
-	}
-
-	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, major, files, titles)
+	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles)
 	if err != nil {
 		return nil, err
 	}
@@ -175,12 +170,7 @@ func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project
 		return nil, err
 	}
 
-	major, err := s.majorRepo.Get(ctx, project.MajorID)
-	if err != nil {
-		return nil, err
-	}
-
-	project, err = s.projectRepo.UpdateProjectWithFiles(ctx, project, major, files, titles)
+	project, err := s.projectRepo.UpdateProjectWithFiles(ctx, project, files, titles)
 	if err != nil {
 		return nil, err
 	}

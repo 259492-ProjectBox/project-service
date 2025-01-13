@@ -6,7 +6,7 @@ type Employee struct {
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email" gorm:"unique"`
-	MajorID   int       `json:"major_id"`
-	Major     Major     `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
+	Program   Program   `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	ProgramID int       `json:"program_id"`
 	Projects  []Project `json:"projects" gorm:"many2many:project_employees;constraint:OnDelete:CASCADE;"`
 }

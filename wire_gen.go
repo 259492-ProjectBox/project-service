@@ -28,10 +28,10 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	}
 	projectRepository := repositories.NewProjectRepository(gormDB, client)
 	employeeRepository := repositories.NewEmployeeRepository(gormDB)
-	majorRepository := repositories.NewMajorRepository(gormDB)
+	programRepository := repositories.NewProgramRepository(gormDB)
 	courseRepository := repositories.NewCourseRepository(gormDB)
 	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
-	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, majorRepository, courseRepository, projectNumberCounterRepository)
+	projectService := services.NewProjectService(channel, projectRepository, employeeRepository, programRepository, courseRepository, projectNumberCounterRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
 	calendarRepository := repositories.NewCalendarRepository(gormDB)
 	calendarService := services.NewCalendarService(calendarRepository, majorRepository)

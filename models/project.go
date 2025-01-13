@@ -10,14 +10,14 @@ type Project struct {
 	AbstractText     *string           `json:"abstract_text"`
 	AcademicYear     int               `json:"academic_year"`
 	Semester         int               `json:"semester"`
-	IsApproved       bool              `json:"is_approved"`
-	CreatedAt        time.Time         `json:"created_at" gorm:"default:CURRENT_DATE"`
 	SectionID        *string           `json:"section_id"`
-	MajorID          int               `json:"major_id"`
-	Major            Major             `json:"major" gorm:"foreignKey:MajorID;constraint:OnDelete:SET NULL"`
+	Program          Program           `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	ProgramID        int               `json:"program_id"`
 	CourseID         int               `json:"course_id"`
 	Course           Course            `json:"course" gorm:"foreignKey:CourseID;constraint:OnDelete:SET NULL"`
 	Employees        []Employee        `json:"employees" gorm:"many2many:project_employees;constraint:OnDelete:CASCADE;"`
 	Members          []Student         `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 	ProjectResources []ProjectResource `json:"project_resources"`
+	CreatedAt        time.Time         `json:"created_at" gorm:"default:CURRENT_DATE"`
+	Updated_at       time.Time         `json:"updated_at"`
 }

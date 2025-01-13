@@ -29,8 +29,8 @@ type ProjectData struct {
 	IsApproved       bool              `json:"is_approved"`
 	SectionID        string            `json:"section_id"`
 	CreatedAt        string            `json:"created_at"`
-	MajorID          int               `json:"major_id"`
-	Major            Major             `json:"major"`
+	ProgramID        int               `json:"program_id"`
+	Program          Program           `json:"program"`
 	CourseID         int               `json:"course_id"`
 	Course           Course            `json:"course"`
 	Employees        []Employee        `json:"employees"`

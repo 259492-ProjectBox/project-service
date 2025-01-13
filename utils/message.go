@@ -21,23 +21,22 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 		TitleEN:      getStringValue(project.TitleEN),
 		AbstractText: getStringValue(project.AbstractText),
 		AcademicYear: project.AcademicYear,
-		IsApproved:   project.IsApproved,
 		SectionID:    getStringValue(project.SectionID),
 		Semester:     project.Semester,
 		CreatedAt:    project.CreatedAt.Format("2006-01-02"),
-		MajorID:      project.MajorID,
-		Major: dtos.Major{
-			ID:        project.Major.ID,
-			MajorName: project.Major.MajorName,
+		ProgramID:    project.ProgramID,
+		Program: dtos.Program{
+			ID:          project.Program.ID,
+			ProgramName: project.Program.ProgramName,
 		},
 		Course: dtos.Course{
 			ID:         project.Course.ID,
 			CourseNo:   project.Course.CourseNo,
 			CourseName: project.Course.CourseName,
-			MajorID:    project.Course.MajorID,
-			Major: dtos.Major{
-				ID:        project.Course.Major.ID,
-				MajorName: project.Course.Major.MajorName,
+			ProgramID:  project.Course.ProgramID,
+			Program: dtos.Program{
+				ID:          project.Course.Program.ID,
+				ProgramName: project.Course.Program.ProgramName,
 			},
 		},
 	}
@@ -49,10 +48,10 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 			FirstName: committee.FirstName,
 			LastName:  committee.LastName,
 			Email:     committee.Email,
-			MajorID:   committee.MajorID,
-			Major: dtos.Major{
-				ID:        committee.Major.ID,
-				MajorName: committee.Major.MajorName,
+			ProgramID: committee.ProgramID,
+			Program: dtos.Program{
+				ID:          committee.Program.ID,
+				ProgramName: committee.Program.ProgramName,
 			},
 		})
 	}
@@ -64,10 +63,10 @@ func SanitizeProjectMessage(project *models.Project) dto.ProjectData {
 			FirstName: member.FirstName,
 			LastName:  member.LastName,
 			Email:     member.Email,
-			MajorID:   member.MajorID,
-			Major: dtos.Major{
-				ID:        member.Major.ID,
-				MajorName: member.Major.MajorName,
+			ProgramID: member.ProgramID,
+			Program: dtos.Program{
+				ID:          member.Program.ID,
+				ProgramName: member.Program.ProgramName,
 			},
 		})
 	}

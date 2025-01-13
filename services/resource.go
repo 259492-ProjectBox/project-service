@@ -2,13 +2,16 @@ package services
 
 import (
 	"context"
+	"mime/multipart"
 
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
 )
 
 type ResourceService interface {
-	// CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error)
+	UploadAssetResource(ctx context.Context, assetResource *models.AssetResource, file *multipart.FileHeader, title string) (*models.AssetResource, error)
+	GetAssetResourceByProgramID(ctx context.Context, programId string) ([]models.AssetResource, error)
+	DeleteAssetResourceByID(ctx context.Context, id string) error
 	GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
 	DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error
 	GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
@@ -24,27 +27,23 @@ func NewResourceService(resourceRepository repositories.ResourceRepository) Reso
 	}
 }
 
-// func (s *resourceService) CreateResource(ctx context.Context, resource *models.Resource) (*models.Resource, error) {
-// 	if resource.ProjectID == 0 {
-// 		return nil, errors.New("project_id is required")
-// 	}
-// 	if resource.ResourceTypeID == 0 {
-// 		return nil, errors.New("resource_type_id is required")
-// 	}
-// 	if resource.URL == "" {
-// 		return nil, errors.New("url is required")
-// 	}
-
-// 	return s.resourceRepository.CreateResource(ctx, resource)
-// }
+func (s *resourceService) UploadAssetResource(ctx context.Context, assetResource *models.AssetResource, file *multipart.FileHeader, title string) (*models.AssetResource, error) {
+	return s.resourceRepository.CreateAssetResource(ctx, assetResource, file, title)
+}
 
 func (s *resourceService) GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error) {
 	return s.resourceRepository.FindDetailedResourceByID(ctx, id)
 }
 
 func (s *resourceService) DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error {
-
 	return s.resourceRepository.DeleteProjectResourceByID(ctx, id, filePath)
+}
+
+func (s *resourceService) GetAssetResourceByProgramID(ctx context.Context, programId string) ([]models.AssetResource, error) {
+	return s.resourceRepository.FindAssetResourcesByProgramID(ctx, programId)
+}
+func (s *resourceService) DeleteAssetResourceByID(ctx context.Context, id string) error {
+	return s.resourceRepository.DeleteAssetResourceByID(ctx, id)
 }
 
 func (s *resourceService) GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error) {
