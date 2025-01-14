@@ -77,7 +77,7 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 	for _, projectResource := range project.ProjectResources {
 		resourceType := dtos.ResourceType{
 			ID:       projectResource.Resource.ResourceTypeID,
-			MimeType: projectResource.Resource.ResourceType.MimeType,
+			TypeName: projectResource.Resource.ResourceType.TypeName,
 		}
 
 		resource := dtos.Resource{

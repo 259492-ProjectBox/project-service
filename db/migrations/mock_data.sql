@@ -20,11 +20,11 @@ INSERT INTO "courses" ("course_no", "course_name", "program_id" , "semester") VA
   ('CE101', 'Introduction to Civil Engineering', 4,2);
 
 -- Insert Students
-INSERT INTO "students" ("id", "prefix", "first_name", "last_name", "email", "program_id") VALUES
-  ('640610304', 'Mr.', 'John', 'Doe', 'john.doe@example.com', 1),
-  ('640610305', 'Ms.', 'Jane', 'Smith', 'jane.smith@example.com', 2),
-  ('640610306', 'Mr.', 'Mark', 'Johnson', 'mark.johnson@example.com', 3),
-  ('640610307', 'Ms.', 'Emily', 'Davis', 'emily.davis@example.com', 4);
+INSERT INTO "students" ("id", "prefix", "first_name", "last_name", "email") VALUES
+  ('640610304', 'Mr.', 'John', 'Doe', 'john.doe@example.com'),
+  ('640610305', 'Ms.', 'Jane', 'Smith', 'jane.smith@example.com'),
+  ('640610306', 'Mr.', 'Mark', 'Johnson', 'mark.johnson@example.com'),
+  ('640610307', 'Ms.', 'Emily', 'Davis', 'emily.davis@example.com');
 
 -- Insert mock data into project_roles
 INSERT INTO "project_roles" ("role_name", "program_id") VALUES 
@@ -57,8 +57,8 @@ INSERT INTO "project_staffs" ("project_id", "staff_id", "project_role_id") VALUE
   (2, 2, 2),
   (2, 1, 2);
 
--- Insert Resource Types
-INSERT INTO "resource_types" ("type_name","mime_type") VALUES
+-- Insert File extensions 
+INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
   ('jpeg','image/jpeg'),
   ('text','text/plain'),
   ('png','image/png'),
@@ -66,6 +66,10 @@ INSERT INTO "resource_types" ("type_name","mime_type") VALUES
   ('zip','application/vnd.rar'),
   ('pdf','application/pdf'),
   ('powerpoint','application/vnd.ms-powerpoint');
+
+INSERT INTO "resource_types" ("type_name") VALUES 
+('File'),
+('URL');
 
 -- Insert Asset Resources
 INSERT INTO "asset_resources" ("description", "program_id") VALUES
@@ -78,9 +82,9 @@ INSERT INTO "project_resources" ("project_id") VALUES
   (2);
 
 -- Insert Resources
-INSERT INTO "resources" ("title", "resource_type_id", "url" , "asset_resource_id" , "project_resource_id") VALUES
-  ('Computer Science Textbook', 1, 'https://example.com/cs-textbook',1 , NULL),
-  ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab', NULL, 2);
+INSERT INTO "resources" ("title", "resource_type_id", "url" , "asset_resource_id"  , "project_resource_id" ,"file_extension_id") VALUES
+  ('Computer Science Textbook', 1, 'https://example.com/cs-textbook',1 , NULL , 6),
+  ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab', NULL, 2 ,7);
 
 -- Insert Project Resource Configs
 INSERT INTO "project_resource_configs" ("title", "resource_type_id", "program_id") VALUES
@@ -96,10 +100,3 @@ INSERT INTO "project_configs" ("title", "is_active", "program_id") VALUES
   ('semester', true, 2),
   ('section_id', true, 2),
   ('course_id', true, 2);
-
--- Insert Calendar Events
-INSERT INTO "calendar" ("program_id", "start_date", "end_date", "description" , "title") VALUES
-  (1, '2024-01-15', '2024-01-15', 'Final exam for CS 101 course' , 'CS 101 Final Exam'),
-  (2, '2024-02-20', '2024-02-20', 'Electrical Engineering Lab practical session' , 'EE Lab Practical'),
-  (3, '2024-03-25', '2024-03-25', 'Mechanical Engineering project presentation' , 'ME Project Presentation'),
-  (4, '2024-04-30', '2024-04-30', 'Civil Engineering project submission' , 'CE Project Submission');
