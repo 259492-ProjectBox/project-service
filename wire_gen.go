@@ -26,7 +26,9 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	projectRepository := repositories.NewProjectRepository(gormDB, client)
+	resourceRepository := repositories.NewResourceRepository(gormDB, client)
+	resourceTypeRepository := repositories.NewResourceTypeRepository(gormDB)
+	projectRepository := repositories.NewProjectRepository(gormDB, client, resourceRepository, resourceTypeRepository)
 	staffRepository := repositories.NewStaffRepository(gormDB)
 	programRepository := repositories.NewProgramRepository(gormDB)
 	courseRepository := repositories.NewCourseRepository(gormDB)
@@ -36,7 +38,6 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	calendarRepository := repositories.NewCalendarRepository(gormDB)
 	calendarService := services.NewCalendarService(calendarRepository, programRepository)
 	calendarHandler := handlers.NewCalendarHandler(calendarService)
-	resourceRepository := repositories.NewResourceRepository(gormDB, client)
 	resourceService := services.NewResourceService(resourceRepository)
 	resourceHandler := handlers.NewResourceHandler(client, resourceService, projectService)
 	staffService := services.NewStaffService(staffRepository)
@@ -67,6 +68,6 @@ var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHan
 
 var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewStaffService, services.NewConfigService, services.NewProjectConfigService, services.NewProgramService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
 
 var RedisSet = wire.NewSet()

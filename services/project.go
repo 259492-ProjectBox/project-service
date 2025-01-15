@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"mime/multipart"
 
+	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	rabbitMQQueue "github.com/project-box/queues/rabbitmq"
 	"github.com/project-box/repositories"
@@ -16,8 +16,8 @@ import (
 type ProjectService interface {
 	PublishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project)
 	ValidateProject(ctx context.Context, project *models.Project) error
-	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
-	UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
+	CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*models.Project, error)
+	UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*models.Project, error)
 	GetProjectById(ctx context.Context, id int) (*models.Project, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
@@ -102,14 +102,6 @@ func (s *projectServiceImpl) validateProgram(ctx context.Context, programId int)
 	return nil
 }
 
-// func (s *projectServiceImpl) validateAdvisor(ctx context.Context, advisorID int) error {
-// 	advisor, err := s.committeeRepo.Get(ctx, advisorID)
-// 	if err != nil || advisor == nil {
-// 		return fmt.Errorf("advisor not found")
-// 	}
-// 	return nil
-// }
-
 func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
 	if err := s.validateCourse(ctx, project.CourseID, project.Semester); err != nil {
 		return err
@@ -119,7 +111,12 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	}
 	return nil
 }
-func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
+func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*models.Project, error) {
+	project := req.Project
+	files := req.Files
+	titles := req.Titles
+	urls := req.Urls
+
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
 	}
@@ -129,7 +126,7 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 		return nil, err
 	}
 
-	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles)
+	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles, urls)
 	if err != nil {
 		return nil, err
 	}
@@ -165,12 +162,16 @@ func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, student
 	return project, nil
 }
 
-func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
+func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*models.Project, error) {
+	project := req.Project
+	files := req.Files
+	titles := req.Titles
+	urls := req.Urls
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
 	}
 
-	project, err := s.projectRepo.UpdateProjectWithFiles(ctx, project, files, titles)
+	project, err := s.projectRepo.UpdateProjectWithFiles(ctx, project, files, titles, urls)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +196,6 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 	return nil
 }
 
-// get project relate to advisor from advisor id
 func (s *projectServiceImpl) GetProjectsByAdvisorIdService(ctx context.Context, advisorId int) ([]models.Project, error) {
 	project, err := s.projectRepo.GetProjectsByAdvisorId(ctx, advisorId)
 	if err != nil {

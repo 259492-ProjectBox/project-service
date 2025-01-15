@@ -59,6 +59,7 @@ var RepositorySet = wire.NewSet(
 	repositories.NewCourseRepository,
 	repositories.NewSectionRepository,
 	repositories.NewResourceRepository,
+	repositories.NewResourceTypeRepository,
 	repositories.NewCalendarRepository,
 	repositories.NewConfigRepository,
 	repositories.NewProjectConfigRepository,

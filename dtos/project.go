@@ -9,13 +9,15 @@ import (
 type CreateProjectRequest struct {
 	Files   []*multipart.FileHeader `form:"files"`
 	Titles  []string                `form:"titles[]"`
-	Project models.Project          `form:"project"`
+	Urls    []string                `form:"urls[]"`
+	Project *models.Project         `form:"project"`
 }
 
 type UpdateProjectRequest struct {
 	Files   []*multipart.FileHeader `form:"files"`
 	Titles  []string                `form:"titles[]"`
-	Project models.Project          `form:"project"`
+	Urls    []string                `form:"urls[]"`
+	Project *models.Project         `form:"project"`
 }
 
 type ProjectData struct {

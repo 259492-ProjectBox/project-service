@@ -1,6 +1,5 @@
 package models
 
-// Student model
 type Student struct {
 	ID        string `json:"id" gorm:"primaryKey"`
 	Prefix    string `json:"prefix"`

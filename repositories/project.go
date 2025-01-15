@@ -20,22 +20,26 @@ type ProjectRepository interface {
 	GetProjectByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
-	UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error)
+	CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) (*models.Project, error)
+	UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) (*models.Project, error)
 	GetProjectsByAdvisorId(ctx context.Context, advisorId int) ([]models.Project, error)
 }
 
 type projectRepositoryImpl struct {
-	db          *gorm.DB
-	minioClient *minio.Client
+	db               *gorm.DB
+	minioClient      *minio.Client
+	resourceRepo     ResourceRepository
+	resourceTypeRepo ResourceTypeRepository
 	*repositoryImpl[models.Project]
 }
 
-func NewProjectRepository(db *gorm.DB, minioClient *minio.Client) ProjectRepository {
+func NewProjectRepository(db *gorm.DB, minioClient *minio.Client, resourceRepo ResourceRepository, resourceTypeRepo ResourceTypeRepository) ProjectRepository {
 	return &projectRepositoryImpl{
-		db:             db,
-		minioClient:    minioClient,
-		repositoryImpl: newRepository[models.Project](db),
+		db:               db,
+		minioClient:      minioClient,
+		resourceRepo:     resourceRepo,
+		resourceTypeRepo: resourceTypeRepo,
+		repositoryImpl:   newRepository[models.Project](db),
 	}
 }
 
@@ -45,7 +49,7 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*mo
 		Preload("Program").
 		Preload("Course.Program").
 		Preload("Staffs.Program").
-		Preload("Members.Program").
+		Preload("Members").
 		Preload("ProjectResources.Resource.ResourceType").
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
@@ -59,7 +63,7 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 		Preload("Program").
 		Preload("Course.Program").
 		Preload("Staffs.Program").
-		Preload("Members.Program").
+		Preload("Members").
 		Preload("ProjectResources.Resource.ResourceType").
 		Preload("ProjectResources.Resource.PDF.Pages").
 		First(project, "projects.id = ?", id).Error; err != nil {
@@ -87,7 +91,7 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 		Preload("Program").
 		Preload("Course").
 		Preload("Staffs.Program").
-		Preload("Members.Program").
+		Preload("Members").
 		Preload("ProjectResources.Resource.ResourceType").
 		Find(&projects).Error; err != nil {
 		return nil, err
@@ -95,47 +99,57 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 	return projects, nil
 }
 
-func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
+func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) (*models.Project, error) {
 	tx := r.db.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
 	if err := r.createProject(ctx, tx, project); err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
-	uploadedFilePaths, err := r.handleProjectResourcesUpload(ctx, tx, project, files, titles)
+	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, files, titles, urls)
 	if err != nil {
+		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		tx.Rollback()
 		return nil, err
 	}
 
 	return r.GetProjectWithPDFByID(ctx, project.ID)
 }
 
-func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string) (*models.Project, error) {
+func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) (*models.Project, error) {
 	tx := r.db.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	if err := r.deleteProjectAssociations(ctx, tx, project.ID); err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 	if err := r.updateProject(ctx, tx, project); err != nil {
+		tx.Rollback()
 		return nil, err
 	}
-	uploadedFilePaths, err := r.handleProjectResourcesUpload(ctx, tx, project, files, titles)
+	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, files, titles, urls)
 	if err != nil {
+
+		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -170,12 +184,10 @@ func (r *projectRepositoryImpl) deleteProjectStaffs(ctx context.Context, tx *gor
 
 func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, project *models.Project) error {
 	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if err := tx.WithContext(ctx).Preload("Program").First(project).Error; err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -184,7 +196,6 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 
 func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, project *models.Project) error {
 	if err := tx.WithContext(ctx).Save(project).Error; err != nil {
-		tx.Rollback()
 		return err
 	}
 	return nil
@@ -192,38 +203,79 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 
 func isPDFFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
 
-func (r *projectRepositoryImpl) handleProjectResourcesUpload(ctx context.Context, tx *gorm.DB, project *models.Project, files []*multipart.FileHeader, titles []string) ([]string, error) {
+func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context, tx *gorm.DB, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) ([]string, error) {
 	var uploadedObjectNames []string
-	for i, file := range files {
-		title := titles[i]
+	if len(titles) != len(files)+len(urls) {
+		return uploadedObjectNames, fmt.Errorf("not enough titles provided for the files")
+	}
+	for _, file := range files {
+		// Pop the first title
+		title := titles[0]
+		titles = titles[1:]
+
 		uniqueFileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
 		filePath := fmt.Sprintf("%s/%s/%s/%s", os.Getenv("MINIO_PROJECT_BUCKET"), project.Program.ProgramName, title, uniqueFileName)
 		objectName := fmt.Sprintf("%s/%s/%s", project.Program.ProgramName, title, uniqueFileName)
 		err := r.uploadFileToMinio(ctx, objectName, file)
 		if err != nil {
-			tx.Rollback()
 			return uploadedObjectNames, err
 		}
 		uploadedObjectNames = append(uploadedObjectNames, objectName)
 
-		resourceType, err := r.getResourceType(ctx, tx, file)
+		resourceType, err := r.resourceTypeRepo.GetResourceTypeByName(ctx, tx, "file")
 		if err != nil {
-			r.deleteUploadedFiles(ctx, uploadedObjectNames)
-			tx.Rollback()
+			return uploadedObjectNames, err
+		}
+
+		fileExtension, err := r.getFileExtension(ctx, tx, file)
+		if err != nil {
 			return uploadedObjectNames, err
 		}
 
 		var pdf *models.PDF
-		if isPDFFile(resourceType.MimeType) {
+		if isPDFFile(fileExtension.MimeType) {
 			if pdf, err = utils.ReadPdf(file); err != nil {
-				tx.Rollback()
 				return uploadedObjectNames, err
 			}
 		}
 
-		if err := r.createProjectResourceAndResource(ctx, tx, project.ID, title, filePath, file.Filename, pdf, resourceType.ID); err != nil {
-			r.deleteUploadedFiles(ctx, uploadedObjectNames)
-			tx.Rollback()
+		projectResource := &models.ProjectResource{
+			ProjectID: project.ID,
+		}
+		resource := &models.Resource{
+			Title:             title,
+			ProjectResourceID: nil,
+			ResourceName:      &file.Filename,
+			Path:              &filePath,
+			PDF:               pdf,
+			ResourceTypeID:    resourceType.ID,
+			FileExtensionID:   &fileExtension.ID,
+		}
+		if err := r.resourceRepo.CreateProjectResourceAndResource(ctx, tx, projectResource, resource); err != nil {
+			return uploadedObjectNames, err
+		}
+	}
+
+	for _, url := range urls {
+		// Pop the first title
+		title := titles[0]
+		titles = titles[1:]
+
+		resourceType, err := r.resourceTypeRepo.GetResourceTypeByName(ctx, tx, "url")
+		if err != nil {
+			return uploadedObjectNames, err
+		}
+
+		projectResource := &models.ProjectResource{
+			ProjectID: project.ID,
+		}
+		resource := &models.Resource{
+			Title:             title,
+			ProjectResourceID: nil,
+			URL:               url,
+			ResourceTypeID:    resourceType.ID,
+		}
+		if err := r.resourceRepo.CreateProjectResourceAndResource(ctx, tx, projectResource, resource); err != nil {
 			return uploadedObjectNames, err
 		}
 	}
@@ -248,43 +300,17 @@ func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, objectNam
 	return nil
 }
 
-func (r *projectRepositoryImpl) getResourceType(ctx context.Context, tx *gorm.DB, file *multipart.FileHeader) (*models.ResourceType, error) {
+func (r *projectRepositoryImpl) getFileExtension(ctx context.Context, tx *gorm.DB, file *multipart.FileHeader) (*models.FileExtension, error) {
 	fileType := file.Header.Get("Content-Type")
 	if fileType == "" {
 		fileType = "unknown"
 	}
-
-	resourceType := &models.ResourceType{}
-	if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(resourceType).Error; err != nil {
+	fileExtension := &models.FileExtension{}
+	if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(fileExtension).Error; err != nil {
 		return nil, fmt.Errorf("file type not found: %w", err)
 	}
 
-	return resourceType, nil
-}
-
-func (r *projectRepositoryImpl) createProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectID int, title string, filePath string, fileName string, pdf *models.PDF, resourceTypeID int) error {
-	projectResource := &models.ProjectResource{
-		ProjectID: projectID,
-	}
-
-	if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
-		return err
-	}
-
-	resource := &models.Resource{
-		Title:             title,
-		ProjectResourceID: &projectResource.ID,
-		ResourceName:      fileName,
-		Path:              filePath,
-		PDF:               pdf,
-		ResourceTypeID:    resourceTypeID,
-	}
-
-	if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return fileExtension, nil
 }
 
 func (r *projectRepositoryImpl) deleteUploadedFiles(ctx context.Context, objectNames []string) {

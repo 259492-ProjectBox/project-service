@@ -66,11 +66,6 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 			FirstName: member.FirstName,
 			LastName:  member.LastName,
 			Email:     member.Email,
-			ProgramID: member.ProgramID,
-			Program: dtos.Program{
-				ID:          member.Program.ID,
-				ProgramName: member.Program.ProgramName,
-			},
 		})
 	}
 
@@ -83,8 +78,8 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 		resource := dtos.Resource{
 			ID:             projectResource.Resource.ID,
 			Title:          projectResource.Resource.Title,
-			ResourceName:   projectResource.Resource.ResourceName,
-			Path:           projectResource.Resource.Path,
+			ResourceName:   getStringValue(projectResource.Resource.ResourceName),
+			Path:           getStringValue(projectResource.Resource.Path),
 			CreatedAt:      projectResource.Resource.CreatedAt.Format("2006-01-02"),
 			ResourceTypeID: projectResource.Resource.ResourceTypeID,
 			ResourceType:   resourceType,

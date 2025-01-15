@@ -44,7 +44,7 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	project, err := h.projectService.CreateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
+	project, err := h.projectService.CreateProjectWithFiles(c, req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -71,7 +71,7 @@ func (h *projectHandler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	project, err := h.projectService.UpdateProjectWithFiles(c, &req.Project, req.Files, req.Titles)
+	project, err := h.projectService.UpdateProjectWithFiles(c, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

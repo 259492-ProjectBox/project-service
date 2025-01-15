@@ -15,6 +15,7 @@ import (
 
 type ResourceRepository interface {
 	CreateAssetResource(ctx context.Context, assetResource *models.AssetResource, file *multipart.FileHeader, title string) (*models.AssetResource, error)
+	CreateProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource, resource *models.Resource) error
 	DeleteAssetResourceByID(ctx context.Context, id string) error
 	FindAssetResourcesByProgramID(ctx context.Context, id string) ([]models.AssetResource, error)
 	FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
@@ -71,8 +72,8 @@ func (r *resourceRepository) CreateAssetResource(
 	resource := &models.Resource{
 		Title:           title,
 		AssetResourceID: &assetResource.ID,
-		ResourceName:    fileName,
-		Path:            filePath,
+		ResourceName:    &fileName,
+		Path:            &filePath,
 		ResourceTypeID:  resourceType.ID,
 	}
 
@@ -195,4 +196,18 @@ func (r *resourceRepository) getResourceType(ctx context.Context, tx *gorm.DB, f
 	}
 
 	return resourceType, nil
+}
+
+func (r *resourceRepository) CreateProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource, resource *models.Resource) error {
+	if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
+		return err
+	}
+
+	resource.ProjectResourceID = &projectResource.ID
+
+	if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

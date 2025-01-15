@@ -68,8 +68,8 @@ INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
   ('powerpoint','application/vnd.ms-powerpoint');
 
 INSERT INTO "resource_types" ("type_name") VALUES 
-('File'),
-('URL');
+('file'),
+('url');
 
 -- Insert Asset Resources
 INSERT INTO "asset_resources" ("description", "program_id") VALUES
