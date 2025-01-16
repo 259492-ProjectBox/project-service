@@ -18,6 +18,27 @@ type Project struct {
 	Staffs           []Staff           `json:"staffs" gorm:"many2many:project_staffs;constraint:OnDelete:CASCADE;"`
 	Members          []Student         `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 	ProjectResources []ProjectResource `json:"project_resources"`
-	CreatedAt        time.Time         `json:"created_at" gorm:"default:CURRENT_DATE"`
-	Updated_at       time.Time         `json:"updated_at"`
+	CreatedAt        *time.Time        `json:"created_at" gorm:"default:CURRENT_DATE"`
+	UpdatedAt        *time.Time        `json:"updated_at"`
+}
+
+type ProjectRequest struct {
+	ID               int               `json:"id"`
+	ProjectNo        string            `json:"project_no"`
+	TitleTH          *string           `json:"title_th"`
+	TitleEN          *string           `json:"title_en"`
+	AbstractText     *string           `json:"abstract_text"`
+	AcademicYear     int               `json:"academic_year"`
+	Semester         int               `json:"semester"`
+	IsApproved       bool              `json:"is_approved"`
+	SectionID        *string           `json:"section_id"`
+	ProgramID        int               `json:"program_id"`
+	Program          Program           `json:"program"`
+	CourseID         int               `json:"course_id"`
+	Course           Course            `json:"course"`
+	ProjectStaffs    []ProjectStaff    `json:"staffs"`
+	Members          []Student         `json:"members"`
+	ProjectResources []ProjectResource `json:"project_resources"`
+	CreatedAt        *time.Time        `json:"created_at"`
+	UpdatedAt        *time.Time        `json:"updated_at"`
 }

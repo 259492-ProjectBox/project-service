@@ -1,6 +1,6 @@
 package dtos
 
-type ProjectStaff struct {
+type ProjectStaffMessage struct {
 	ID          int         `json:"id" gorm:"primaryKey;autoIncrement"`
 	Prefix      string      `json:"prefix"`
 	FirstName   string      `json:"first_name"`

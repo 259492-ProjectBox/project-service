@@ -34,6 +34,7 @@ func migrateModel(db *gorm.DB) error {
 	if err := db.AutoMigrate(
 		&models.Config{},
 		&models.ProjectRole{},
+		&models.ProjectStaff{},
 		&models.ProjectResource{},
 		&models.AssetResource{},
 		&models.ResourceType{},

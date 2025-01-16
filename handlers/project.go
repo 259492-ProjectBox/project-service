@@ -14,8 +14,8 @@ type ProjectHandler interface {
 	UpdateProject(c *gin.Context)
 	GetProjectById(c *gin.Context)
 	GetProjectsByStudentId(c *gin.Context)
+	// GetProjectByAdvisorId(c *gin.Context)
 	DeleteProject(c *gin.Context)
-	GetProjectByAdvisorIDHandler(c *gin.Context)
 }
 
 type projectHandler struct {
@@ -163,18 +163,18 @@ func (h *projectHandler) DeleteProject(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Invalid advisor ID"
 // @Failure 404 {object} map[string]interface{} "Project not found"
 // @Router /projects/advisor/{advisor_id} [get]
-func (h *projectHandler) GetProjectByAdvisorIDHandler(c *gin.Context) {
-	advisor_id, err := strconv.Atoi(c.Param("advisor_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid advisor ID"})
-		return
-	}
+// func (h *projectHandler) GetProjectByAdvisorId(c *gin.Context) {
+// 	advisor_id, err := strconv.Atoi(c.Param("advisor_id"))
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid advisor ID"})
+// 		return
+// 	}
 
-	projects, err := h.projectService.GetProjectsByAdvisorIdService(c, advisor_id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
-		return
-	}
+// 	projects, err := h.projectService.GetProjectsByAdvisorId(c, advisor_id)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, projects)
-}
+// 	c.JSON(http.StatusOK, projects)
+// }

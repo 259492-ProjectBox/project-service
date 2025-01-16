@@ -53,6 +53,7 @@ var ServiceSet = wire.NewSet(
 
 var RepositorySet = wire.NewSet(
 	repositories.NewProjectRepository,
+	repositories.NewProjectStaffRepository,
 	repositories.NewProjectNumberCounterRepository,
 	repositories.NewStaffRepository,
 	repositories.NewProgramRepository,

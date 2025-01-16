@@ -1,19 +1,38 @@
 package utils
 
 import (
+	"time"
+
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 )
 
-func getStringValue(ptr *string) string {
-	if ptr == nil {
-		return ""
+// Helper functions
+func getStringValue(value *string) string {
+	if value != nil {
+		return *value
 	}
-	return *ptr
+	return ""
+}
+
+func getIntValue(value *int) int {
+	if value != nil {
+		return *value
+	}
+	return 0
+}
+
+func formatTime(value *time.Time) string {
+	if value != nil {
+		return value.Format("2006-01-02")
+	}
+	return ""
 }
 func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
-
-	projectData := dtos.ProjectData{
+	if project == nil {
+		return dtos.ProjectData{}
+	}
+	projectMessage := dtos.ProjectData{
 		ID:           project.ID,
 		ProjectNo:    project.ProjectNo,
 		TitleTH:      getStringValue(project.TitleTH),
@@ -22,12 +41,12 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 		AcademicYear: project.AcademicYear,
 		SectionID:    getStringValue(project.SectionID),
 		Semester:     project.Semester,
-		CreatedAt:    project.CreatedAt.Format("2006-01-02"),
 		ProgramID:    project.ProgramID,
 		Program: dtos.Program{
 			ID:          project.Program.ID,
 			ProgramName: project.Program.ProgramName,
 		},
+		CourseID: project.Course.ID,
 		Course: dtos.Course{
 			ID:         project.Course.ID,
 			CourseNo:   project.Course.CourseNo,
@@ -38,10 +57,12 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 				ProgramName: project.Course.Program.ProgramName,
 			},
 		},
+		CreatedAt: formatTime(project.CreatedAt),
+		UpdatedAt: formatTime(project.UpdatedAt),
 	}
 
 	for _, staff := range project.Staffs {
-		projectData.Staffs = append(projectData.Staffs, dtos.ProjectStaff{
+		projectMessage.ProjectStaffs = append(projectMessage.ProjectStaffs, dtos.ProjectStaffMessage{
 			ID:        staff.ID,
 			Prefix:    staff.Prefix,
 			FirstName: staff.FirstName,
@@ -52,15 +73,12 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 				ID:          staff.Program.ID,
 				ProgramName: staff.Program.ProgramName,
 			},
-			ProjectRole: dtos.ProjectRole{
-				ID:       1,
-				RoleName: "Advisor",
-			},
+			ProjectRole: dtos.ProjectRole{}, // Placeholder for role, will be updated later
 		})
 	}
-
+	// Map Members
 	for _, member := range project.Members {
-		projectData.Members = append(projectData.Members, dtos.Student{
+		projectMessage.Members = append(projectMessage.Members, dtos.Student{
 			ID:        member.ID,
 			Prefix:    member.Prefix,
 			FirstName: member.FirstName,
@@ -68,7 +86,7 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 			Email:     member.Email,
 		})
 	}
-
+	// Map Project Resources
 	for _, projectResource := range project.ProjectResources {
 		resourceType := dtos.ResourceType{
 			ID:       projectResource.Resource.ResourceTypeID,
@@ -78,37 +96,42 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 		resource := dtos.Resource{
 			ID:             projectResource.Resource.ID,
 			Title:          projectResource.Resource.Title,
-			ResourceName:   getStringValue(projectResource.Resource.ResourceName),
-			Path:           getStringValue(projectResource.Resource.Path),
-			CreatedAt:      projectResource.Resource.CreatedAt.Format("2006-01-02"),
 			ResourceTypeID: projectResource.Resource.ResourceTypeID,
 			ResourceType:   resourceType,
+			URL:            projectResource.Resource.URL,
+			CreatedAt:      formatTime(projectResource.Resource.CreatedAt),
 		}
 
-		pages := []dtos.PDFPage{}
-		if projectResource.Resource.PDF != nil {
+		if projectResource.Resource.ResourceType.TypeName != "url" {
+			resource.ResourceName = projectResource.Resource.ResourceName
+			resource.Path = projectResource.Resource.Path
+			resource.FileExtension = &dtos.FileExtension{}
+			resource.FileExtensionID = projectResource.Resource.FileExtensionID
+			resource.FileExtension.ID = projectResource.Resource.FileExtension.ID
+			resource.FileExtension.ExtensionName = projectResource.Resource.FileExtension.ExtensionName
+			resource.FileExtension.MimeType = projectResource.Resource.FileExtension.MimeType
+		}
+
+		if projectResource.Resource.FileExtension != nil && projectResource.Resource.FileExtension.ExtensionName == "pdf" {
+			pages := []dtos.PDFPage{}
 			for _, page := range projectResource.Resource.PDF.Pages {
-				pageObj := dtos.PDFPage{
+				pages = append(pages, dtos.PDFPage{
 					ID:         page.ID,
 					PDFID:      page.PDFID,
 					PageNumber: page.PageNumber,
 					Content:    page.Content,
-				}
-				pages = append(pages, pageObj)
+				})
 			}
-
-			resource.PDF = dtos.PDF{
+			resource.PDF = &dtos.PDF{
 				ID:         projectResource.Resource.PDF.ID,
 				ResourceID: projectResource.Resource.PDF.ResourceID,
 				Pages:      pages,
 			}
 		}
-
-		projectData.ProjectResources = append(projectData.ProjectResources, dtos.ProjectResource{
+		projectMessage.ProjectResources = append(projectMessage.ProjectResources, dtos.ProjectResource{
 			ID:       projectResource.ID,
 			Resource: resource,
 		})
-
 	}
-	return projectData
+	return projectMessage
 }

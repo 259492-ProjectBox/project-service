@@ -12,19 +12,19 @@ type ProjectConfigRepository interface {
 	InsertProjectConfig(configs []models.ProjectConfig) error
 }
 
-type projectconfigRepositoryImpl struct {
+type projectConfigRepositoryImpl struct {
 	db *gorm.DB
 	*repositoryImpl[models.ProjectConfig]
 }
 
 func NewProjectConfigRepository(db *gorm.DB) ProjectConfigRepository {
-	return &projectconfigRepositoryImpl{
+	return &projectConfigRepositoryImpl{
 		db:             db,
 		repositoryImpl: newRepository[models.ProjectConfig](db),
 	}
 }
 
-func (r *projectconfigRepositoryImpl) GetProjectConfigByProgramID(programId int) ([]models.ProjectConfig, error) {
+func (r *projectConfigRepositoryImpl) GetProjectConfigByProgramID(programId int) ([]models.ProjectConfig, error) {
 	var configs []models.ProjectConfig
 
 	if err := r.db.
@@ -38,11 +38,11 @@ func (r *projectconfigRepositoryImpl) GetProjectConfigByProgramID(programId int)
 }
 
 // update project_config with array of project_config
-func (r *projectconfigRepositoryImpl) UpdateProjectConfig(configs []models.ProjectConfig) error {
+func (r *projectConfigRepositoryImpl) UpdateProjectConfig(configs []models.ProjectConfig) error {
 	return r.db.Save(configs).Error
 }
 
 // insert project_config with array of project_config
-func (r *projectconfigRepositoryImpl) InsertProjectConfig(configs []models.ProjectConfig) error {
+func (r *projectConfigRepositoryImpl) InsertProjectConfig(configs []models.ProjectConfig) error {
 	return r.db.Create(configs).Error
 }

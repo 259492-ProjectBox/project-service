@@ -26,9 +26,10 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	projectStaffRepository := repositories.NewProjectStaffRepository(gormDB)
 	resourceRepository := repositories.NewResourceRepository(gormDB, client)
 	resourceTypeRepository := repositories.NewResourceTypeRepository(gormDB)
-	projectRepository := repositories.NewProjectRepository(gormDB, client, resourceRepository, resourceTypeRepository)
+	projectRepository := repositories.NewProjectRepository(gormDB, client, projectStaffRepository, resourceRepository, resourceTypeRepository)
 	staffRepository := repositories.NewStaffRepository(gormDB)
 	programRepository := repositories.NewProgramRepository(gormDB)
 	courseRepository := repositories.NewCourseRepository(gormDB)
@@ -68,6 +69,6 @@ var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHan
 
 var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewStaffService, services.NewConfigService, services.NewProjectConfigService, services.NewProgramService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectStaffRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
 
 var RedisSet = wire.NewSet()

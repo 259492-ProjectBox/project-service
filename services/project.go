@@ -14,15 +14,15 @@ import (
 )
 
 type ProjectService interface {
-	PublishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project)
-	ValidateProject(ctx context.Context, project *models.Project) error
-	CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*models.Project, error)
-	UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*models.Project, error)
-	GetProjectById(ctx context.Context, id int) (*models.Project, error)
-	GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error)
+	PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int)
+	ValidateProject(ctx context.Context, project *models.ProjectRequest) error
+	GetProjectById(ctx context.Context, id int) (*dtos.ProjectData, error)
+	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
+	// GetProjectByAdvisorId(ctx context.Context, advisorId int) ([]dtos.ProjectData, error)
+	CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*dtos.ProjectData, error)
+	UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*dtos.ProjectData, error)
 	DeleteProject(ctx context.Context, id int) error
-	GetProjectsByAdvisorIdService(ctx context.Context, advisorId int) ([]models.Project, error)
 }
 
 type projectServiceImpl struct {
@@ -52,34 +52,26 @@ func NewProjectService(
 	}
 }
 
-func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, project *models.Project) {
+func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) {
 	go func() {
-		project, err := s.GetProjectWithPDFByID(ctx, project.ID)
+		projectMessage, err := s.projectRepo.GetProjectMessageByID(ctx, projectId)
 		if err != nil {
-			log.Printf("Failed to fetch project by ID: %v", err)
-			return
+			log.Printf("Failed to get project message")
 		}
 
-		if project == nil {
-			log.Printf("Project with ID is nil")
-			return
-		}
-
-		projectMessage := utils.SanitizeProjectMessage(project)
-		fmt.Printf("%v", projectMessage)
 		if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
 			log.Printf("Failed to publish message to RabbitMQ for action %s: %v", action, err)
 		}
 	}()
 }
 
-func (s *projectServiceImpl) createProjectNumber(project *models.Project) (*models.Project, error) {
+func (s *projectServiceImpl) createProjectNumber(project *models.ProjectRequest) (*models.ProjectRequest, error) {
 	nextProjectNumber, err := s.projectNumberCounterRepo.GetNextProjectNumber(project.AcademicYear, project.Semester, project.CourseID)
 	if err != nil {
 		return nil, err
 	}
-	projectID := utils.FormatProjectID(project.Semester, project.AcademicYear, nextProjectNumber)
-	project.ProjectNo = projectID
+	projectNumber := utils.FormatProjectID(project.Semester, project.AcademicYear, nextProjectNumber)
+	project.ProjectNo = projectNumber
 	return project, nil
 }
 
@@ -102,7 +94,7 @@ func (s *projectServiceImpl) validateProgram(ctx context.Context, programId int)
 	return nil
 }
 
-func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.Project) error {
+func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *models.ProjectRequest) error {
 	if err := s.validateCourse(ctx, project.CourseID, project.Semester); err != nil {
 		return err
 	}
@@ -111,7 +103,7 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	}
 	return nil
 }
-func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*models.Project, error) {
+func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*dtos.ProjectData, error) {
 	project := req.Project
 	files := req.Files
 	titles := req.Titles
@@ -125,18 +117,17 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dt
 	if err != nil {
 		return nil, err
 	}
-
-	project, err = s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles, urls)
+	projectMessage, err := s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles, urls)
 	if err != nil {
 		return nil, err
 	}
 
-	s.PublishProjectMessageToElasticSearch(ctx, "create", project)
+	s.PublishProjectMessageToElasticSearch(ctx, "create", project.ID)
 
-	return project, nil
+	return projectMessage, nil
 }
 
-func (s *projectServiceImpl) GetProjectById(ctx context.Context, id int) (*models.Project, error) {
+func (s *projectServiceImpl) GetProjectById(ctx context.Context, id int) (*dtos.ProjectData, error) {
 	project, err := s.projectRepo.GetProjectByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -144,7 +135,8 @@ func (s *projectServiceImpl) GetProjectById(ctx context.Context, id int) (*model
 
 	return project, nil
 }
-func (s *projectServiceImpl) GetProjectWithPDFByID(ctx context.Context, id int) (*models.Project, error) {
+
+func (s *projectServiceImpl) GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error) {
 	project, err := s.projectRepo.GetProjectWithPDFByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -162,7 +154,16 @@ func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, student
 	return project, nil
 }
 
-func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*models.Project, error) {
+// func (s *projectServiceImpl) GetProjectsByAdvisorId(ctx context.Context, advisorId int) ([]dtos.ProjectData, error) {
+// 	project, err := s.projectRepo.GetProjectsByAdvisorId(ctx, advisorId)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return project, nil
+// }
+
+func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*dtos.ProjectData, error) {
 	project := req.Project
 	files := req.Files
 	titles := req.Titles
@@ -171,14 +172,14 @@ func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, req *dt
 		return nil, err
 	}
 
-	project, err := s.projectRepo.UpdateProjectWithFiles(ctx, project, files, titles, urls)
+	projectMessage, err := s.projectRepo.UpdateProjectWithFiles(ctx, project, files, titles, urls)
 	if err != nil {
 		return nil, err
 	}
 
-	s.PublishProjectMessageToElasticSearch(ctx, "update", project)
+	s.PublishProjectMessageToElasticSearch(ctx, "update", project.ID)
 
-	return project, nil
+	return projectMessage, nil
 }
 
 func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
@@ -191,16 +192,7 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 		return err
 	}
 
-	s.PublishProjectMessageToElasticSearch(ctx, "delete", project)
+	s.PublishProjectMessageToElasticSearch(ctx, "delete", project.ID)
 
 	return nil
-}
-
-func (s *projectServiceImpl) GetProjectsByAdvisorIdService(ctx context.Context, advisorId int) ([]models.Project, error) {
-	project, err := s.projectRepo.GetProjectsByAdvisorId(ctx, advisorId)
-	if err != nil {
-		return nil, err
-	}
-
-	return project, nil
 }
