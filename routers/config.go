@@ -6,7 +6,7 @@ import (
 )
 
 func SetupConfigRouter(r *gin.RouterGroup, handler handlers.ConfigHandler) {
-	configRouteV1 := r.Group("/configs")
+	configRouteV1 := r.Group("/v1/configs")
 	{
 
 		configRouteV1.GET("/program/:program_id", handler.GetConfigByProgramId)

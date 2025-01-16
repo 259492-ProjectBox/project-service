@@ -19,7 +19,7 @@ type ResourceRepository interface {
 	DeleteAssetResourceByID(ctx context.Context, id string) error
 	FindAssetResourcesByProgramID(ctx context.Context, id string) ([]models.AssetResource, error)
 	FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
-	DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error
+	DeleteProjectResourceByID(ctx context.Context, id string, filePath *string) error
 	FindByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
 }
 
@@ -82,8 +82,8 @@ func (r *resourceRepository) CreateAssetResource(
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
-	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		return nil, fmt.Errorf("transaction commit failed: %w", err)
 	}
 
@@ -146,20 +146,22 @@ func (r *resourceRepository) FindDetailedResourceByID(ctx context.Context, id st
 	return &detailedResource, nil
 }
 
-func (r *resourceRepository) DeleteProjectResourceByID(ctx context.Context, id string, filePath string) error {
+func (r *resourceRepository) DeleteProjectResourceByID(ctx context.Context, id string, filePath *string) error {
 	tx := r.db.WithContext(ctx).Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
-
+	
 	if result := tx.Delete(&models.ProjectResource{}, id); result.Error != nil {
 		tx.Rollback()
 		return result.Error
 	}
 
-	if err := r.minioClient.RemoveObject(ctx, os.Getenv("MINIO_PROJECT_BUCKET"), filePath, minio.RemoveObjectOptions{}); err != nil {
-		tx.Rollback()
-		return err
+	if filePath != nil {
+		if err := r.minioClient.RemoveObject(ctx, os.Getenv("MINIO_PROJECT_BUCKET"), *filePath, minio.RemoveObjectOptions{}); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	if err := tx.Commit().Error; err != nil {

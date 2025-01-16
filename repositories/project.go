@@ -310,6 +310,8 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 
 func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, projectReq *models.ProjectRequest) (*models.Project, error) {
 	project := &models.Project{
+		ID:           projectReq.ID,
+		ProjectNo:    projectReq.ProjectNo,
 		TitleTH:      projectReq.TitleTH,
 		TitleEN:      projectReq.TitleEN,
 		AbstractText: projectReq.AbstractText,
@@ -320,9 +322,15 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 		CourseID:     projectReq.CourseID,
 		Program:      projectReq.Program,
 		Course:       projectReq.Course,
+		CreatedAt:    projectReq.CreatedAt,
+		Members:      projectReq.Members,
 	}
 
 	if err := tx.WithContext(ctx).Save(project).Error; err != nil {
+		return nil, err
+	}
+
+	if err := tx.WithContext(ctx).Preload("Program").Preload("Course").First(project).Error; err != nil {
 		return nil, err
 	}
 

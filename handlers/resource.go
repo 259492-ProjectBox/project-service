@@ -51,7 +51,7 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	}
 
 	filePath := detailedResource.Resource.Path
-	if err := h.resourceService.DeleteProjectResourceByID(c, id, *filePath); err != nil {
+	if err := h.resourceService.DeleteProjectResourceByID(c, id, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete resource record"})
 		return
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 func SetupCalendarRouter(r *gin.RouterGroup, handler handlers.CalendarHandler) {
-	calendarRouteV1 := r.Group("/calendars")
+	calendarRouteV1 := r.Group("/v1/calendars")
 	{
 
 		calendarRouteV1.POST("/", handler.CreateCalendar)

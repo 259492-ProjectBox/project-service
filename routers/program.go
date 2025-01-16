@@ -6,7 +6,7 @@ import (
 )
 
 func SetUpProgramRoute(r *gin.RouterGroup, handler handlers.ProgramHandler) {
-	programRouteV1 := r.Group("/programs")
+	programRouteV1 := r.Group("/v1/programs")
 	{
 
 		programRouteV1.POST("/", handler.CreateProgram)
