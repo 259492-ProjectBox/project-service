@@ -121,8 +121,7 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dt
 	if err != nil {
 		return nil, err
 	}
-
-	s.PublishProjectMessageToElasticSearch(ctx, "create", project.ID)
+	s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
 
 	return projectMessage, nil
 }

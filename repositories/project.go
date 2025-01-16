@@ -18,7 +18,7 @@ import (
 
 type ProjectRepository interface {
 	repository[models.Project]
-	GetProjectMessageByID(ctx context.Context, id int) (*dtos.ProjectData, error)
+	GetProjectMessageByID(ctx context.Context, id int) (dtos.ProjectData, error)
 	GetProjectByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
@@ -47,12 +47,12 @@ func NewProjectRepository(db *gorm.DB, minioClient *minio.Client, projectStaffRe
 	}
 }
 
-func (r *projectRepositoryImpl) GetProjectMessageByID(ctx context.Context, id int) (*dtos.ProjectData, error) {
+func (r *projectRepositoryImpl) GetProjectMessageByID(ctx context.Context, id int) (dtos.ProjectData, error) {
 	projectData, err := r.GetProjectWithPDFByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return dtos.ProjectData{}, err
 	}
-	return projectData, nil
+	return *projectData, nil
 }
 
 func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dtos.ProjectData, error) {
@@ -193,7 +193,7 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(
 		tx.Rollback()
 		return nil, err
 	}
-	return projectData, nil
+	return &projectData, nil
 }
 
 func (r *projectRepositoryImpl) UpdateProjectWithFiles(
@@ -245,7 +245,7 @@ func (r *projectRepositoryImpl) UpdateProjectWithFiles(
 		tx.Rollback()
 		return nil, err
 	}
-	return projectData, nil
+	return &projectData, nil
 }
 
 func (r *projectRepositoryImpl) deleteProjectAssociations(ctx context.Context, tx *gorm.DB, projectID int) error {

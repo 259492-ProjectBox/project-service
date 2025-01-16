@@ -7,27 +7,13 @@ import (
 	"github.com/project-box/models"
 )
 
-// Helper functions
-func getStringValue(value *string) string {
-	if value != nil {
-		return *value
-	}
-	return ""
-}
-
-func getIntValue(value *int) int {
-	if value != nil {
-		return *value
-	}
-	return 0
-}
-
 func formatTime(value *time.Time) string {
 	if value != nil {
 		return value.Format("2006-01-02")
 	}
 	return ""
 }
+
 func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 	if project == nil {
 		return dtos.ProjectData{}
@@ -35,11 +21,11 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 	projectMessage := dtos.ProjectData{
 		ID:           project.ID,
 		ProjectNo:    project.ProjectNo,
-		TitleTH:      getStringValue(project.TitleTH),
-		TitleEN:      getStringValue(project.TitleEN),
-		AbstractText: getStringValue(project.AbstractText),
+		TitleTH:      project.TitleTH,
+		TitleEN:      project.TitleEN,
+		AbstractText: project.AbstractText,
 		AcademicYear: project.AcademicYear,
-		SectionID:    getStringValue(project.SectionID),
+		SectionID:    project.SectionID,
 		Semester:     project.Semester,
 		ProgramID:    project.ProgramID,
 		Program: dtos.Program{
@@ -73,7 +59,7 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 				ID:          staff.Program.ID,
 				ProgramName: staff.Program.ProgramName,
 			},
-			ProjectRole: dtos.ProjectRole{}, // Placeholder for role, will be updated later
+			ProjectRole: dtos.ProjectRole{},
 		})
 	}
 	// Map Members

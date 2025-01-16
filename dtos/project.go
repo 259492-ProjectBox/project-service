@@ -23,12 +23,12 @@ type UpdateProjectRequest struct {
 type ProjectData struct {
 	ID               int                   `json:"id"`
 	ProjectNo        string                `json:"project_no"`
-	TitleTH          string                `json:"title_th"`
-	TitleEN          string                `json:"title_en"`
-	AbstractText     string                `json:"abstract_text"`
+	TitleTH          *string               `json:"title_th"`
+	TitleEN          *string               `json:"title_en"`
+	AbstractText     *string               `json:"abstract_text"`
 	AcademicYear     int                   `json:"academic_year"`
 	Semester         int                   `json:"semester"`
-	SectionID        string                `json:"section_id"`
+	SectionID        *string               `json:"section_id"`
 	ProgramID        int                   `json:"program_id"`
 	Program          Program               `json:"program"`
 	CourseID         int                   `json:"course_id"`
