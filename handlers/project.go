@@ -14,7 +14,6 @@ type ProjectHandler interface {
 	UpdateProject(c *gin.Context)
 	GetProjectById(c *gin.Context)
 	GetProjectsByStudentId(c *gin.Context)
-	// GetProjectByAdvisorId(c *gin.Context)
 	DeleteProject(c *gin.Context)
 }
 
@@ -152,29 +151,3 @@ func (h *projectHandler) DeleteProject(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
 }
-
-// GetProjectByAdvisorID retrieves a project by its Advisor ID
-// @Summary Get a project by Advisor ID
-// @Description Fetches a project by its advisor ID
-// @Tags Project
-// @Produce  json
-// @Param advisor_id path string true "Advisor ID"
-// @Success 200 {object} []models.Project "Successfully retrieved project"
-// @Failure 400 {object} map[string]interface{} "Invalid advisor ID"
-// @Failure 404 {object} map[string]interface{} "Project not found"
-// @Router /projects/advisor/{advisor_id} [get]
-// func (h *projectHandler) GetProjectByAdvisorId(c *gin.Context) {
-// 	advisor_id, err := strconv.Atoi(c.Param("advisor_id"))
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid advisor ID"})
-// 		return
-// 	}
-
-// 	projects, err := h.projectService.GetProjectsByAdvisorId(c, advisor_id)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, projects)
-// }

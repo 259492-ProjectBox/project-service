@@ -19,7 +19,6 @@ type ProjectService interface {
 	GetProjectById(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	// GetProjectByAdvisorId(ctx context.Context, advisorId int) ([]dtos.ProjectData, error)
 	CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*dtos.ProjectData, error)
 	UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*dtos.ProjectData, error)
 	DeleteProject(ctx context.Context, id int) error
@@ -103,6 +102,7 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	}
 	return nil
 }
+
 func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*dtos.ProjectData, error) {
 	project := req.Project
 	files := req.Files
@@ -117,7 +117,7 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dt
 	if err != nil {
 		return nil, err
 	}
-	
+
 	projectMessage, err := s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles, urls)
 	if err != nil {
 		return nil, err
@@ -154,15 +154,6 @@ func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, student
 
 	return project, nil
 }
-
-// func (s *projectServiceImpl) GetProjectsByAdvisorId(ctx context.Context, advisorId int) ([]dtos.ProjectData, error) {
-// 	project, err := s.projectRepo.GetProjectsByAdvisorId(ctx, advisorId)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return project, nil
-// }
 
 func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*dtos.ProjectData, error) {
 	project := req.Project

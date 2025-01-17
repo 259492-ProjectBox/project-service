@@ -14,9 +14,9 @@ func formatTime(value *time.Time) string {
 	return ""
 }
 
-func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
+func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 	if project == nil {
-		return dtos.ProjectData{}
+		return nil
 	}
 	projectMessage := dtos.ProjectData{
 		ID:           project.ID,
@@ -119,5 +119,5 @@ func SanitizeProjectMessage(project *models.Project) dtos.ProjectData {
 			Resource: resource,
 		})
 	}
-	return projectMessage
+	return &projectMessage
 }
