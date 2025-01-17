@@ -14,45 +14,65 @@ import (
 )
 
 type ResourceRepository interface {
-	CreateAssetResource(ctx context.Context, assetResource *models.AssetResource, file *multipart.FileHeader, title string) (*models.AssetResource, error)
-	CreateProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource, resource *models.Resource) error
+	CreateAssetResource(ctx context.Context, file *multipart.FileHeader, assetResource *models.AssetResource) (*models.AssetResource, error)
 	DeleteAssetResourceByID(ctx context.Context, id string) error
 	FindAssetResourcesByProgramID(ctx context.Context, id string) ([]models.AssetResource, error)
+
+	CreateProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource, resource *models.Resource) error
 	FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
 	DeleteProjectResourceByID(ctx context.Context, id string, filePath *string) error
 	FindByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
 }
 
 type resourceRepository struct {
-	db          *gorm.DB
-	minioClient *minio.Client
+	db                *gorm.DB
+	minioClient       *minio.Client
+	fileExtensionRepo FileExtensionRepository
 }
 
-func NewResourceRepository(db *gorm.DB, minioClient *minio.Client) ResourceRepository {
+func NewResourceRepository(db *gorm.DB, minioClient *minio.Client, fileExtensionRepo FileExtensionRepository) ResourceRepository {
 	return &resourceRepository{
-		db:          db,
-		minioClient: minioClient,
+		db:                db,
+		minioClient:       minioClient,
+		fileExtensionRepo: fileExtensionRepo,
 	}
 }
 
-func (r *resourceRepository) CreateAssetResource(
-	ctx context.Context,
-	assetResource *models.AssetResource,
-	file *multipart.FileHeader,
-	title string,
-) (*models.AssetResource, error) {
+func (r *resourceRepository) generateFilePath(fileName, programName, bucket string) (string, string, string) {
+	uniqueFileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileName)
+	objectName := fmt.Sprintf("%s/%s", programName, uniqueFileName)
+	filePath := fmt.Sprintf("%s/%s", bucket, objectName)
+	return uniqueFileName, objectName, filePath
+}
+
+func (r *resourceRepository) CreateAssetResource(ctx context.Context, file *multipart.FileHeader, assetResource *models.AssetResource) (*models.AssetResource, error) {
 	tx := r.db.WithContext(ctx).Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	// Create the initial asset resource
+	if err := tx.Create(assetResource).Error; err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to create asset resource: %w", err)
+	}
+
+	if err := tx.Preload("Program").First(assetResource).Error; err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to preload program: %w", err)
+	}
+
 	programName := assetResource.Program.ProgramName
+	uniqueFileName, objectName, filePath := r.generateFilePath(file.Filename, programName, os.Getenv("MINIO_ASSET_BUCKET"))
 
-	fileName := file.Filename
-	uniqueFileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileName)
-	objectName := fmt.Sprintf("%s/%s/%s", programName, title, uniqueFileName)
-	filePath := fmt.Sprintf("%s/%s", os.Getenv("MINIO_ASSET_BUCKET"), objectName)
-
+	// Upload file to MinIO
 	if err := r.uploadFileToMinio(ctx, objectName, file); err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("file upload failed: %w", err)
@@ -64,17 +84,18 @@ func (r *resourceRepository) CreateAssetResource(
 		return nil, fmt.Errorf("failed to get resource type: %w", err)
 	}
 
-	if err := tx.Create(assetResource).Error; err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to create asset resource: %w", err)
+	fileExtension, err := r.fileExtensionRepo.GetFileExtension(ctx, tx, file)
+	if err != nil {
+		return nil, err
 	}
 
 	resource := &models.Resource{
-		Title:           title,
-		AssetResourceID: &assetResource.ID,
-		ResourceName:    &fileName,
-		Path:            &filePath,
-		ResourceTypeID:  resourceType.ID,
+		ProjectResourceID: nil,
+		AssetResourceID:   &assetResource.ID,
+		ResourceName:      &uniqueFileName,
+		Path:              &filePath,
+		ResourceTypeID:    resourceType.ID,
+		FileExtensionID:   &fileExtension.ID,
 	}
 
 	if err := tx.Create(resource).Error; err != nil {
@@ -83,7 +104,6 @@ func (r *resourceRepository) CreateAssetResource(
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
 		return nil, fmt.Errorf("transaction commit failed: %w", err)
 	}
 
@@ -151,7 +171,7 @@ func (r *resourceRepository) DeleteProjectResourceByID(ctx context.Context, id s
 	if tx.Error != nil {
 		return tx.Error
 	}
-	
+
 	if result := tx.Delete(&models.ProjectResource{}, id); result.Error != nil {
 		tx.Rollback()
 		return result.Error

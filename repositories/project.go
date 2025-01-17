@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"mime/multipart"
 	"os"
 	"time"
 
-	"github.com/minio/minio-go/v7"
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/utils"
@@ -28,22 +26,24 @@ type ProjectRepository interface {
 }
 
 type projectRepositoryImpl struct {
-	db               *gorm.DB
-	minioClient      *minio.Client
-	projectStaffRepo ProjectStaffRepository
-	resourceRepo     ResourceRepository
-	resourceTypeRepo ResourceTypeRepository
+	db                *gorm.DB
+	fileExtensionRepo FileExtensionRepository
+	projectStaffRepo  ProjectStaffRepository
+	resourceRepo      ResourceRepository
+	resourceTypeRepo  ResourceTypeRepository
+	uploadRepo        UploadRepository
 	*repositoryImpl[models.Project]
 }
 
-func NewProjectRepository(db *gorm.DB, minioClient *minio.Client, projectStaffRepo ProjectStaffRepository, resourceRepo ResourceRepository, resourceTypeRepo ResourceTypeRepository) ProjectRepository {
+func NewProjectRepository(db *gorm.DB, fileExtensionRepo FileExtensionRepository, projectStaffRepo ProjectStaffRepository, resourceRepo ResourceRepository, resourceTypeRepo ResourceTypeRepository, uploadRepo UploadRepository) ProjectRepository {
 	return &projectRepositoryImpl{
-		db:               db,
-		minioClient:      minioClient,
-		projectStaffRepo: projectStaffRepo,
-		resourceRepo:     resourceRepo,
-		resourceTypeRepo: resourceTypeRepo,
-		repositoryImpl:   newRepository[models.Project](db),
+		db:                db,
+		fileExtensionRepo: fileExtensionRepo,
+		projectStaffRepo:  projectStaffRepo,
+		resourceRepo:      resourceRepo,
+		resourceTypeRepo:  resourceTypeRepo,
+		uploadRepo:        uploadRepo,
+		repositoryImpl:    newRepository[models.Project](db),
 	}
 }
 
@@ -178,18 +178,18 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, files, titles, urls)
 	if err != nil {
-		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
 		tx.Rollback()
 		return nil, err
 	}
 	if err := tx.Commit().Error; err != nil {
-		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
 		tx.Rollback()
 		return nil, err
 	}
 	projectData, err := r.GetProjectMessageByID(ctx, project.ID)
 	if err != nil {
-		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
 		tx.Rollback()
 		return nil, err
 	}
@@ -228,20 +228,20 @@ func (r *projectRepositoryImpl) UpdateProjectWithFiles(
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, files, titles, urls)
 	if err != nil {
-		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
 		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
 		tx.Rollback()
 		return nil, err
 	}
 
 	projectData, err := r.GetProjectMessageByID(ctx, project.ID)
 	if err != nil {
-		r.deleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
 		tx.Rollback()
 		return nil, err
 	}
@@ -351,14 +351,13 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 		return uploadedObjectNames, fmt.Errorf("not enough titles provided for the files")
 	}
 	for _, file := range files {
-		// Pop the first title
 		title := titles[0]
 		titles = titles[1:]
 
 		uniqueFileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
 		filePath := fmt.Sprintf("%s/%s/%s/%s", os.Getenv("MINIO_PROJECT_BUCKET"), project.Program.ProgramName, title, uniqueFileName)
 		objectName := fmt.Sprintf("%s/%s/%s", project.Program.ProgramName, title, uniqueFileName)
-		err := r.uploadFileToMinio(ctx, objectName, file)
+		err := r.uploadRepo.UploadFile(ctx, objectName, file)
 		if err != nil {
 			return uploadedObjectNames, err
 		}
@@ -369,7 +368,7 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 			return uploadedObjectNames, err
 		}
 
-		fileExtension, err := r.getFileExtension(ctx, tx, file)
+		fileExtension, err := r.fileExtensionRepo.GetFileExtension(ctx, tx, file)
 		if err != nil {
 			return uploadedObjectNames, err
 		}
@@ -399,7 +398,6 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 	}
 
 	for _, url := range urls {
-		// Pop the first title
 		title := titles[0]
 		titles = titles[1:]
 
@@ -423,45 +421,6 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 	}
 
 	return uploadedObjectNames, nil
-}
-
-func (r *projectRepositoryImpl) uploadFileToMinio(ctx context.Context, objectName string, file *multipart.FileHeader) error {
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-
-	_, err = r.minioClient.PutObject(ctx, os.Getenv("MINIO_PROJECT_BUCKET"), objectName, src, file.Size, minio.PutObjectOptions{
-		ContentType: file.Header.Get("Content-Type"),
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *projectRepositoryImpl) getFileExtension(ctx context.Context, tx *gorm.DB, file *multipart.FileHeader) (*models.FileExtension, error) {
-	fileType := file.Header.Get("Content-Type")
-	if fileType == "" {
-		fileType = "unknown"
-	}
-	fileExtension := &models.FileExtension{}
-	if err := tx.WithContext(ctx).Where("mime_type = ?", fileType).First(fileExtension).Error; err != nil {
-		return nil, fmt.Errorf("file type not found: %w", err)
-	}
-
-	return fileExtension, nil
-}
-
-func (r *projectRepositoryImpl) deleteUploadedFiles(ctx context.Context, objectNames []string) {
-	for _, objectName := range objectNames {
-		err := r.minioClient.RemoveObject(ctx, os.Getenv("MINIO_PROJECT_BUCKET"), objectName, minio.RemoveObjectOptions{})
-		if err != nil {
-			log.Printf("Failed to delete file from MinIO: %s, error: %v", objectName, err)
-		}
-	}
 }
 
 func (r *projectRepositoryImpl) UpdateProject(ctx context.Context, id int, project *models.Project) error {

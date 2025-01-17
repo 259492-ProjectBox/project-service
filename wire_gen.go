@@ -22,14 +22,16 @@ import (
 func InitializeApp() (*gin.Engine, func(), error) {
 	channel := db.NewRabbitMQConnection()
 	gormDB := db2.NewPostgresDatabase()
+	fileExtensionRepository := repositories.NewFileExtensionRepository(gormDB)
+	projectStaffRepository := repositories.NewProjectStaffRepository(gormDB)
 	client, err := db3.NewMinIOConnection()
 	if err != nil {
 		return nil, nil, err
 	}
-	projectStaffRepository := repositories.NewProjectStaffRepository(gormDB)
-	resourceRepository := repositories.NewResourceRepository(gormDB, client)
+	resourceRepository := repositories.NewResourceRepository(gormDB, client, fileExtensionRepository)
 	resourceTypeRepository := repositories.NewResourceTypeRepository(gormDB)
-	projectRepository := repositories.NewProjectRepository(gormDB, client, projectStaffRepository, resourceRepository, resourceTypeRepository)
+	uploadRepository := repositories.NewUploadRepository(client)
+	projectRepository := repositories.NewProjectRepository(gormDB, fileExtensionRepository, projectStaffRepository, resourceRepository, resourceTypeRepository, uploadRepository)
 	staffRepository := repositories.NewStaffRepository(gormDB)
 	programRepository := repositories.NewProgramRepository(gormDB)
 	courseRepository := repositories.NewCourseRepository(gormDB)
@@ -69,6 +71,6 @@ var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHan
 
 var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewResourceService, services.NewStaffService, services.NewConfigService, services.NewProjectConfigService, services.NewProgramService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectStaffRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectStaffRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewFileExtensionRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository, repositories.NewUploadRepository)
 
 var RedisSet = wire.NewSet()

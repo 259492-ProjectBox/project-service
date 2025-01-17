@@ -78,7 +78,7 @@ func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
 		return
 	}
 
-	assetResource, err := h.resourceService.UploadAssetResource(c, req.AssetResource, req.File, req.Title)
+	assetResource, err := h.resourceService.UploadAssetResource(c, req.File, req.Description, req.ProgramID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -47,10 +47,6 @@ func (h *calendarHandler) CreateCalendar(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create event"})
-		return
-	}
 
 	c.JSON(http.StatusCreated, event)
 }

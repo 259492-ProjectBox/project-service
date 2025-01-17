@@ -117,10 +117,12 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dt
 	if err != nil {
 		return nil, err
 	}
+	
 	projectMessage, err := s.projectRepo.CreateProjectWithFiles(ctx, project, files, titles, urls)
 	if err != nil {
 		return nil, err
 	}
+
 	s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
 
 	return projectMessage, nil
