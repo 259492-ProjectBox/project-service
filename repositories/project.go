@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/utils"
@@ -25,6 +26,7 @@ type ProjectRepository interface {
 
 type projectRepositoryImpl struct {
 	db                *gorm.DB
+	projectBucketName string
 	fileExtensionRepo FileExtensionRepository
 	projectStaffRepo  ProjectStaffRepository
 	resourceRepo      ResourceRepository
@@ -36,6 +38,7 @@ type projectRepositoryImpl struct {
 func NewProjectRepository(db *gorm.DB, fileExtensionRepo FileExtensionRepository, projectStaffRepo ProjectStaffRepository, resourceRepo ResourceRepository, resourceTypeRepo ResourceTypeRepository, uploadRepo UploadRepository) ProjectRepository {
 	return &projectRepositoryImpl{
 		db:                db,
+		projectBucketName: os.Getenv("MINIO_PROJECT_BUCKET"),
 		fileExtensionRepo: fileExtensionRepo,
 		projectStaffRepo:  projectStaffRepo,
 		resourceRepo:      resourceRepo,
@@ -67,7 +70,9 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}
+
 	projectData := utils.SanitizeProjectMessage(project)
+
 	for i, projectStaff := range project.Staffs {
 		projectRole, err := r.projectStaffRepo.GetProjectStaffByProjectIdAndStaffId(ctx, project.ID, projectStaff.ID)
 		if err != nil {
@@ -94,7 +99,9 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}
+
 	projectData := utils.SanitizeProjectMessage(project)
+
 	for i, projectStaff := range project.Staffs {
 		projectStaff, err := r.projectStaffRepo.GetProjectStaffByProjectIdAndStaffId(ctx, project.ID, projectStaff.ID)
 		if err != nil {
@@ -164,18 +171,21 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, files, titles, urls)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		return nil, err
 	}
+
 	if err := tx.Commit().Error; err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		return nil, err
 	}
+
 	projectData, err := r.GetProjectMessageByID(ctx, project.ID)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		return nil, err
 	}
+
 	return projectData, nil
 }
 
@@ -210,18 +220,18 @@ func (r *projectRepositoryImpl) UpdateProjectWithFiles(
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, files, titles, urls)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		return nil, err
 	}
 
 	projectData, err := r.GetProjectMessageByID(ctx, project.ID)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, uploadedFilePaths)
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		return nil, err
 	}
 
@@ -323,6 +333,18 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 	return project, nil
 }
 
+func generateUniqueFileName(fileName string) string {
+	return fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileName)
+}
+
+func buildFilePath(bucketName, programName, title, uniqueFileName string) string {
+	return fmt.Sprintf("%s/%s/%s/%s", bucketName, programName, title, uniqueFileName)
+}
+
+func buildObjectName(programName, title, uniqueFileName string) string {
+	return fmt.Sprintf("%s/%s/%s", programName, title, uniqueFileName)
+}
+
 func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context, tx *gorm.DB, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) ([]string, error) {
 	var uploadedObjectNames []string
 	if len(titles) != len(files)+len(urls) {
@@ -332,10 +354,10 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 		title := titles[0]
 		titles = titles[1:]
 
-		uniqueFileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
-		filePath := fmt.Sprintf("%s/%s/%s/%s", os.Getenv("MINIO_PROJECT_BUCKET"), project.Program.ProgramName, title, uniqueFileName)
-		objectName := fmt.Sprintf("%s/%s/%s", project.Program.ProgramName, title, uniqueFileName)
-		err := r.uploadRepo.UploadFile(ctx, objectName, file)
+		uniqueFileName := generateUniqueFileName(file.Filename)
+		filePath := buildFilePath(r.projectBucketName, project.Program.ProgramName, title, uniqueFileName)
+		objectName := buildObjectName(project.Program.ProgramName, title, uniqueFileName)
+		err := r.uploadRepo.UploadFile(ctx, r.projectBucketName, objectName, file, minio.PutObjectOptions{})
 		if err != nil {
 			return uploadedObjectNames, err
 		}
@@ -362,7 +384,7 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 			ProjectID: project.ID,
 		}
 		resource := &models.Resource{
-			Title:             title,
+			Title:             &title,
 			ProjectResourceID: nil,
 			ResourceName:      &file.Filename,
 			Path:              &filePath,
@@ -389,9 +411,9 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 		}
 
 		resource := &models.Resource{
-			Title:             title,
+			Title:             &title,
 			ProjectResourceID: nil,
-			URL:               url,
+			URL:               &url,
 			ResourceTypeID:    resourceType.ID,
 		}
 		if err := r.resourceRepo.CreateProjectResourceAndResource(ctx, tx, projectResource, resource); err != nil {

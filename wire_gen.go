@@ -24,13 +24,13 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	gormDB := db2.NewPostgresDatabase()
 	fileExtensionRepository := repositories.NewFileExtensionRepository(gormDB)
 	projectStaffRepository := repositories.NewProjectStaffRepository(gormDB)
+	resourceTypeRepository := repositories.NewResourceTypeRepository(gormDB)
 	client, err := db3.NewMinIOConnection()
 	if err != nil {
 		return nil, nil, err
 	}
-	resourceRepository := repositories.NewResourceRepository(gormDB, client, fileExtensionRepository)
-	resourceTypeRepository := repositories.NewResourceTypeRepository(gormDB)
 	uploadRepository := repositories.NewUploadRepository(client)
+	resourceRepository := repositories.NewResourceRepository(gormDB, resourceTypeRepository, fileExtensionRepository, uploadRepository)
 	projectRepository := repositories.NewProjectRepository(gormDB, fileExtensionRepository, projectStaffRepository, resourceRepository, resourceTypeRepository, uploadRepository)
 	staffRepository := repositories.NewStaffRepository(gormDB)
 	programRepository := repositories.NewProgramRepository(gormDB)

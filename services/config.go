@@ -21,8 +21,6 @@ func NewConfigService(configRepo repositories.ConfigRepository) ConfigService {
 
 func (s *configServiceImpl) GetConfigByProgramId(programId int) ([]dtos.ConfigReponse, error) {
 	configs, err := s.configRepo.GetConfigByProgramId(programId)
-	// //convert to dtos.ConfigDto
-	// var err error
 	var configDtos []dtos.ConfigReponse
 
 	for _, config := range configs {

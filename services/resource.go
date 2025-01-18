@@ -9,7 +9,7 @@ import (
 )
 
 type ResourceService interface {
-	UploadAssetResource(ctx context.Context, file *multipart.FileHeader, description string, programId int) (*models.AssetResource, error)
+	UploadAssetResource(ctx context.Context, file *multipart.FileHeader, assetResource *models.AssetResource) (*models.AssetResource, error)
 	GetAssetResourceByProgramID(ctx context.Context, programId string) ([]models.AssetResource, error)
 	DeleteAssetResourceByID(ctx context.Context, id string) error
 	GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
@@ -27,11 +27,7 @@ func NewResourceService(resourceRepository repositories.ResourceRepository) Reso
 	}
 }
 
-func (s *resourceService) UploadAssetResource(ctx context.Context, file *multipart.FileHeader, description string, programId int) (*models.AssetResource, error) {
-	assetResource := &models.AssetResource{
-		Description: description,
-		ProgramID:   programId,
-	}
+func (s *resourceService) UploadAssetResource(ctx context.Context, file *multipart.FileHeader, assetResource *models.AssetResource) (*models.AssetResource, error) {
 	return s.resourceRepository.CreateAssetResource(ctx, file, assetResource)
 }
 

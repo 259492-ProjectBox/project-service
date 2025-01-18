@@ -4,10 +4,10 @@ import "time"
 
 type Resource struct {
 	ID                int            `json:"id" gorm:"primaryKey;autoIncrement"`
-	Title             string         `json:"title"`
+	Title             *string        `json:"title"`
 	ResourceName      *string        `json:"resource_name"`
 	Path              *string        `json:"path"`
-	URL               string         `json:"url"`
+	URL               *string        `json:"url"`
 	PDF               *PDF           `json:"pdf" gorm:"constraint:OnDelete:CASCADE"`
 	ProjectResourceID *int           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	AssetResourceID   *int           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
