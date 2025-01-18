@@ -41,7 +41,7 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 // @Success 200 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /projectResource/{id} [delete]
+// @Router /v1/projectResource/{id} [delete]
 func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	id := c.Param("id")
 	detailedResource, err := h.resourceService.GetDetailedResourceByID(c, id)
@@ -68,7 +68,7 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 // @Param program_id path string true "Program ID"
 // @Success 200 {array} dtos.AssetResource
 // @Failure 500 {object} map[string]string
-// @Router /assetResources/{program_id} [get]
+// @Router /v1/assetResources/{program_id} [get]
 func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
 	programId := c.Param("program_id")
 	assetResources, err := h.resourceService.GetAssetResourceByProgramID(c, programId)
@@ -86,7 +86,7 @@ func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
 // @Param body body dtos.UploadAssetResource true "Upload Asset Resource Request"
 // @Success 200 {object} dtos.AssetResource
 // @Failure 400 {object} map[string]string
-// @Router /assetResources [post]
+// @Router /v1/assetResources [post]
 func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
 	req := &dtos.UploadAssetResource{}
 	if err := c.ShouldBind(req); err != nil {
@@ -109,7 +109,7 @@ func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
 // @Param id path int true "Asset Resource ID"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
-// @Router /assetResources/{id} [delete]
+// @Router /v1/assetResources/{id} [delete]
 func (h *resourceHandler) DeleteAssetResource(c *gin.Context) {
 	id := c.Param("id")
 	err := h.resourceService.DeleteAssetResourceByID(c, id)

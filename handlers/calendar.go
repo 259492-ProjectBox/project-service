@@ -35,7 +35,7 @@ func NewCalendarHandler(calendarService services.CalendarService) CalendarHandle
 // @Success 201 {object} dtos.CalendarResponse "Successfully created calendar"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /calendar [post]
+// @Router /v1/calendars [post]
 func (h *calendarHandler) CreateCalendar(c *gin.Context) {
 	req := &dtos.CreateCalendarRequest{}
 	if err := c.ShouldBind(&req); err != nil {
@@ -59,7 +59,7 @@ func (h *calendarHandler) CreateCalendar(c *gin.Context) {
 // @Success 200 {object} []dtos.CalendarResponse "Successfully retrieved calendar events"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Calendar events not found"
-// @Router /calendar/program/{program_id} [get]
+// @Router /v1/calendars/program/{program_id} [get]
 func (h *calendarHandler) GetCalendarByProgramId(c *gin.Context) {
 	programId, err := strconv.Atoi(c.Param("program_id"))
 	if err != nil {
@@ -83,7 +83,7 @@ func (h *calendarHandler) GetCalendarByProgramId(c *gin.Context) {
 // @Success 200 {object} dtos.CalendarResponse "Successfully updated event"
 // @Failure 400 {object} map[string]interface{} "Invalid event ID or request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /calendar [put]
+// @Router /v1/calendars [put]
 func (h *calendarHandler) UpdateCalendar(c *gin.Context) {
 	calendar := &dtos.UpdateCalendarRequest{}
 	if err := c.ShouldBindJSON(&calendar); err != nil {
@@ -109,7 +109,7 @@ func (h *calendarHandler) UpdateCalendar(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Event deleted successfully"
 // @Failure 400 {object} map[string]interface{} "Invalid event ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /calendar/{id} [delete]
+// @Router /v1/calendars/{id} [delete]
 func (h *calendarHandler) DeleteCalendar(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

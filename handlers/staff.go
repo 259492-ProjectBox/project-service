@@ -34,7 +34,7 @@ func NewStaffHandler(staffService services.StaffService) StaffHandler {
 // @Success 200 {object} dtos.StaffResponse "Successfully retrieved staff"
 // @Failure 400 {object} map[string]interface{} "Invalid staff ID"
 // @Failure 404 {object} map[string]interface{} "Staff not found"
-// @Router /staff/{id} [get]
+// @Router /v1/staffs/{id} [get]
 func (h *staffHandler) GetStaffById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -57,7 +57,7 @@ func (h *staffHandler) GetStaffById(c *gin.Context) {
 // @Success 200 {object} []dtos.StaffResponse "Successfully retrieved staffs"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Staffs not found"
-// @Router /staff/program/{program_id} [get]
+// @Router /v1/staffs/program/{program_id} [get]
 func (h *staffHandler) GetStaffByProgramId(c *gin.Context) {
 	programId, err := strconv.Atoi(c.Param("program_id"))
 	if err != nil {
@@ -81,7 +81,7 @@ func (h *staffHandler) GetStaffByProgramId(c *gin.Context) {
 // @Success 201 {object} dtos.StaffResponse "Successfully created staff"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /staff [post]
+// @Router /v1/staffs [post]
 func (h *staffHandler) CreateStaff(c *gin.Context) {
 	req := &dtos.CreateStaffRequest{}
 	if err := c.ShouldBind(&req); err != nil {
@@ -105,7 +105,7 @@ func (h *staffHandler) CreateStaff(c *gin.Context) {
 // @Success 200 {object} dtos.StaffResponse "Successfully updated staff"
 // @Failure 400 {object} map[string]interface{} "Invalid staff ID or request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /staff [put]
+// @Router /v1/staffs [put]
 func (h *staffHandler) UpdateStaff(c *gin.Context) {
 	staff := &dtos.UpdateStaffRequest{}
 	if err := c.ShouldBindJSON(&staff); err != nil {

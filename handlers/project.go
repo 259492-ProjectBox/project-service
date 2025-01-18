@@ -36,7 +36,7 @@ func NewProjectHandler(projectService services.ProjectService) ProjectHandler {
 // @Success 201 {object} models.Project "Successfully created project"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /projects [post]
+// @Router /v1/projects [post]
 func (h *projectHandler) CreateProject(c *gin.Context) {
 	req := &dtos.CreateProjectRequest{}
 	if err := c.ShouldBind(req); err != nil {
@@ -62,7 +62,7 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 // @Success 200 {object} models.Project "Successfully updated project"
 // @Failure 400 {object} map[string]interface{} "Invalid project ID or request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /projects/{id} [put]
+// @Router /v1/projects/{id} [put]
 func (h *projectHandler) UpdateProject(c *gin.Context) {
 	req := &dtos.UpdateProjectRequest{}
 	if err := c.ShouldBind(req); err != nil {
@@ -88,7 +88,7 @@ func (h *projectHandler) UpdateProject(c *gin.Context) {
 // @Success 200 {object} models.Project "Successfully retrieved project"
 // @Failure 400 {object} map[string]interface{} "Invalid project ID"
 // @Failure 404 {object} map[string]interface{} "Project not found"
-// @Router /projects/{id} [get]
+// @Router /v1/projects/{id} [get]
 func (h *projectHandler) GetProjectById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -114,7 +114,7 @@ func (h *projectHandler) GetProjectById(c *gin.Context) {
 // @Success 200 {object} []models.Project "Successfully retrieved project"
 // @Failure 400 {object} map[string]interface{} "Invalid student ID"
 // @Failure 404 {object} map[string]interface{} "Project not found"
-// @Router /projects/student/{student_id} [get]
+// @Router /v1/projects/student/{student_id} [get]
 func (h *projectHandler) GetProjectsByStudentId(c *gin.Context) {
 	studentId := c.Param("student_id")
 
@@ -136,7 +136,7 @@ func (h *projectHandler) GetProjectsByStudentId(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Project deleted successfully"
 // @Failure 400 {object} map[string]interface{} "Invalid project ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /projects/{id} [delete]
+// @Router /v1/projects/{id} [delete]
 func (h *projectHandler) DeleteProject(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

@@ -31,7 +31,7 @@ func NewProgramHandler(programService services.ProgramService) ProgramHandler {
 // @Produce json
 // @Success 200 {array} models.Program "Successfully fetched programs"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /programs [get]
+// @Router /v1/programs [get]
 func (h *programHandler) GetPrograms(c *gin.Context) {
 	programs, err := h.programService.GetPrograms(c)
 	if err != nil {
@@ -50,7 +50,7 @@ func (h *programHandler) GetPrograms(c *gin.Context) {
 // @Success 201 {object} models.Program "Successfully created program"
 // @Failure 400 {object} gin.H "Invalid request body"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /programs [post]
+// @Router /v1/programs [post]
 func (h *programHandler) CreateProgram(c *gin.Context) {
 	var program dtos.CreateProgramRequest
 	if err := c.ShouldBindJSON(&program); err != nil {
@@ -75,7 +75,7 @@ func (h *programHandler) CreateProgram(c *gin.Context) {
 // @Success 200 {object} gin.H "Successfully updated program name"
 // @Failure 400 {object} gin.H "Invalid request body or parameters"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /programs/update-name [put]
+// @Router /v1/programs/update-name [put]
 func (h *programHandler) UpdateProgramName(c *gin.Context) {
 	var program models.Program
 	// Bind JSON to Program object
