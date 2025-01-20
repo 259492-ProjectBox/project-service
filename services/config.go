@@ -6,7 +6,7 @@ import (
 )
 
 type ConfigService interface {
-	GetConfigByProgramId(programId int) ([]dtos.ConfigReponse, error)
+	GetConfigByProgramId(programId int) ([]dtos.ConfigResponse, error)
 }
 
 type configServiceImpl struct {
@@ -19,12 +19,12 @@ func NewConfigService(configRepo repositories.ConfigRepository) ConfigService {
 	}
 }
 
-func (s *configServiceImpl) GetConfigByProgramId(programId int) ([]dtos.ConfigReponse, error) {
+func (s *configServiceImpl) GetConfigByProgramId(programId int) ([]dtos.ConfigResponse, error) {
 	configs, err := s.configRepo.GetConfigByProgramId(programId)
-	var configDtos []dtos.ConfigReponse
+	var configDtos []dtos.ConfigResponse
 
 	for _, config := range configs {
-		configDtos = append(configDtos, dtos.ConfigReponse{
+		configDtos = append(configDtos, dtos.ConfigResponse{
 			ProgramID:  config.ProgramID,
 			ConfigName: config.ConfigName,
 			Value:      config.Value,

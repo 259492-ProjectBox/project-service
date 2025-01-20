@@ -10,6 +10,6 @@ func SetupProjectConfigRouter(r *gin.RouterGroup, handler handlers.ProjectConfig
 	{
 
 		projectconfigRouteV1.GET("/program/:program_id", handler.GetProjectConfigByProgramId)
-		projectconfigRouteV1.POST("/", handler.UpsertProjectConfig)
+		projectconfigRouteV1.PUT("/", handler.UpsertProjectConfig)
 	}
 }

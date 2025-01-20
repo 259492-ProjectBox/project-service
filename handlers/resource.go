@@ -41,7 +41,7 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 // @Success 200 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /v1/projectResource/{id} [delete]
+// @Router /v1/projectResources/{id} [delete]
 func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	id := c.Param("id")
 	detailedResource, err := h.resourceService.GetDetailedResourceByID(c, id)
@@ -66,7 +66,7 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 // @Description Retrieve all asset resources associated with a specific program
 // @Tags Resource
 // @Param program_id path string true "Program ID"
-// @Success 200 {array} dtos.AssetResource
+// @Success 200 {array} []models.AssetResource
 // @Failure 500 {object} map[string]string
 // @Router /v1/assetResources/{program_id} [get]
 func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
@@ -84,7 +84,7 @@ func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
 // @Description Upload a new asset resource for a specific program
 // @Tags Resource
 // @Param body body dtos.UploadAssetResource true "Upload Asset Resource Request"
-// @Success 200 {object} dtos.AssetResource
+// @Success 200 {object} models.AssetResource
 // @Failure 400 {object} map[string]string
 // @Router /v1/assetResources [post]
 func (h *resourceHandler) UploadAssetResource(c *gin.Context) {

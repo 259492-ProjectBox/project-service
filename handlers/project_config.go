@@ -14,13 +14,13 @@ type ProjectConfigHandler interface {
 	UpsertProjectConfig(c *gin.Context)
 }
 
-type projectconfigHandler struct {
-	projectconfigService services.ProjectConfigService
+type projectConfigHandler struct {
+	projectConfigService services.ProjectConfigService
 }
 
-func NewProjectConfigHandler(projectconfigService services.ProjectConfigService) ProjectConfigHandler {
-	return &projectconfigHandler{
-		projectconfigService: projectconfigService,
+func NewProjectConfigHandler(projectConfigService services.ProjectConfigService) ProjectConfigHandler {
+	return &projectConfigHandler{
+		projectConfigService: projectConfigService,
 	}
 }
 
@@ -34,14 +34,14 @@ func NewProjectConfigHandler(projectconfigService services.ProjectConfigService)
 // @Failure 404 {object} map[string]interface{} "Program not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /v1/projectConfigs/program/{program_id} [get]
-func (h *projectconfigHandler) GetProjectConfigByProgramId(c *gin.Context) {
+func (h *projectConfigHandler) GetProjectConfigByProgramId(c *gin.Context) {
 	programId, err := strconv.Atoi(c.Param("program_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
 		return
 	}
 
-	configs, err := h.projectconfigService.GetProjectConfigByProgramId(programId)
+	configs, err := h.projectConfigService.GetProjectConfigByProgramId(programId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -65,15 +65,15 @@ func (h *projectconfigHandler) GetProjectConfigByProgramId(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Program not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /v1/projectConfig [post]
-func (h *projectconfigHandler) UpsertProjectConfig(c *gin.Context) {
+// @Router /v1/projectConfigs [put]
+func (h *projectConfigHandler) UpsertProjectConfig(c *gin.Context) {
 	var configs []dtos.ProjectConfigUpsertRequest
 	if err := c.ShouldBindJSON(&configs); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.projectconfigService.UpdateProjectConfig(configs)
+	err := h.projectConfigService.UpsertProjectConfig(configs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

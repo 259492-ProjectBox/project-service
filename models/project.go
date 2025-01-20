@@ -30,7 +30,6 @@ type ProjectRequest struct {
 	AbstractText     *string           `json:"abstract_text"`
 	AcademicYear     int               `json:"academic_year"`
 	Semester         int               `json:"semester"`
-	IsApproved       bool              `json:"is_approved"`
 	SectionID        *string           `json:"section_id"`
 	ProgramID        int               `json:"program_id"`
 	Program          Program           `json:"program"`

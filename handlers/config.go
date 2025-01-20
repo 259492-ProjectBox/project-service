@@ -27,11 +27,11 @@ func NewConfigHandler(configService services.ConfigService) ConfigHandler {
 // @Tags Config
 // @Produce json
 // @Param program_id path int true "Program ID"
-// @Success 200 {object} []dtos.ConfigReponse "Successfully fetched config"
+// @Success 200 {object} []dtos.ConfigResponse "Successfully fetched config"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Program not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /v1/config/program/{program_id} [get]
+// @Router /v1/configs/program/{program_id} [get]
 func (h *configHandler) GetConfigByProgramId(c *gin.Context) {
 	programId, err := strconv.Atoi(c.Param("program_id"))
 	if err != nil {

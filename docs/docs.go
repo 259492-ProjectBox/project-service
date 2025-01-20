@@ -24,7 +24,123 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/calendar": {
+        "/v1/assetResources": {
+            "post": {
+                "description": "Upload a new asset resource for a specific program",
+                "tags": [
+                    "Resource"
+                ],
+                "summary": "Upload an asset resource",
+                "parameters": [
+                    {
+                        "description": "Upload Asset Resource Request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadAssetResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AssetResource"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/assetResources/{id}": {
+            "delete": {
+                "description": "Delete an asset resource by its ID",
+                "tags": [
+                    "Resource"
+                ],
+                "summary": "Delete an asset resource",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Asset Resource ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/assetResources/{program_id}": {
+            "get": {
+                "description": "Retrieve all asset resources associated with a specific program",
+                "tags": [
+                    "Resource"
+                ],
+                "summary": "Get asset resources by program ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/models.AssetResource"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/calendars": {
             "put": {
                 "description": "Updates an event by its ID with the provided data",
                 "consumes": [
@@ -118,7 +234,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/calendar/GetByMajorID/{program_id}": {
+        "/v1/calendars/program/{program_id}": {
             "get": {
                 "description": "Fetches all calendar events for a given program",
                 "produces": [
@@ -164,7 +280,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/calendar/{id}": {
+        "/v1/calendars/{id}": {
             "delete": {
                 "description": "Deletes the specified event using its ID",
                 "produces": [
@@ -208,7 +324,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/config/GetByMajorId/{program_id}": {
+        "/v1/configs/program/{program_id}": {
             "get": {
                 "description": "Fetches all config for a given program",
                 "produces": [
@@ -233,7 +349,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dtos.ConfigReponse"
+                                "$ref": "#/definitions/dtos.ConfigResponse"
                             }
                         }
                     },
@@ -261,250 +377,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/staff": {
-            "put": {
-                "description": "Updates an staff by their ID with the provided data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Staff"
-                ],
-                "summary": "Update an existing staff",
-                "parameters": [
-                    {
-                        "description": "Updated Staff Data",
-                        "name": "staff",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UpdateStaffRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully updated staff",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.StaffResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid staff ID or request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new staff",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Staff"
-                ],
-                "summary": "Create a new staff",
-                "parameters": [
-                    {
-                        "description": "Staff Data",
-                        "name": "staff",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.CreateStaffRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successfully created staff",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.StaffResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/staff/GetByMajorID/{program_id}": {
+        "/v1/programs": {
             "get": {
-                "description": "Fetches all staffs for a given program",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Staff"
-                ],
-                "summary": "Get staffs by program ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Program ID",
-                        "name": "program_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved staffs",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dtos.StaffResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid program ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Staffs not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/staff/{id}": {
-            "get": {
-                "description": "Fetches an staff by their ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Staff"
-                ],
-                "summary": "Get staff by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Staff ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved staff",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.StaffResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid staff ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Staff not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/program": {
-            "post": {
-                "description": "Create a new program",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Retrieves all programs from the database",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Program"
                 ],
-                "summary": "Create program",
-                "parameters": [
-                    {
-                        "description": "Program object",
-                        "name": "program",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.CreateMajorRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successfully created program",
-                        "schema": {
-                            "$ref": "#/definitions/models.Program"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/program/GetAllMajor": {
-            "get": {
-                "description": "Fetches all program",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Program"
-                ],
-                "summary": "Get all program",
+                "summary": "Get All Programs",
                 "responses": {
                     "200": {
-                        "description": "Successfully fetched program",
+                        "description": "Successfully fetched programs",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -520,11 +405,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/program/UpdateMajorName": {
-            "put": {
-                "description": "Update the name of a program",
+            },
+            "post": {
+                "description": "Creates a new program in the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -534,10 +417,58 @@ const docTemplate = `{
                 "tags": [
                     "Program"
                 ],
-                "summary": "Update program name",
+                "summary": "Create a New Program",
                 "parameters": [
                     {
-                        "description": "Program object containing ID and name",
+                        "description": "Program creation details",
+                        "name": "program",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateProgramRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created program",
+                        "schema": {
+                            "$ref": "#/definitions/models.Program"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/programs/update-name": {
+            "put": {
+                "description": "Updates the name of an existing program",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Program"
+                ],
+                "summary": "Update Program Name",
+                "parameters": [
+                    {
+                        "description": "Program details with ID and updated name",
                         "name": "program",
                         "in": "body",
                         "required": true,
@@ -550,7 +481,8 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully updated program name",
                         "schema": {
-                            "$ref": "#/definitions/models.Program"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -570,8 +502,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/projectConfig": {
-            "post": {
+        "/v1/projectConfigs": {
+            "put": {
                 "description": "Update all project config if ID is provided, otherwise insert new project config",
                 "consumes": [
                     "application/json"
@@ -629,7 +561,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/projectConfig/GetByMajorId/{program_id}": {
+        "/v1/projectConfigs/program/{program_id}": {
             "get": {
                 "description": "Fetches all config for a given program",
                 "produces": [
@@ -682,13 +614,118 @@ const docTemplate = `{
                 }
             }
         },
-        "/projectResource/{id}": {
+        "/v1/projectResourceConfigs": {
+            "put": {
+                "description": "Insert or update project resource configurations. If an ID is provided, it updates the configuration; otherwise, it inserts a new configuration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectResourceConfig"
+                ],
+                "summary": "Upsert Project Resource Configurations",
+                "parameters": [
+                    {
+                        "description": "configuration to upsert",
+                        "name": "configs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ProjectResourceConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully upsert configurations",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/projectResourceConfigs/program/{program_id}": {
+            "get": {
+                "description": "Fetch all project resource configurations for a given program ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectResourceConfig"
+                ],
+                "summary": "Get Project Resource Config by Program ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully fetched configurations",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/models.ProjectResourceConfig"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "No configurations found for the given program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/projectResources/{id}": {
             "delete": {
-                "description": "Delete a resource and its file",
+                "description": "Delete a project resource and its associated file",
                 "tags": [
                     "Resource"
                 ],
-                "summary": "Delete a resource",
+                "summary": "Delete a project resource",
                 "parameters": [
                     {
                         "type": "integer",
@@ -702,19 +739,34 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             }
         },
-        "/projects": {
+        "/v1/projects": {
             "post": {
                 "description": "Creates a new project with the provided data",
                 "consumes": [
@@ -762,53 +814,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects/advisor/{advisor_id}": {
-            "get": {
-                "description": "Fetches a project by its advisor ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Get a project by Advisor ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Advisor ID",
-                        "name": "advisor_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved project",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Project"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid advisor ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Project not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/student/{student_id}": {
+        "/v1/projects/student/{student_id}": {
             "get": {
                 "description": "Fetches a project by its student ID",
                 "produces": [
@@ -854,7 +860,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects/{id}": {
+        "/v1/projects/{id}": {
             "get": {
                 "description": "Fetches a project by its unique ID",
                 "produces": [
@@ -991,6 +997,189 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/staffs": {
+            "put": {
+                "description": "Updates an staff by their ID with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Update an existing staff",
+                "parameters": [
+                    {
+                        "description": "Updated Staff Data",
+                        "name": "staff",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UpdateStaffRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated staff",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.StaffResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid staff ID or request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new staff",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Create a new staff",
+                "parameters": [
+                    {
+                        "description": "Staff Data",
+                        "name": "staff",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateStaffRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created staff",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.StaffResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/staffs/program/{program_id}": {
+            "get": {
+                "description": "Fetches all staffs for a given program",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get staffs by program ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved staffs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.StaffResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Staffs not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/staffs/{id}": {
+            "get": {
+                "description": "Fetches an staff by their ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get staff by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Staff ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved staff",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.StaffResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid staff ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Staff not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1017,7 +1206,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.ConfigReponse": {
+        "dtos.ConfigResponse": {
             "type": "object",
             "properties": {
                 "config_name": {
@@ -1051,6 +1240,14 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.CreateProgramRequest": {
+            "type": "object",
+            "properties": {
+                "program_name": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.CreateStaffRequest": {
             "type": "object",
             "properties": {
@@ -1063,45 +1260,11 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "program_id": {
-                    "type": "integer"
-                },
                 "prefix": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.CreateMajorRequest": {
-            "type": "object",
-            "required": [
-                "program_name"
-            ],
-            "properties": {
-                "program_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.StaffResponse": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "last_name": {
                     "type": "string"
                 },
                 "program_id": {
                     "type": "integer"
-                },
-                "prefix": {
-                    "type": "string"
                 }
             }
         },
@@ -1136,6 +1299,29 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.StaffResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "program_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1177,11 +1363,34 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
+                "prefix": {
+                    "type": "string"
+                },
+                "program_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.UploadAssetResource": {
+            "type": "object"
+        },
+        "models.AssetResource": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
                 "program_id": {
                     "type": "integer"
                 },
-                "prefix": {
-                    "type": "string"
+                "resource": {
+                    "$ref": "#/definitions/models.Resource"
                 }
             }
         },
@@ -1205,45 +1414,16 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Staff": {
+        "models.FileExtension": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
+                "extension_name": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "last_name": {
-                    "type": "string"
-                },
-                "program": {
-                    "$ref": "#/definitions/models.Program"
-                },
-                "program_id": {
-                    "type": "integer"
-                },
-                "prefix": {
-                    "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Project"
-                    }
-                }
-            }
-        },
-        "models.Program": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "program_name": {
+                "mime_type": {
                     "type": "string"
                 }
             }
@@ -1278,8 +1458,18 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "pdf_id": {
-                    "description": "Foreign key",
                     "type": "integer"
+                }
+            }
+        },
+        "models.Program": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "program_name": {
+                    "type": "string"
                 }
             }
         },
@@ -1301,22 +1491,7 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "staffs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Staff"
-                    }
-                },
                 "id": {
-                    "type": "integer"
-                },
-                "is_approved": {
-                    "type": "boolean"
-                },
-                "program": {
-                    "$ref": "#/definitions/models.Program"
-                },
-                "program_id": {
                     "type": "integer"
                 },
                 "members": {
@@ -1324,6 +1499,12 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Student"
                     }
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
                 },
                 "project_no": {
                     "type": "string"
@@ -1340,10 +1521,19 @@ const docTemplate = `{
                 "semester": {
                     "type": "integer"
                 },
+                "staffs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Staff"
+                    }
+                },
                 "title_en": {
                     "type": "string"
                 },
                 "title_th": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1359,11 +1549,52 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ProjectResourceConfig": {
+            "type": "object",
+            "properties": {
+                "file_extension": {
+                    "$ref": "#/definitions/models.FileExtension"
+                },
+                "file_extension_id": {
+                    "type": "integer"
+                },
+                "icon_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "max_file_size": {
+                    "type": "integer"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/models.ResourceType"
+                },
+                "resource_type_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Resource": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
+                },
+                "file_extension": {
+                    "$ref": "#/definitions/models.FileExtension"
+                },
+                "file_extension_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1385,6 +1616,9 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -1394,16 +1628,40 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "mime_type": {
+                "type_name": {
                     "type": "string"
                 }
             }
         },
-        "models.ResponseMessage": {
+        "models.Staff": {
             "type": "object",
             "properties": {
-                "message": {
+                "email": {
                     "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Project"
+                    }
                 }
             }
         },
@@ -1411,35 +1669,18 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "description": "Unique email address",
                     "type": "string"
                 },
                 "first_name": {
-                    "description": "First name of the student",
                     "type": "string"
                 },
                 "id": {
-                    "description": "Use ` + "`" + `ID` + "`" + ` as the primary key",
                     "type": "string"
                 },
                 "last_name": {
-                    "description": "Last name of the student",
                     "type": "string"
                 },
-                "program": {
-                    "description": "Program related to student",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.Program"
-                        }
-                    ]
-                },
-                "program_id": {
-                    "description": "Program ID, not null",
-                    "type": "integer"
-                },
                 "prefix": {
-                    "description": "Optional field for title (e.g., Mr., Ms., etc.)",
                     "type": "string"
                 }
             }
@@ -1459,7 +1700,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",
 	Description:      "This is a sample server celler server.",

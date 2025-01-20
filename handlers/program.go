@@ -30,7 +30,7 @@ func NewProgramHandler(programService services.ProgramService) ProgramHandler {
 // @Tags Program
 // @Produce json
 // @Success 200 {array} models.Program "Successfully fetched programs"
-// @Failure 500 {object} gin.H "Internal server error"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /v1/programs [get]
 func (h *programHandler) GetPrograms(c *gin.Context) {
 	programs, err := h.programService.GetPrograms(c)
@@ -48,8 +48,8 @@ func (h *programHandler) GetPrograms(c *gin.Context) {
 // @Produce json
 // @Param program body dtos.CreateProgramRequest true "Program creation details"
 // @Success 201 {object} models.Program "Successfully created program"
-// @Failure 400 {object} gin.H "Invalid request body"
-// @Failure 500 {object} gin.H "Internal server error"
+// @Failure 400 {object} map[string]interface{} "Invalid request body"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /v1/programs [post]
 func (h *programHandler) CreateProgram(c *gin.Context) {
 	var program dtos.CreateProgramRequest
@@ -72,9 +72,9 @@ func (h *programHandler) CreateProgram(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param program body models.Program true "Program details with ID and updated name"
-// @Success 200 {object} gin.H "Successfully updated program name"
-// @Failure 400 {object} gin.H "Invalid request body or parameters"
-// @Failure 500 {object} gin.H "Internal server error"
+// @Success 200 {object} map[string]interface{} "Successfully updated program name"
+// @Failure 400 {object} map[string]interface{} "Invalid request body or parameters"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /v1/programs/update-name [put]
 func (h *programHandler) UpdateProgramName(c *gin.Context) {
 	var program models.Program

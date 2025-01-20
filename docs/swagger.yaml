@@ -1,3 +1,4 @@
+basePath: /api
 definitions:
   dtos.CalendarResponse:
     properties:
@@ -14,7 +15,7 @@ definitions:
       title:
         type: string
     type: object
-  dtos.ConfigReponse:
+  dtos.ConfigResponse:
     properties:
       config_name:
         type: string
@@ -36,6 +37,11 @@ definitions:
       title:
         type: string
     type: object
+  dtos.CreateProgramRequest:
+    properties:
+      program_name:
+        type: string
+    type: object
   dtos.CreateStaffRequest:
     properties:
       email:
@@ -44,32 +50,10 @@ definitions:
         type: string
       last_name:
         type: string
-      program_id:
-        type: integer
       prefix:
-        type: string
-    type: object
-  dtos.CreateMajorRequest:
-    properties:
-      program_name:
-        type: string
-    required:
-    - program_name
-    type: object
-  dtos.StaffResponse:
-    properties:
-      email:
-        type: string
-      first_name:
-        type: string
-      id:
-        type: integer
-      last_name:
         type: string
       program_id:
         type: integer
-      prefix:
-        type: string
     type: object
   dtos.ProjectConfigResponse:
     properties:
@@ -92,6 +76,21 @@ definitions:
         type: integer
       title:
         type: string
+    type: object
+  dtos.StaffResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      prefix:
+        type: string
+      program_id:
+        type: integer
     type: object
   dtos.UpdateCalendarRequest:
     properties:
@@ -118,10 +117,25 @@ definitions:
         type: integer
       last_name:
         type: string
-      program_id:
-        type: integer
       prefix:
         type: string
+      program_id:
+        type: integer
+    type: object
+  dtos.UploadAssetResource:
+    type: object
+  models.AssetResource:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
+      resource:
+        $ref: '#/definitions/models.Resource'
     type: object
   models.Course:
     properties:
@@ -136,32 +150,13 @@ definitions:
       program_id:
         type: integer
     type: object
-  models.Staff:
+  models.FileExtension:
     properties:
-      email:
-        type: string
-      first_name:
+      extension_name:
         type: string
       id:
         type: integer
-      last_name:
-        type: string
-      program:
-        $ref: '#/definitions/models.Program'
-      program_id:
-        type: integer
-      prefix:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/models.Project'
-        type: array
-    type: object
-  models.Program:
-    properties:
-      id:
-        type: integer
-      program_name:
+      mime_type:
         type: string
     type: object
   models.PDF:
@@ -184,8 +179,14 @@ definitions:
       page_number:
         type: integer
       pdf_id:
-        description: Foreign key
         type: integer
+    type: object
+  models.Program:
+    properties:
+      id:
+        type: integer
+      program_name:
+        type: string
     type: object
   models.Project:
     properties:
@@ -199,22 +200,16 @@ definitions:
         type: integer
       created_at:
         type: string
-      staffs:
-        items:
-          $ref: '#/definitions/models.Staff'
-        type: array
       id:
-        type: integer
-      is_approved:
-        type: boolean
-      program:
-        $ref: '#/definitions/models.Program'
-      program_id:
         type: integer
       members:
         items:
           $ref: '#/definitions/models.Student'
         type: array
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
       project_no:
         type: string
       project_resources:
@@ -225,9 +220,15 @@ definitions:
         type: string
       semester:
         type: integer
+      staffs:
+        items:
+          $ref: '#/definitions/models.Staff'
+        type: array
       title_en:
         type: string
       title_th:
+        type: string
+      updated_at:
         type: string
     type: object
   models.ProjectResource:
@@ -237,10 +238,37 @@ definitions:
       resource:
         $ref: '#/definitions/models.Resource'
     type: object
+  models.ProjectResourceConfig:
+    properties:
+      file_extension:
+        $ref: '#/definitions/models.FileExtension'
+      file_extension_id:
+        type: integer
+      icon_name:
+        type: string
+      id:
+        type: integer
+      max_file_size:
+        type: integer
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
+      resource_type:
+        $ref: '#/definitions/models.ResourceType'
+      resource_type_id:
+        type: integer
+      title:
+        type: string
+    type: object
   models.Resource:
     properties:
       created_at:
         type: string
+      file_extension:
+        $ref: '#/definitions/models.FileExtension'
+      file_extension_id:
+        type: integer
       id:
         type: integer
       path:
@@ -255,42 +283,48 @@ definitions:
         type: integer
       title:
         type: string
+      url:
+        type: string
     type: object
   models.ResourceType:
     properties:
       id:
         type: integer
-      mime_type:
+      type_name:
         type: string
     type: object
-  models.ResponseMessage:
+  models.Staff:
     properties:
-      message:
+      email:
         type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      prefix:
+        type: string
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
+      projects:
+        items:
+          $ref: '#/definitions/models.Project'
+        type: array
     type: object
   models.Student:
     properties:
       email:
-        description: Unique email address
         type: string
       first_name:
-        description: First name of the student
         type: string
       id:
-        description: Use `ID` as the primary key
         type: string
       last_name:
-        description: Last name of the student
         type: string
-      program:
-        allOf:
-        - $ref: '#/definitions/models.Program'
-        description: Program related to student
-      program_id:
-        description: Program ID, not null
-        type: integer
       prefix:
-        description: Optional field for title (e.g., Mr., Ms., etc.)
         type: string
     type: object
 info:
@@ -306,7 +340,83 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /calendar:
+  /v1/assetResources:
+    post:
+      description: Upload a new asset resource for a specific program
+      parameters:
+      - description: Upload Asset Resource Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UploadAssetResource'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AssetResource'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload an asset resource
+      tags:
+      - Resource
+  /v1/assetResources/{id}:
+    delete:
+      description: Delete an asset resource by its ID
+      parameters:
+      - description: Asset Resource ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an asset resource
+      tags:
+      - Resource
+  /v1/assetResources/{program_id}:
+    get:
+      description: Retrieve all asset resources associated with a specific program
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.AssetResource'
+              type: array
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset resources by program ID
+      tags:
+      - Resource
+  /v1/calendars:
     post:
       consumes:
       - application/json
@@ -369,7 +479,7 @@ paths:
       summary: Update an existing event
       tags:
       - Calendar
-  /calendar/{id}:
+  /v1/calendars/{id}:
     delete:
       description: Deletes the specified event using its ID
       parameters:
@@ -399,7 +509,7 @@ paths:
       summary: Delete an event by ID
       tags:
       - Calendar
-  /calendar/GetByMajorID/{program_id}:
+  /v1/calendars/program/{program_id}:
     get:
       description: Fetches all calendar events for a given program
       parameters:
@@ -430,7 +540,7 @@ paths:
       summary: Get calendar by program ID
       tags:
       - Calendar
-  /config/GetByMajorId/{program_id}:
+  /v1/configs/program/{program_id}:
     get:
       description: Fetches all config for a given program
       parameters:
@@ -446,7 +556,7 @@ paths:
           description: Successfully fetched config
           schema:
             items:
-              $ref: '#/definitions/dtos.ConfigReponse'
+              $ref: '#/definitions/dtos.ConfigResponse'
             type: array
         "400":
           description: Invalid program ID
@@ -466,169 +576,14 @@ paths:
       summary: Get config by program ID
       tags:
       - Config
-  /staff:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new staff
-      parameters:
-      - description: Staff Data
-        in: body
-        name: staff
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.CreateStaffRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Successfully created staff
-          schema:
-            $ref: '#/definitions/dtos.StaffResponse'
-        "400":
-          description: Invalid request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a new staff
-      tags:
-      - Staff
-    put:
-      consumes:
-      - application/json
-      description: Updates an staff by their ID with the provided data
-      parameters:
-      - description: Updated Staff Data
-        in: body
-        name: staff
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UpdateStaffRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated staff
-          schema:
-            $ref: '#/definitions/dtos.StaffResponse'
-        "400":
-          description: Invalid staff ID or request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update an existing staff
-      tags:
-      - Staff
-  /staff/{id}:
+  /v1/programs:
     get:
-      description: Fetches an staff by their ID
-      parameters:
-      - description: Staff ID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: Retrieves all programs from the database
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully retrieved staff
-          schema:
-            $ref: '#/definitions/dtos.StaffResponse'
-        "400":
-          description: Invalid staff ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Staff not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get staff by ID
-      tags:
-      - Staff
-  /staff/GetByMajorID/{program_id}:
-    get:
-      description: Fetches all staffs for a given program
-      parameters:
-      - description: Program ID
-        in: path
-        name: program_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved staffs
-          schema:
-            items:
-              $ref: '#/definitions/dtos.StaffResponse'
-            type: array
-        "400":
-          description: Invalid program ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Staffs not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get staffs by program ID
-      tags:
-      - Staff
-  /program:
-    post:
-      consumes:
-      - application/json
-      description: Create a new program
-      parameters:
-      - description: Program object
-        in: body
-        name: program
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.CreateMajorRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Successfully created program
-          schema:
-            $ref: '#/definitions/models.Program'
-        "400":
-          description: Invalid request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create program
-      tags:
-      - Program
-  /program/GetAllMajor:
-    get:
-      description: Fetches all program
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully fetched program
+          description: Successfully fetched programs
           schema:
             items:
               $ref: '#/definitions/models.Program'
@@ -638,16 +593,47 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get all program
+      summary: Get All Programs
       tags:
       - Program
-  /program/UpdateMajorName:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new program in the database
+      parameters:
+      - description: Program creation details
+        in: body
+        name: program
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateProgramRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created program
+          schema:
+            $ref: '#/definitions/models.Program'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a New Program
+      tags:
+      - Program
+  /v1/programs/update-name:
     put:
       consumes:
       - application/json
-      description: Update the name of a program
+      description: Updates the name of an existing program
       parameters:
-      - description: Program object containing ID and name
+      - description: Program details with ID and updated name
         in: body
         name: program
         required: true
@@ -659,7 +645,8 @@ paths:
         "200":
           description: Successfully updated program name
           schema:
-            $ref: '#/definitions/models.Program'
+            additionalProperties: true
+            type: object
         "400":
           description: Invalid request body or parameters
           schema:
@@ -670,11 +657,11 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Update program name
+      summary: Update Program Name
       tags:
       - Program
-  /projectConfig:
-    post:
+  /v1/projectConfigs:
+    put:
       consumes:
       - application/json
       description: Update all project config if ID is provided, otherwise insert new
@@ -714,7 +701,7 @@ paths:
       summary: Upsert project config
       tags:
       - ProjectConfig
-  /projectConfig/GetByMajorId/{program_id}:
+  /v1/projectConfigs/program/{program_id}:
     get:
       description: Fetches all config for a given program
       parameters:
@@ -750,9 +737,81 @@ paths:
       summary: Get config by program ID
       tags:
       - ProjectConfig
-  /projectResource/{id}:
+  /v1/projectResourceConfigs:
+    put:
+      consumes:
+      - application/json
+      description: Insert or update project resource configurations. If an ID is provided,
+        it updates the configuration; otherwise, it inserts a new configuration.
+      parameters:
+      - description: configuration to upsert
+        in: body
+        name: configs
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectResourceConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully upsert configurations
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upsert Project Resource Configurations
+      tags:
+      - ProjectResourceConfig
+  /v1/projectResourceConfigs/program/{program_id}:
+    get:
+      description: Fetch all project resource configurations for a given program ID
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully fetched configurations
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.ProjectResourceConfig'
+              type: array
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: No configurations found for the given program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Project Resource Config by Program ID
+      tags:
+      - ProjectResourceConfig
+  /v1/projectResources/{id}:
     delete:
-      description: Delete a resource and its file
+      description: Delete a project resource and its associated file
       parameters:
       - description: Resource ID
         in: path
@@ -763,15 +822,25 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
-      summary: Delete a resource
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a project resource
       tags:
       - Resource
-  /projects:
+  /v1/projects:
     post:
       consumes:
       - application/json
@@ -803,7 +872,7 @@ paths:
       summary: Create a new project
       tags:
       - Project
-  /projects/{id}:
+  /v1/projects/{id}:
     delete:
       description: Deletes the specified project using its ID
       parameters:
@@ -897,38 +966,7 @@ paths:
       summary: Update an existing project
       tags:
       - Project
-  /projects/advisor/{advisor_id}:
-    get:
-      description: Fetches a project by its advisor ID
-      parameters:
-      - description: Advisor ID
-        in: path
-        name: advisor_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved project
-          schema:
-            items:
-              $ref: '#/definitions/models.Project'
-            type: array
-        "400":
-          description: Invalid advisor ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Project not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get a project by Advisor ID
-      tags:
-      - Project
-  /projects/student/{student_id}:
+  /v1/projects/student/{student_id}:
     get:
       description: Fetches a project by its student ID
       parameters:
@@ -959,6 +997,129 @@ paths:
       summary: Get a project by Student ID
       tags:
       - Project
+  /v1/staffs:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new staff
+      parameters:
+      - description: Staff Data
+        in: body
+        name: staff
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateStaffRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created staff
+          schema:
+            $ref: '#/definitions/dtos.StaffResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new staff
+      tags:
+      - Staff
+    put:
+      consumes:
+      - application/json
+      description: Updates an staff by their ID with the provided data
+      parameters:
+      - description: Updated Staff Data
+        in: body
+        name: staff
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateStaffRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated staff
+          schema:
+            $ref: '#/definitions/dtos.StaffResponse'
+        "400":
+          description: Invalid staff ID or request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing staff
+      tags:
+      - Staff
+  /v1/staffs/{id}:
+    get:
+      description: Fetches an staff by their ID
+      parameters:
+      - description: Staff ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved staff
+          schema:
+            $ref: '#/definitions/dtos.StaffResponse'
+        "400":
+          description: Invalid staff ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Staff not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get staff by ID
+      tags:
+      - Staff
+  /v1/staffs/program/{program_id}:
+    get:
+      description: Fetches all staffs for a given program
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved staffs
+          schema:
+            items:
+              $ref: '#/definitions/dtos.StaffResponse'
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Staffs not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get staffs by program ID
+      tags:
+      - Staff
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

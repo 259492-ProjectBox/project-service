@@ -8,7 +8,7 @@ import (
 
 type ProjectConfigService interface {
 	GetProjectConfigByProgramId(programId int) ([]dtos.ProjectConfigResponse, error)
-	UpdateProjectConfig(configs []dtos.ProjectConfigUpsertRequest) error
+	UpsertProjectConfig(configs []dtos.ProjectConfigUpsertRequest) error
 }
 
 type projectconfigServiceImpl struct {
@@ -39,7 +39,7 @@ func (s *projectconfigServiceImpl) GetProjectConfigByProgramId(programId int) ([
 
 }
 
-func (s *projectconfigServiceImpl) UpdateProjectConfig(configs []dtos.ProjectConfigUpsertRequest) error {
+func (s *projectconfigServiceImpl) UpsertProjectConfig(configs []dtos.ProjectConfigUpsertRequest) error {
 	var updateProjectConfigs []models.ProjectConfig
 	var insertProjectConfigs []models.ProjectConfig
 

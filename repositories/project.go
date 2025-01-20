@@ -273,10 +273,10 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		AcademicYear: projectReq.AcademicYear,
 		SectionID:    projectReq.SectionID,
 		Semester:     projectReq.Semester,
-		ProgramID:    projectReq.ProgramID,
-		CourseID:     projectReq.CourseID,
 		Program:      projectReq.Program,
+		CourseID:     projectReq.CourseID,
 		Course:       projectReq.Course,
+		ProgramID:    projectReq.ProgramID,
 		Members:      projectReq.Members,
 	}
 

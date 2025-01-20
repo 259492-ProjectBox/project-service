@@ -19,8 +19,10 @@ func NewApp(
 	calendarHandler handlers.CalendarHandler,
 	resourceHandler handlers.ResourceHandler,
 	staffHandler handlers.StaffHandler,
-	configHanler handlers.ConfigHandler,
-	projectconfigHandler handlers.ProjectConfigHandler,
+	courseHandler handlers.CourseHandler,
+	configHandler handlers.ConfigHandler,
+	projectConfigHandler handlers.ProjectConfigHandler,
+	projectResourceConfig handlers.ProjectResourceConfigHandler,
 	programHandler handlers.ProgramHandler,
 ) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
@@ -41,10 +43,12 @@ func NewApp(
 		r,
 		projectHandler,
 		resourceHandler,
+		courseHandler,
 		calendarHandler,
 		staffHandler,
-		configHanler,
-		projectconfigHandler,
+		configHandler,
+		projectConfigHandler,
+		projectResourceConfig,
 		programHandler,
 	)
 
@@ -55,20 +59,22 @@ func NewApp(
 // @version         1.0
 // @description     This is a sample server celler server.
 // @termsOfService  http://swagger.io/terms/
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @contact.name    API Support
+// @contact.url     http://www.swagger.io/support
+// @contact.email   support@swagger.io
+// @license.name    Apache 2.0
+// @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath        /api
 // @SecurityDefinitions.apikey BearerAuth
 // @In header
 // @Name Authorization
-// @description Type "Bearer" followed by a space and JWT token.
-// @externalDocs.description  OpenAPI
+// @description     Type "Bearer" followed by a space and JWT token.
+// @externalDocs.description OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
-func main() {
 
+func main() {
 	configs.InitialEnv(".env")
+
 	app, cleanup, err := InitializeApp()
 	if err != nil {
 		log.Print(err)
@@ -87,5 +93,4 @@ func main() {
 	if err := app.Run(fmt.Sprintf(":%s", configs.GetPort())); err != nil {
 		log.Print(err)
 	}
-
 }
