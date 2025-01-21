@@ -843,15 +843,26 @@ paths:
   /v1/projects:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Creates a new project with the provided data
       parameters:
+      - description: List of URLs
+        in: formData
+        name: urls[]
+        type: string
+      - description: List of Titles
+        in: formData
+        name: title[]
+        type: string
+      - description: Upload Files
+        in: formData
+        name: files
+        type: file
       - description: Project Data
-        in: body
+        in: formData
         name: project
         required: true
-        schema:
-          $ref: '#/definitions/models.Project'
+        type: string
       produces:
       - application/json
       responses:
@@ -932,20 +943,26 @@ paths:
       - Project
     put:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Updates a project by its ID with the provided data
       parameters:
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Updated Project Data
-        in: body
+      - description: List of URLs
+        in: formData
+        name: urls[]
+        type: string
+      - description: List of Titles
+        in: formData
+        name: title[]
+        type: string
+      - description: Upload Files
+        in: formData
+        name: files
+        type: file
+      - description: Project Data
+        in: formData
         name: project
         required: true
-        schema:
-          $ref: '#/definitions/models.Project'
+        type: string
       produces:
       - application/json
       responses:

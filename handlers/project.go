@@ -30,9 +30,12 @@ func NewProjectHandler(projectService services.ProjectService) ProjectHandler {
 // @Summary Create a new project
 // @Description Creates a new project with the provided data
 // @Tags Project
-// @Accept  json
+// @Accept  multipart/form-data
 // @Produce  json
-// @Param project body models.Project true "Project Data"
+// @Param urls formData string false "List of URLs"
+// @Param titles formData string false "List of Titles"
+// @Param files formData file false "Upload Files"
+// @Param project formData string true "Project Data"
 // @Success 201 {object} models.Project "Successfully created project"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
@@ -55,10 +58,12 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 // @Summary Update an existing project
 // @Description Updates a project by its ID with the provided data
 // @Tags Project
-// @Accept  json
+// @Accept  multipart/form-data
 // @Produce  json
-// @Param id path int true "Project ID"
-// @Param project body models.Project true "Updated Project Data"
+// @Param urls formData string false "List of URLs"
+// @Param titles formData string false "List of Titles"
+// @Param files formData file false "Upload Files"
+// @Param project formData string true "Project Data"
 // @Success 200 {object} models.Project "Successfully updated project"
 // @Failure 400 {object} map[string]interface{} "Invalid project ID or request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
