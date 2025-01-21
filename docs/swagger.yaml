@@ -39,7 +39,9 @@ definitions:
     type: object
   dtos.CreateProgramRequest:
     properties:
-      program_name:
+      program_name_en:
+        type: string
+      program_name_th:
         type: string
     type: object
   dtos.CreateStaffRequest:
@@ -185,7 +187,9 @@ definitions:
     properties:
       id:
         type: integer
-      program_name:
+      program_name_en:
+        type: string
+      program_name_th:
         type: string
     type: object
   models.Project:
@@ -323,8 +327,6 @@ definitions:
       id:
         type: string
       last_name:
-        type: string
-      prefix:
         type: string
     type: object
 info:
@@ -627,13 +629,12 @@ paths:
       summary: Create a New Program
       tags:
       - Program
-  /v1/programs/update-name:
     put:
       consumes:
       - application/json
-      description: Updates the name of an existing program
+      description: update program
       parameters:
-      - description: Program details with ID and updated name
+      - description: Program details
         in: body
         name: program
         required: true
@@ -643,7 +644,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successfully updated program name
+          description: Successfully updated program
           schema:
             additionalProperties: true
             type: object
@@ -657,7 +658,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Update Program Name
+      summary: Update Program
       tags:
       - Program
   /v1/projectConfigs:
@@ -848,11 +849,11 @@ paths:
       parameters:
       - description: List of URLs
         in: formData
-        name: urls[]
+        name: urls
         type: string
       - description: List of Titles
         in: formData
-        name: title[]
+        name: titles
         type: string
       - description: Upload Files
         in: formData
@@ -948,11 +949,11 @@ paths:
       parameters:
       - description: List of URLs
         in: formData
-        name: urls[]
+        name: urls
         type: string
       - description: List of Titles
         in: formData
-        name: title[]
+        name: titles
         type: string
       - description: Upload Files
         in: formData

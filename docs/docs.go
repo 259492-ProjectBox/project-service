@@ -406,6 +406,53 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "description": "update program",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Program"
+                ],
+                "summary": "Update Program",
+                "parameters": [
+                    {
+                        "description": "Program details",
+                        "name": "program",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Program"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated program",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new program in the database",
                 "consumes": [
@@ -438,55 +485,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid request body",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/programs/update-name": {
-            "put": {
-                "description": "Updates the name of an existing program",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Program"
-                ],
-                "summary": "Update Program Name",
-                "parameters": [
-                    {
-                        "description": "Program details with ID and updated name",
-                        "name": "program",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Program"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully updated program name",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body or parameters",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -783,13 +781,13 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "List of URLs",
-                        "name": "urls[]",
+                        "name": "urls",
                         "in": "formData"
                     },
                     {
                         "type": "string",
                         "description": "List of Titles",
-                        "name": "title[]",
+                        "name": "titles",
                         "in": "formData"
                     },
                     {
@@ -934,13 +932,13 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "List of URLs",
-                        "name": "urls[]",
+                        "name": "urls",
                         "in": "formData"
                     },
                     {
                         "type": "string",
                         "description": "List of Titles",
-                        "name": "title[]",
+                        "name": "titles",
                         "in": "formData"
                     },
                     {
@@ -1268,7 +1266,10 @@ const docTemplate = `{
         "dtos.CreateProgramRequest": {
             "type": "object",
             "properties": {
-                "program_name": {
+                "program_name_en": {
+                    "type": "string"
+                },
+                "program_name_th": {
                     "type": "string"
                 }
             }
@@ -1493,7 +1494,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "program_name": {
+                "program_name_en": {
+                    "type": "string"
+                },
+                "program_name_th": {
                     "type": "string"
                 }
             }
@@ -1703,9 +1707,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "last_name": {
-                    "type": "string"
-                },
-                "prefix": {
                     "type": "string"
                 }
             }
