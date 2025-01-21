@@ -92,7 +92,7 @@ func (r *resourceRepository) CreateAssetResource(ctx context.Context, file *mult
 		return nil, fmt.Errorf("failed to preload program: %w", err)
 	}
 
-	programName := assetResource.Program.ProgramName
+	programName := assetResource.Program.ProgramNameTH
 	objectName, filePath := r.generateFilePath(file.Filename, programName, os.Getenv("MINIO_ASSET_BUCKET"))
 
 	if err := r.uploadFileToMinio(ctx, objectName, file); err != nil {

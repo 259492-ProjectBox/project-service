@@ -11,7 +11,6 @@ import (
 type ProgramRepository interface {
 	repository[models.Program]
 	GetProgramById(ctx context.Context, programId int) (*models.Program, error)
-	UpdateProgramName(ctx context.Context, program *models.Program) error
 	GetPrograms(ctx context.Context) ([]models.Program, error)
 	CreateProgram(ctx context.Context, program *models.Program) error
 }
@@ -58,13 +57,4 @@ func (r *programRepositoryImpl) GetProgramById(ctx context.Context, programId in
 	}
 
 	return &program, nil
-}
-
-// update program name with program model
-func (r *programRepositoryImpl) UpdateProgramName(ctx context.Context, program *models.Program) error {
-	return r.db.WithContext(ctx).
-		Model(&models.Program{}).
-		Where("id = ?", program.ID).
-		Update("program_name", program.ProgramName).
-		Error
 }

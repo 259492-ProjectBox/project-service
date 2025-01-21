@@ -10,7 +10,7 @@ import (
 )
 
 type ProgramService interface {
-	UpdateProgramName(ctx context.Context, programId int, name string) error
+	UpdateProgram(ctx context.Context, program *models.Program) (*models.Program, error)
 	CreateProgram(ctx context.Context, program *dtos.CreateProgramRequest) error
 	GetPrograms(ctx context.Context) ([]models.Program, error)
 }
@@ -25,25 +25,21 @@ func NewProgramService(programRepo repositories.ProgramRepository) ProgramServic
 	}
 }
 
-// get all program from repository
 func (s *programServiceImpl) GetPrograms(ctx context.Context) ([]models.Program, error) {
 	return s.programRepo.GetPrograms(ctx)
 }
 
-// update program name
-func (s *programServiceImpl) UpdateProgramName(ctx context.Context, programId int, programName string) error {
-	if programId <= 0 {
-		return errors.New("invalid program ID")
+func (s *programServiceImpl) UpdateProgram(ctx context.Context, program *models.Program) (*models.Program, error) {
+	if program.ID <= 0 {
+		return nil, errors.New("invalid program ID")
 	}
-	updatedProgram := &models.Program{ID: programId, ProgramName: programName}
-
-	return s.programRepo.UpdateProgramName(ctx, updatedProgram)
+	return s.programRepo.Update(ctx, program.ID, program)
 }
 
-// create program from repository
 func (s *programServiceImpl) CreateProgram(ctx context.Context, programBody *dtos.CreateProgramRequest) error {
 	program := &models.Program{
-		ProgramName: programBody.ProgramName,
+		ProgramNameTH: programBody.ProgramNameTH,
+		ProgramNameEN: programBody.ProgramNameEN,
 	}
 
 	return s.programRepo.CreateProgram(ctx, program)

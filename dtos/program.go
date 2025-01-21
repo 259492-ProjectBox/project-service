@@ -1,10 +1,12 @@
 package dtos
 
 type Program struct {
-	ID          int    `json:"id"`
-	ProgramName string `json:"program_name"`
+	ID            int    `json:"id"`
+	ProgramNameTH string `json:"program_name_th" gorm:"unique"`
+	ProgramNameEN string `json:"program_name_en" gorm:"unique"`
 }
 
 type CreateProgramRequest struct {
-	ProgramName string `json:"program_name"`
+	ProgramNameTH string `json:"program_name_th" gorm:"unique"`
+	ProgramNameEN string `json:"program_name_en" gorm:"unique"`
 }

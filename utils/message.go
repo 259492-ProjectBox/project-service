@@ -29,8 +29,9 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		Semester:     project.Semester,
 		ProgramID:    project.ProgramID,
 		Program: dtos.Program{
-			ID:          project.Program.ID,
-			ProgramName: project.Program.ProgramName,
+			ID:            project.Program.ID,
+			ProgramNameTH: project.Program.ProgramNameTH,
+			ProgramNameEN: project.Program.ProgramNameEN,
 		},
 		CourseID: project.Course.ID,
 		Course: dtos.Course{
@@ -39,8 +40,9 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			CourseName: project.Course.CourseName,
 			ProgramID:  project.Course.ProgramID,
 			Program: dtos.Program{
-				ID:          project.Course.Program.ID,
-				ProgramName: project.Course.Program.ProgramName,
+				ID:            project.Course.Program.ID,
+				ProgramNameTH: project.Program.ProgramNameTH,
+				ProgramNameEN: project.Program.ProgramNameEN,
 			},
 		},
 		CreatedAt: formatTime(project.CreatedAt),
@@ -56,8 +58,9 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			Email:     staff.Email,
 			ProgramID: staff.ProgramID,
 			Program: dtos.Program{
-				ID:          staff.Program.ID,
-				ProgramName: staff.Program.ProgramName,
+				ID:            staff.Program.ID,
+				ProgramNameTH: project.Program.ProgramNameTH,
+				ProgramNameEN: project.Program.ProgramNameEN,
 			},
 			ProjectRole: dtos.ProjectRole{},
 		})
@@ -66,7 +69,6 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 	for _, member := range project.Members {
 		projectMessage.Members = append(projectMessage.Members, dtos.Student{
 			ID:        member.ID,
-			Prefix:    member.Prefix,
 			FirstName: member.FirstName,
 			LastName:  member.LastName,
 			Email:     member.Email,

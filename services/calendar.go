@@ -79,7 +79,7 @@ func (s *calendarServiceImpl) CreateCalendar(ctx context.Context, calendar *dtos
 		EndDate:     utils.FormatDate(newCalendar.EndDate),
 		Title:       newCalendar.Title,
 		Description: newCalendar.Description,
-		Program:     program.ProgramName,
+		Program:     program.ProgramNameTH,
 	}
 
 	return response, nil

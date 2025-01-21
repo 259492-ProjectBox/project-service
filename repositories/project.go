@@ -355,8 +355,8 @@ func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context
 		titles = titles[1:]
 
 		uniqueFileName := generateUniqueFileName(file.Filename)
-		filePath := buildFilePath(r.projectBucketName, project.Program.ProgramName, title, uniqueFileName)
-		objectName := buildObjectName(project.Program.ProgramName, title, uniqueFileName)
+		filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, title, uniqueFileName)
+		objectName := buildObjectName(project.Program.ProgramNameTH, title, uniqueFileName)
 		err := r.uploadRepo.UploadFile(ctx, r.projectBucketName, objectName, file, minio.PutObjectOptions{})
 		if err != nil {
 			return uploadedObjectNames, err

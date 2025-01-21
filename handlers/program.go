@@ -12,7 +12,7 @@ import (
 type ProgramHandler interface {
 	GetPrograms(c *gin.Context)
 	CreateProgram(c *gin.Context)
-	UpdateProgramName(c *gin.Context)
+	UpdateProgram(c *gin.Context)
 }
 
 type programHandler struct {
@@ -66,19 +66,18 @@ func (h *programHandler) CreateProgram(c *gin.Context) {
 	c.JSON(http.StatusCreated, program)
 }
 
-// @Summary Update Program Name
-// @Description Updates the name of an existing program
+// @Summary Update Program
+// @Description update program
 // @Tags Program
 // @Accept json
 // @Produce json
-// @Param program body models.Program true "Program details with ID and updated name"
-// @Success 200 {object} map[string]interface{} "Successfully updated program name"
+// @Param program body models.Program true "Program details"
+// @Success 200 {object} map[string]interface{} "Successfully updated program"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or parameters"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /v1/programs/update-name [put]
-func (h *programHandler) UpdateProgramName(c *gin.Context) {
+// @Router /v1/programs [put]
+func (h *programHandler) UpdateProgram(c *gin.Context) {
 	var program models.Program
-	// Bind JSON to Program object
 	if err := c.ShouldBindJSON(&program); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body: " + err.Error()})
 		return
@@ -88,19 +87,20 @@ func (h *programHandler) UpdateProgramName(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
 		return
 	}
-	if program.ProgramName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Program name cannot be empty"})
+	if program.ProgramNameTH == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Program name th cannot be empty"})
 		return
 	}
 
 	ctx := c.Request.Context()
-	if err := h.programService.UpdateProgramName(ctx, program.ID, program.ProgramName); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update program name: " + err.Error()})
+	updatedProgram, err := h.programService.UpdateProgram(ctx, &program)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update program: " + err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Successfully updated program name",
-		"program": program,
+		"message": "Successfully updated program",
+		"program": updatedProgram,
 	})
 }
