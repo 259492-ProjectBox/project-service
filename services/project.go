@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mime/multipart"
 
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
@@ -19,8 +20,8 @@ type ProjectService interface {
 	GetProjectById(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*dtos.ProjectData, error)
-	UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*dtos.ProjectData, error)
+	CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, files []*multipart.FileHeader, titles []string, urls []string) (*dtos.ProjectData, error)
+	UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, files []*multipart.FileHeader, titles []string, urls []string) (*dtos.ProjectData, error)
 	DeleteProject(ctx context.Context, id int) error
 }
 
@@ -103,12 +104,7 @@ func (s *projectServiceImpl) ValidateProject(ctx context.Context, project *model
 	return nil
 }
 
-func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, req *dtos.CreateProjectRequest) (*dtos.ProjectData, error) {
-	project := req.Project
-	files := req.Files
-	titles := req.Titles
-	urls := req.Urls
-
+func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, files []*multipart.FileHeader, titles []string, urls []string) (*dtos.ProjectData, error) {
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
 	}
@@ -155,11 +151,7 @@ func (s *projectServiceImpl) GetProjectsByStudentId(ctx context.Context, student
 	return project, nil
 }
 
-func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, req *dtos.UpdateProjectRequest) (*dtos.ProjectData, error) {
-	project := req.Project
-	files := req.Files
-	titles := req.Titles
-	urls := req.Urls
+func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, files []*multipart.FileHeader, titles []string, urls []string) (*dtos.ProjectData, error) {
 	if err := s.ValidateProject(ctx, project); err != nil {
 		return nil, err
 	}

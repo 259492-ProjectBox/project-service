@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/project-box/dtos"
@@ -46,7 +47,18 @@ func (h *projectHandler) CreateProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	project, err := h.projectService.CreateProjectWithFiles(c, req)
+
+	var titles []string
+	var urls []string
+
+	if req.Titles != "" {
+		titles = strings.Split(req.Titles, ",")
+	}
+	if req.Urls != "" {
+		urls = strings.Split(req.Urls, ",")
+	}
+
+	project, err := h.projectService.CreateProjectWithFiles(c, req.Project, req.Files, titles, urls)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -75,7 +87,17 @@ func (h *projectHandler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	project, err := h.projectService.UpdateProjectWithFiles(c, req)
+	var titles []string
+	var urls []string
+
+	if req.Titles != "" {
+		titles = strings.Split(req.Titles, ",")
+	}
+	if req.Urls != "" {
+		urls = strings.Split(req.Urls, ",")
+	}
+
+	project, err := h.projectService.UpdateProjectWithFiles(c, req.Project, req.Files, titles, urls)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

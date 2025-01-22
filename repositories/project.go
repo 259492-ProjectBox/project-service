@@ -347,6 +347,8 @@ func buildObjectName(programName, title, uniqueFileName string) string {
 
 func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context, tx *gorm.DB, project *models.Project, files []*multipart.FileHeader, titles []string, urls []string) ([]string, error) {
 	var uploadedObjectNames []string
+	fmt.Print(titles)
+	fmt.Print(urls)
 	if len(titles) != len(files)+len(urls) {
 		return uploadedObjectNames, fmt.Errorf("not enough titles provided for the files")
 	}
