@@ -1115,6 +1115,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/staffs/GetAllStaffs": {
+            "get": {
+                "description": "Fetches all staffs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get all staffs",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved staffs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.StaffResponse"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Staffs not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/staffs/program/{program_id}": {
             "get": {
                 "description": "Fetches all staffs for a given program",

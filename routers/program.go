@@ -9,8 +9,8 @@ func SetUpProgramRoute(r *gin.RouterGroup, handler handlers.ProgramHandler) {
 	programRouteV1 := r.Group("/v1/programs")
 	{
 
-		programRouteV1.POST("/", handler.CreateProgram)
-		programRouteV1.GET("/", handler.GetPrograms)
-		programRouteV1.PUT("/", handler.UpdateProgram)
+		programRouteV1.POST("", handler.CreateProgram)
+		programRouteV1.GET("", handler.GetPrograms)
+		programRouteV1.PUT("", handler.UpdateProgram)
 	}
 }

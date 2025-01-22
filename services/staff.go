@@ -14,6 +14,7 @@ type StaffService interface {
 	UpdateStaff(ctx context.Context, staff *dtos.UpdateStaffRequest) (*dtos.StaffResponse, error)
 	DeleteStaff(ctx context.Context, id int) error
 	GetStaffByProgramId(ctx context.Context, programId int) ([]dtos.StaffResponse, error)
+	GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error)
 }
 
 type staffServiceImpl struct {
@@ -24,6 +25,28 @@ func NewStaffService(staffRepo repositories.StaffRepository) StaffService {
 	return &staffServiceImpl{
 		staffRepo: staffRepo,
 	}
+}
+
+func (s *staffServiceImpl) GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error) {
+	staffs, err := s.staffRepo.GetAllStaffs()
+	if err != nil {
+		return nil, err
+	}
+
+	// convert to response
+	var StaffResponses []dtos.StaffResponse
+	for _, staff := range staffs {
+		StaffResponses = append(StaffResponses, dtos.StaffResponse{
+			ID:        staff.ID,
+			Prefix:    staff.Prefix,
+			FirstName: staff.FirstName,
+			LastName:  staff.LastName,
+			Email:     staff.Email,
+			ProgramID: staff.ProgramID,
+		})
+	}
+
+	return StaffResponses, nil
 }
 
 func (s *staffServiceImpl) CreateStaff(ctx context.Context, staffBody *dtos.CreateStaffRequest) (*dtos.StaffResponse, error) {

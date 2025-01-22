@@ -14,6 +14,7 @@ type StaffHandler interface {
 	GetStaffByProgramId(c *gin.Context)
 	CreateStaff(c *gin.Context)
 	UpdateStaff(c *gin.Context)
+	GetAllStaffHandler(c *gin.Context)
 }
 
 type staffHandler struct {
@@ -120,4 +121,20 @@ func (h *staffHandler) UpdateStaff(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, updatedStaff)
+}
+
+// @Summary Get all staffs
+// @Description Fetches all staffs
+// @Tags Staff
+// @Produce  json
+// @Success 200 {object} []dtos.StaffResponse "Successfully retrieved staffs"
+// @Failure 404 {object} map[string]interface{} "Staffs not found"
+// @Router /v1/staffs/GetAllStaffs [get]
+func (h *staffHandler) GetAllStaffHandler(c *gin.Context) {
+	staffs, err := h.staffService.GetAllStaffService(c)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Staffs not found"})
+		return
+	}
+	c.JSON(http.StatusOK, staffs)
 }

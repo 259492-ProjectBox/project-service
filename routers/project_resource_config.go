@@ -9,6 +9,6 @@ func SetupProjectResourceConfigRouter(r *gin.RouterGroup, handler handlers.Proje
 	projectResourceConfigRouteV1 := r.Group("/v1/projectResourceConfigs")
 	{
 		projectResourceConfigRouteV1.GET("/program/:program_id", handler.GetProjectResourceConfigsByProgramId)
-		projectResourceConfigRouteV1.PUT("/", handler.UpsertProjectResourceConfig)
+		projectResourceConfigRouteV1.PUT("", handler.UpsertProjectResourceConfig)
 	}
 }

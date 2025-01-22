@@ -11,6 +11,7 @@ type StaffRepository interface {
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
 	CreateStaff(staff *models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
+	GetAllStaffs() ([]models.Staff, error)
 }
 
 type staffRepositoryImpl struct {
@@ -23,6 +24,15 @@ func NewStaffRepository(db *gorm.DB) StaffRepository {
 		db:             db,
 		repositoryImpl: newRepository[models.Staff](db),
 	}
+}
+
+// get all staff
+func (r *staffRepositoryImpl) GetAllStaffs() ([]models.Staff, error) {
+	var staffs []models.Staff
+	if err := r.db.Find(&staffs).Error; err != nil {
+		return nil, err
+	}
+	return staffs, nil
 }
 
 func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
