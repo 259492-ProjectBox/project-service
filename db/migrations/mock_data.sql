@@ -1,9 +1,14 @@
 -- Insert programs
-INSERT INTO "programs" ("program_name_en", "program_name_th") VALUES
-  ('Computer Science', 'วิทยาการคอมพิวเตอร์'),
-  ('Electrical Engineering', 'วิศวกรรมไฟฟ้า'),
-  ('Mechanical Engineering', 'วิศวกรรมเครื่องกล'),
-  ('Civil Engineering', 'วิศวกรรมโยธา');
+INSERT INTO "programs" ("abbreviation", "program_name_en", "program_name_th") 
+VALUES 
+   ('CPE', 'Computer Engineering', 'วิศวกรรมคอมพิวเตอร์'),
+   ('RE', 'Robotic Engineering', 'วิศวกรรมหุ่นยนต์'),
+   ('EE', 'Electrical Engineering', 'วิศวกรรมไฟฟ้า'),
+   ('ME', 'Mechanical Engineering', 'วิศวกรรมเครื่องกล'),
+   ('CVE', 'Civil Engineering', 'วิศวกรรมโยธา'),
+   ('IE', 'Industrial Engineering', 'วิศวกรรมอุตสาหการ'),
+   ('ENE', 'Environmental Engineering', 'วิศวกรรมสิ่งแวดล้อม'),
+   ('MIE', 'Mining Engineering', 'วิศวกรรมเหมืองแร่');
 
 INSERT INTO "configs" ("config_name", "value", "program_id")
 VALUES 
