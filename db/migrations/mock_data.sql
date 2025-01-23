@@ -46,7 +46,9 @@ VALUES
 -- Insert mock data into project_roles
 INSERT INTO "project_roles" ("role_name", "program_id") VALUES 
 ('Advisor', 1),
-('Reviewer', 2);
+('Co Advisor', 2),
+('Committee', 2);
+('External Committee', 2);
 
 -- Insert Projects
 INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract_text", "academic_year", "semester","is_public" ,"section_id",  "course_id", "program_id") VALUES
