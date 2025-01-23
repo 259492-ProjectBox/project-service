@@ -3,11 +3,12 @@ INSERT INTO "programs" ("abbreviation", "program_name_en", "program_name_th")
 VALUES 
    ('CPE', 'Computer Engineering', 'วิศวกรรมคอมพิวเตอร์'),
    ('ISNE', 'Information Systems and Network Engineering', 'วิศวกรรมระบบสารสนเทศและเครือข่าย'),
-   ('RE', 'Robotic Engineering', 'วิศวกรรมหุ่นยนต์'),
+   ('RE', 'Robotics Engineering and Artificial Intelligence', 'วิศวกรรมหุ่นยนต์และปัญญาประดิษฐ์'),
    ('EE', 'Electrical Engineering', 'วิศวกรรมไฟฟ้า'),
    ('ME', 'Mechanical Engineering', 'วิศวกรรมเครื่องกล'),
    ('CE', 'Civil Engineering', 'วิศวกรรมโยธา'),
    ('IE', 'Industrial Engineering', 'วิศวกรรมอุตสาหการ'),
+   ('INE', 'Integrated Engineering', 'วิศวกรรมบูรณาการ'),
    ('ENVI', 'Environmental Engineering', 'วิศวกรรมสิ่งแวดล้อม'),
    ('MPE', 'Mining and Petroleum Engineering', 'วิศวกรรมเหมืองแร่และปิโตรเลียม');
 
