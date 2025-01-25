@@ -21,7 +21,7 @@ type Resource struct {
 }
 
 type ProjectResource struct {
-	ID       int      `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID       int      `json:"id"`
 	Resource Resource `json:"resource"`
 }
 

@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"context"
+
 	"github.com/project-box/models"
 	"gorm.io/gorm"
 )
@@ -8,6 +10,7 @@ import (
 type ConfigRepository interface {
 	repository[models.Config]
 	GetConfigByProgramId(programId int) ([]models.Config, error)
+	FindByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error)
 }
 
 type configRepositoryImpl struct {
@@ -29,7 +32,16 @@ func (r *configRepositoryImpl) GetConfigByProgramId(programId int) ([]models.Con
 		return nil, err
 	}
 	if len(configs) == 0 {
-		return []models.Config{}, nil // Return an empty slice, not nil
+		return []models.Config{}, nil
 	}
 	return configs, nil
+}
+
+func (r *configRepositoryImpl) FindByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error) {
+	var config models.Config
+	err := r.db.WithContext(ctx).Where("config_name = ? AND program_id = ?", name, programId).First(&config).Error
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
 }

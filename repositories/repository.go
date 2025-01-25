@@ -11,7 +11,7 @@ type repository[M any] interface {
 	Get(ctx context.Context, id int) (*M, error)
 	GetMany(ctx context.Context) ([]M, error)
 	Create(ctx context.Context, ent *M) (*M, error)
-	CreateMany(ctx context.Context, ent []*M) error
+	CreateMany(ctx context.Context, ent []M) error
 	Update(ctx context.Context, id int, ent *M) (*M, error)
 	Upsert(ctx context.Context, ent *M) (*M, error)
 	Delete(ctx context.Context, id int) error
@@ -52,7 +52,7 @@ func (r *repositoryImpl[M]) Create(ctx context.Context, ent *M) (*M, error) {
 	return ent, nil
 }
 
-func (r *repositoryImpl[M]) CreateMany(ctx context.Context, ent []*M) error {
+func (r *repositoryImpl[M]) CreateMany(ctx context.Context, ent []M) error {
 	query := r.db.WithContext(ctx)
 
 	if err := query.Create(ent).Error; err != nil {

@@ -1,12 +1,16 @@
 package services
 
 import (
+	"context"
+
 	"github.com/project-box/dtos"
+	"github.com/project-box/models"
 	"github.com/project-box/repositories"
 )
 
 type ConfigService interface {
 	GetConfigByProgramId(programId int) ([]dtos.ConfigResponse, error)
+	FindConfigByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error)
 }
 
 type configServiceImpl struct {
@@ -29,8 +33,15 @@ func (s *configServiceImpl) GetConfigByProgramId(programId int) ([]dtos.ConfigRe
 			ConfigName: config.ConfigName,
 			Value:      config.Value,
 		})
-
 	}
 	return configDtos, err
+}
 
+func (s *configServiceImpl) FindConfigByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error) {
+	config, err := s.configRepo.FindByNameAndProgramId(ctx, name, programId)
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }

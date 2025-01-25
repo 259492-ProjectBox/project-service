@@ -2,8 +2,13 @@ package dtos
 
 // Student model
 type Student struct {
-	ID        string `json:"id"`         // Use `ID` as the primary key
-	FirstName string `json:"first_name"` // First name of the student
-	LastName  string `json:"last_name"`  // Last name of the student
-	Email     string `json:"email"`      // Unique email address
+	ID           int     `json:"id"`            // Use `ID` as the primary key
+	StudentID    string  `json:"student_id"`    // Student ID
+	FirstName    string  `json:"first_name"`    // First name of the student
+	LastName     string  `json:"last_name"`     // Last name of the student
+	Email        string  `json:"email"`         // Unique email address
+	Semester     int     `json:"semester"`      // Semester
+	AcademicYear int     `json:"academic_year"` // Academic year
+	ProgramID    int     `json:"program_id"`    // Program ID
+	Program      Program `json:"program"`
 }

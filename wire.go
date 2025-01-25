@@ -42,6 +42,7 @@ var HandlerSet = wire.NewSet(
 	handlers.NewProjectResourceConfigHandler,
 	handlers.NewProgramHandler,
 	handlers.NewStudentHandler,
+	handlers.NewUploadHandler,
 )
 
 var ServiceSet = wire.NewSet(
@@ -54,6 +55,8 @@ var ServiceSet = wire.NewSet(
 	services.NewProjectConfigService,
 	services.NewProjectResourceConfigService,
 	services.NewProgramService,
+	services.NewStudentService,
+	services.NewUploadService,
 )
 
 var RepositorySet = wire.NewSet(
@@ -71,6 +74,7 @@ var RepositorySet = wire.NewSet(
 	repositories.NewConfigRepository,
 	repositories.NewProjectConfigRepository,
 	repositories.NewProjectResourceConfigRepository,
+	repositories.NewStudentRepository,
 	repositories.NewUploadRepository,
 )
 

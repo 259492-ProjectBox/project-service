@@ -24,30 +24,30 @@ VALUES
     ('semester', '2', 4);
 
 -- Insert Courses
-INSERT INTO "courses" ("course_no", "course_name", "program_id" , "semester") VALUES
-  ('CS101', 'Introduction to Computer Science', 1 , 1),
-  ('EE101', 'Introduction to Electrical Engineering', 2 , 1),
-  ('ME101', 'Introduction to Mechanical Engineering', 3,2),
-  ('CE101', 'Introduction to Civil Engineering', 4,2);
+INSERT INTO "courses" ("course_no", "course_name", "program_id") VALUES
+  ('CS101', 'Introduction to Computer Science', 1 ),
+  ('EE101', 'Introduction to Electrical Engineering', 2 ),
+  ('ME101', 'Introduction to Mechanical Engineering', 3),
+  ('CE101', 'Introduction to Civil Engineering', 4);
 
 -- Insert Students
 INSERT INTO "students" 
-  ("id", "first_name", "last_name", "email", "academic_year", "semester", "course_id", "program_id") 
+  ("student_id", "first_name", "last_name", "email", "sec_lab" , "semester","academic_year",  "program_id") 
 VALUES
-  ('640610304', 'John', 'Doe', 'john.doe@example.com', 2025, 2, 1, 1),
-  ('640610305', 'James', 'Brown', 'james.brown@example.com', 2025, 2, 1, 1),
-  ('640610306', 'Jane', 'Smith', 'jane.smith@example.com', 2025, 2, 2, 2),
-  ('640610307', 'Emily', 'Clark', 'emily.clark@example.com', 2025, 2, 2, 2),
-  ('640610308', 'Mark', 'Johnson', 'mark.johnson@example.com', 2025, 2, 3, 3),
-  ('640610309', 'David', 'Wilson', 'david.wilson@example.com', 2025, 2, 3, 3),
-  ('640610310', 'Emily', 'Davis', 'emily.davis@example.com', 2025, 2, 4, 4),
-  ('640610311', 'Sophia', 'Taylor', 'sophia.taylor@example.com', 2025, 2, 4, 4);
+  ('640610303', 'John', 'Doe', 'john.doe@example.com','001' , 2, 2025,  1),
+  ('640610305', 'James', 'Brown', 'james.brown@example.com','002' , 2,  2025,  1),
+  ('640610306', 'Jane', 'Smith', 'jane.smith@example.com','002' , 2, 2025,   2),
+  ('640610307', 'Emily', 'Clark', 'emily.clark@example.com','003' , 1,2025,  2),
+  ('640610308', 'Mark', 'Johnson', 'mark.johnson@example.com','003' , 2,2025,   3),
+  ('640610309', 'David', 'Wilson', 'david.wilson@example.com','001' , 1,2025,  3),
+  ('640610310', 'Emily', 'Davis', 'emily.davis@example.com', '003' ,1,2025, 4),
+  ('640610311', 'Sophia', 'Taylor', 'sophia.taylor@example.com','002' ,1, 2025,  4);
 
 -- Insert mock data into project_roles
 INSERT INTO "project_roles" ("role_name", "program_id") VALUES 
 ('Advisor', 1),
 ('Co Advisor', 2),
-('Committee', 2);
+('Committee', 2),
 ('External Committee', 2);
 
 -- Insert Projects
@@ -57,10 +57,10 @@ INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract_text", "
 
 -- Insert Project Students
 INSERT INTO "project_students" ("project_id", "student_id") VALUES
-  (1, '640610304'),
-  (1, '640610305'),
-  (2, '640610306'),
-  (2, '640610307');
+  (1, 1),
+  (1, 2),
+  (2, 3),
+  (2, 4);
 
 -- Insert mock data into staffs
 INSERT INTO "staffs" ("prefix", "first_name", "last_name", "email", "program_id") VALUES 

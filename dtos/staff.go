@@ -1,13 +1,13 @@
 package dtos
 
 type ProjectStaffMessage struct {
-	ID          int         `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID          int         `json:"id"`
 	Prefix      string      `json:"prefix"`
 	FirstName   string      `json:"first_name"`
 	LastName    string      `json:"last_name"`
-	Email       string      `json:"email" gorm:"unique"`
+	Email       string      `json:"email"`
 	ProgramID   int         `json:"program_id"`
-	Program     Program     `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	Program     Program     `json:"program"`
 	ProjectRole ProjectRole `json:"project_role"`
 }
 
@@ -15,7 +15,7 @@ type CreateStaffRequest struct {
 	Prefix    string `json:"prefix"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Email     string `json:"email" gorm:"unique"`
+	Email     string `json:"email"`
 	ProgramID int    `json:"program_id"`
 }
 type UpdateStaffRequest struct {
@@ -23,7 +23,7 @@ type UpdateStaffRequest struct {
 	Prefix    string `json:"prefix"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Email     string `json:"email" gorm:"unique"`
+	Email     string `json:"email"`
 	ProgramID int    `json:"program_id"`
 }
 
@@ -32,6 +32,6 @@ type StaffResponse struct {
 	Prefix    string `json:"prefix"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Email     string `json:"email" gorm:"unique"`
+	Email     string `json:"email"`
 	ProgramID int    `json:"program_id"`
 }

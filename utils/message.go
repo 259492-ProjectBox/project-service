@@ -69,9 +69,16 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 	for _, member := range project.Members {
 		projectMessage.Members = append(projectMessage.Members, dtos.Student{
 			ID:        member.ID,
+			StudentID: member.StudentID,
 			FirstName: member.FirstName,
 			LastName:  member.LastName,
 			Email:     member.Email,
+			ProgramID: member.ProgramID,
+			Program: dtos.Program{
+				ID:            member.Program.ID,
+				ProgramNameTH: project.Program.ProgramNameTH,
+				ProgramNameEN: project.Program.ProgramNameEN,
+			},
 		})
 	}
 	// Map Project Resources
