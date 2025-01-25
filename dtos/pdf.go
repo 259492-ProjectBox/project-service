@@ -1,9 +1,9 @@
 package dtos
 
 type PDF struct {
-	ID         int       `json:"id"`
-	ResourceID int       `json:"resource_id"`
-	Pages      []PDFPage `json:"pages"`
+	ID                int       `json:"id"`
+	ProjectResourceID int       `json:"project_resource_id"`
+	Pages             []PDFPage `json:"pages"`
 }
 
 type PDFPage struct {

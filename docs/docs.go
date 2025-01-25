@@ -324,6 +324,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/configs": {
+            "put": {
+                "description": "Creates a new config or updates an existing config for the given program",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config"
+                ],
+                "summary": "Upsert config for a program",
+                "parameters": [
+                    {
+                        "description": "Config details",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Config"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully upserted config",
+                        "schema": {
+                            "$ref": "#/definitions/models.Config"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID or config data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/configs/program/{program_id}": {
             "get": {
                 "description": "Fetches all config for a given program",
@@ -1450,6 +1502,26 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Config": {
+            "type": "object",
+            "properties": {
+                "config_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Course": {
             "type": "object",
             "properties": {
@@ -1521,6 +1593,9 @@ const docTemplate = `{
         "models.Program": {
             "type": "object",
             "properties": {
+                "abbreviation": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1611,12 +1686,6 @@ const docTemplate = `{
         "models.ProjectResourceConfig": {
             "type": "object",
             "properties": {
-                "file_extension": {
-                    "$ref": "#/definitions/models.FileExtension"
-                },
-                "file_extension_id": {
-                    "type": "integer"
-                },
                 "icon_name": {
                     "type": "string"
                 },
@@ -1625,9 +1694,6 @@ const docTemplate = `{
                 },
                 "is_active": {
                     "type": "boolean"
-                },
-                "max_file_size": {
-                    "type": "integer"
                 },
                 "program": {
                     "$ref": "#/definitions/models.Program"
@@ -1730,6 +1796,9 @@ const docTemplate = `{
         "models.Student": {
             "type": "object",
             "properties": {
+                "academic_year": {
+                    "type": "integer"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -1737,9 +1806,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "last_name": {
+                    "type": "string"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "sec_lab": {
+                    "type": "string"
+                },
+                "semester": {
+                    "type": "integer"
+                },
+                "student_id": {
                     "type": "string"
                 }
             }

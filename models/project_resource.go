@@ -1,10 +1,6 @@
-package dtos
+package models
 
-import (
-	"mime/multipart"
-
-	"github.com/project-box/models"
-)
+import "time"
 
 type ProjectResource struct {
 	ID             int          `json:"id" gorm:"primaryKey;autoIncrement"`
@@ -16,9 +12,6 @@ type ProjectResource struct {
 	ResourceTypeID int          `json:"resource_type_id" gorm:"not null"`
 	ResourceType   ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
 	ProjectID      int          `json:"project_id"`
-	CreatedAt      string       `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-}
-type UploadAssetResource struct {
-	File          *multipart.FileHeader `form:"file"`
-	AssetResource *models.AssetResource `form:"asset_resource"`
+	Project        Project      `json:"project" gorm:"foreignKey:ProjectID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt      time.Time    `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 }

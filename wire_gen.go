@@ -24,6 +24,7 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	gormDB := db2.NewPostgresDatabase()
 	fileExtensionRepository := repositories.NewFileExtensionRepository(gormDB)
 	projectStaffRepository := repositories.NewProjectStaffRepository(gormDB)
+	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
 	resourceTypeRepository := repositories.NewResourceTypeRepository(gormDB)
 	client, err := db3.NewMinIOConnection()
 	if err != nil {
@@ -31,12 +32,11 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	}
 	uploadRepository := repositories.NewUploadRepository(client)
 	resourceRepository := repositories.NewResourceRepository(gormDB, resourceTypeRepository, fileExtensionRepository, uploadRepository)
-	projectRepository := repositories.NewProjectRepository(gormDB, fileExtensionRepository, projectStaffRepository, resourceRepository, resourceTypeRepository, uploadRepository)
+	projectRepository := repositories.NewProjectRepository(gormDB, fileExtensionRepository, projectStaffRepository, projectNumberCounterRepository, resourceRepository, resourceTypeRepository, uploadRepository)
 	staffRepository := repositories.NewStaffRepository(gormDB)
 	programRepository := repositories.NewProgramRepository(gormDB)
 	courseRepository := repositories.NewCourseRepository(gormDB)
-	projectNumberCounterRepository := repositories.NewProjectNumberCounterRepository(gormDB)
-	projectService := services.NewProjectService(channel, projectRepository, staffRepository, programRepository, courseRepository, projectNumberCounterRepository)
+	projectService := services.NewProjectService(channel, projectRepository, staffRepository, programRepository, courseRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
 	calendarRepository := repositories.NewCalendarRepository(gormDB)
 	calendarService := services.NewCalendarService(calendarRepository, programRepository)

@@ -5,11 +5,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/project-box/models"
 	"github.com/project-box/services"
 )
 
 type ConfigHandler interface {
 	GetConfigByProgramId(c *gin.Context)
+	UpsertConfig(c *gin.Context)
 }
 
 type configHandler struct {
@@ -51,4 +53,30 @@ func (h *configHandler) GetConfigByProgramId(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// @Summary Upsert config for a program
+// @Description Creates a new config or updates an existing config for the given program
+// @Tags Config
+// @Produce json
+// @Param config body models.Config true "Config details"
+// @Success 200 {object} models.Config "Successfully upserted config"
+// @Failure 400 {object} map[string]interface{} "Invalid program ID or config data"
+// @Failure 404 {object} map[string]interface{} "Program not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /v1/configs [put]
+func (h *configHandler) UpsertConfig(c *gin.Context) {
+	config := &models.Config{}
+	if err := c.ShouldBindJSON(config); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid config data"})
+		return
+	}
+
+	config, err := h.configService.UpsertConfig(c, config)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, *config)
 }

@@ -7,17 +7,15 @@ import (
 )
 
 type CreateProjectRequest struct {
-	Files   []*multipart.FileHeader `form:"files"`
-	Titles  string                  `form:"titles"`
-	Urls    string                  `form:"urls"`
-	Project *models.ProjectRequest  `form:"project"`
+	Files            []*multipart.FileHeader   `form:"files"`
+	ProjectResources []*models.ProjectResource `form:"projectResources[]"`
+	Project          *models.ProjectRequest    `form:"project"`
 }
 
 type UpdateProjectRequest struct {
-	Files   []*multipart.FileHeader `form:"files"`
-	Titles  string                  `form:"titles"`
-	Urls    string                  `form:"urls"`
-	Project *models.ProjectRequest  `form:"project"`
+	Files            []*multipart.FileHeader   `form:"files"`
+	ProjectResources []*models.ProjectResource `form:"projectResources[]"`
+	Project          *models.ProjectRequest    `form:"project"`
 }
 
 type ProjectData struct {

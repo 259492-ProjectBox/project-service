@@ -1,3 +1,13 @@
+-- Insert File extensions 
+INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
+  ('jpeg','image/jpeg'),
+  ('text','text/plain'),
+  ('png','image/png'),
+  ('word','application/msword'),
+  ('zip','application/vnd.rar'),
+  ('pdf','application/pdf'),
+  ('powerpoint','application/vnd.ms-powerpoint');
+  
 -- Insert programs
 INSERT INTO "programs" ("abbreviation", "program_name_en", "program_name_th") 
 VALUES 
@@ -62,12 +72,10 @@ INSERT INTO "project_students" ("project_id", "student_id") VALUES
   (2, 3),
   (2, 4);
 
--- Insert mock data into staffs
 INSERT INTO "staffs" ("prefix", "first_name", "last_name", "email", "program_id") VALUES 
   ('Dr.', 'Alice', 'Taylor', 'alice.taylor@example.com', 1),
   ('Prof.', 'Bob', 'Williams', 'bob.williams@example.com', 2);
 
--- Insert mock data into project_staffs
 INSERT INTO "project_staffs" ("project_id", "staff_id", "project_role_id") VALUES 
   (1, 1, 1),
   (1, 1, 2),
@@ -76,46 +84,36 @@ INSERT INTO "project_staffs" ("project_id", "staff_id", "project_role_id") VALUE
   (2, 2, 2),
   (2, 1, 2);
 
--- Insert File extensions 
-INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
-  ('jpeg','image/jpeg'),
-  ('text','text/plain'),
-  ('png','image/png'),
-  ('word','application/msword'),
-  ('zip','application/vnd.rar'),
-  ('pdf','application/pdf'),
-  ('powerpoint','application/vnd.ms-powerpoint');
-
 INSERT INTO "resource_types" ("type_name") VALUES 
 ('file'),
 ('url');
 
--- Insert Asset Resources
-INSERT INTO "asset_resources" ("description", "program_id") VALUES
-  ('A comprehensive guide to comp  uter science', 1),
-  ('Tools and equipment for electrical engineering labs', 2);
+INSERT INTO "asset_resources" ("title", "description", "program_id")
+VALUES
+  ('A comprehensive guide to computer science', 'A detailed guide covering various computer science topics and resources.', 1),
+  ('Tools and equipment for electrical engineering labs', 'A list of essential tools and equipment required for electrical engineering labs.', 2);
 
--- Insert Project Resources
-INSERT INTO "project_resources" ("project_id") VALUES
-  (1),
-  (2);
 
--- Insert Resources
-INSERT INTO "resources" ("title", "resource_type_id", "url" , "asset_resource_id"  , "project_resource_id" ,"file_extension_id") VALUES
-  ('Computer Science Textbook', 1, 'https://example.com/cs-textbook',1 , NULL , 6),
-  ('Electrical Engineering Lab Equipment', 2, 'https://example.com/ee-lab', NULL, 2 ,7);
+-- Corrected INSERT INTO project_resources
+INSERT INTO "project_resources" ("title", "icon_name", "url", "resource_type_id", "project_id")
+VALUES
+  ('Project Documentation', 'doc-icon', 'https://example.com/docs', 2, 1),
+  ('API Reference', 'api-icon', 'https://example.com/api', 2, 1),
+  ('Project GitHub Repository', 'github-icon', 'https://github.com/example/repo', 2, 2),
+  ('Video Tutorial', 'video-icon', 'https://example.com/video', 2, 2);
 
--- Insert Project Resource Configs
-INSERT INTO "project_resource_configs" ("title", "resource_type_id", "program_id") VALUES
-  ('Default Resource Config', 1, 1),
-  ('Lab Resource Config', 2, 2);
+-- Corrected INSERT INTO project_resource_configs
+INSERT INTO "project_resource_configs" ("title", "icon_name", "resource_type_id", "is_active", "program_id")
+VALUES
+  ('Default Resource Config', 'default-icon', 1, true, 1),
+  ('Lab Resource Config', 'lab-icon', 2, true, 1);
 
--- Insert Project Resource Configs
+
 INSERT INTO "project_configs" ("title", "is_active", "program_id") VALUES
   ('title_th',true, 1),
-  ('title_en', true, 2),
-  ('abstract_text', true, 2),
-  ('academic_year', true, 2),
-  ('semester', true, 2),
-  ('section_id', true, 2),
-  ('course_id', true, 2);
+  ('title_en', true, 1),
+  ('abstract_text', true, 1),
+  ('academic_year', true, 1),
+  ('semester', true, 1),
+  ('section_id', true, 1),
+  ('course_id', true, 1);

@@ -59,57 +59,56 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			ProgramID: staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
-				ProgramNameTH: project.Program.ProgramNameTH,
-				ProgramNameEN: project.Program.ProgramNameEN,
+				ProgramNameTH: staff.Program.ProgramNameTH,
+				ProgramNameEN: staff.Program.ProgramNameEN,
 			},
 			ProjectRole: dtos.ProjectRole{},
 		})
 	}
-	// Map Members
+
 	for _, member := range project.Members {
 		projectMessage.Members = append(projectMessage.Members, dtos.Student{
-			ID:        member.ID,
-			StudentID: member.StudentID,
-			FirstName: member.FirstName,
-			LastName:  member.LastName,
-			Email:     member.Email,
-			ProgramID: member.ProgramID,
+			ID:           member.ID,
+			StudentID:    member.StudentID,
+			SecLab:       member.SecLab,
+			FirstName:    member.FirstName,
+			LastName:     member.LastName,
+			Email:        member.Email,
+			Semester:     member.Semester,
+			AcademicYear: member.AcademicYear,
+			ProgramID:    member.ProgramID,
 			Program: dtos.Program{
 				ID:            member.Program.ID,
-				ProgramNameTH: project.Program.ProgramNameTH,
-				ProgramNameEN: project.Program.ProgramNameEN,
+				ProgramNameTH: member.Program.ProgramNameTH,
+				ProgramNameEN: member.Program.ProgramNameEN,
 			},
 		})
 	}
-	// Map Project Resources
-	for _, projectResource := range project.ProjectResources {
+
+	for _, resource := range project.ProjectResources {
 		resourceType := dtos.ResourceType{
-			ID:       projectResource.Resource.ResourceTypeID,
-			TypeName: projectResource.Resource.ResourceType.TypeName,
+			ID:       resource.ResourceTypeID,
+			TypeName: resource.ResourceType.TypeName,
 		}
 
-		resource := dtos.Resource{
-			ID:             projectResource.Resource.ID,
-			Title:          projectResource.Resource.Title,
-			ResourceTypeID: projectResource.Resource.ResourceTypeID,
+		projectResource := dtos.ProjectResource{
+			ID:             resource.ID,
+			Title:          resource.Title,
+			ResourceTypeID: resource.ResourceTypeID,
 			ResourceType:   resourceType,
-			URL:            projectResource.Resource.URL,
-			CreatedAt:      formatTime(projectResource.Resource.CreatedAt),
+			ProjectID:      resource.ProjectID,
+			CreatedAt:      formatTime(&resource.CreatedAt),
 		}
 
-		if projectResource.Resource.ResourceType.TypeName != "url" {
-			resource.ResourceName = projectResource.Resource.ResourceName
-			resource.Path = projectResource.Resource.Path
-			resource.FileExtension = &dtos.FileExtension{}
-			resource.FileExtensionID = projectResource.Resource.FileExtensionID
-			resource.FileExtension.ID = projectResource.Resource.FileExtension.ID
-			resource.FileExtension.ExtensionName = projectResource.Resource.FileExtension.ExtensionName
-			resource.FileExtension.MimeType = projectResource.Resource.FileExtension.MimeType
+		if resource.URL != nil {
+			projectResource.ResourceName = resource.ResourceName
+			projectResource.Path = resource.Path
+			projectResource.URL = resource.URL
 		}
 
-		if projectResource.Resource.FileExtension != nil && projectResource.Resource.FileExtension.ExtensionName == "pdf" {
+		if resource.PDF != nil {
 			pages := []dtos.PDFPage{}
-			for _, page := range projectResource.Resource.PDF.Pages {
+			for _, page := range resource.PDF.Pages {
 				pages = append(pages, dtos.PDFPage{
 					ID:         page.ID,
 					PDFID:      page.PDFID,
@@ -117,16 +116,15 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 					Content:    page.Content,
 				})
 			}
-			resource.PDF = &dtos.PDF{
-				ID:         projectResource.Resource.PDF.ID,
-				ResourceID: projectResource.Resource.PDF.ResourceID,
-				Pages:      pages,
+			projectResource.PDF = &dtos.PDF{
+				ID:                resource.PDF.ID,
+				ProjectResourceID: resource.PDF.ProjectResourceID,
+				Pages:             pages,
 			}
 		}
-		projectMessage.ProjectResources = append(projectMessage.ProjectResources, dtos.ProjectResource{
-			ID:       projectResource.ID,
-			Resource: resource,
-		})
+
+		projectMessage.ProjectResources = append(projectMessage.ProjectResources, projectResource)
 	}
+
 	return &projectMessage
 }

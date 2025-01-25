@@ -11,6 +11,7 @@ import (
 type ConfigService interface {
 	GetConfigByProgramId(programId int) ([]dtos.ConfigResponse, error)
 	FindConfigByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error)
+	UpsertConfig(ctx context.Context, config *models.Config) (*models.Config, error)
 }
 
 type configServiceImpl struct {
@@ -43,5 +44,13 @@ func (s *configServiceImpl) FindConfigByNameAndProgramId(ctx context.Context, na
 		return nil, err
 	}
 
+	return config, nil
+}
+
+func (s *configServiceImpl) UpsertConfig(ctx context.Context, config *models.Config) (*models.Config, error) {
+	config, err := s.configRepo.Upsert(ctx, config)
+	if err != nil {
+		return nil, err
+	}
 	return config, nil
 }

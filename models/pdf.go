@@ -1,9 +1,9 @@
 package models
 
 type PDF struct {
-	ID         int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	ResourceID int       `json:"resource_id"`
-	Pages      []PDFPage `json:"pages" gorm:"constraint:OnDelete:CASCADE"`
+	ID                int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	ProjectResourceID int       `json:"project_resource_id"`
+	Pages             []PDFPage `json:"pages" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type PDFPage struct {

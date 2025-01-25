@@ -18,10 +18,9 @@ type ResourceRepository interface {
 	DeleteAssetResourceByID(ctx context.Context, id string) error
 	FindAssetResourcesByProgramID(ctx context.Context, id string) ([]models.AssetResource, error)
 
-	CreateProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource, resource *models.Resource) error
+	CreateProjectResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource) error
 	FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
 	DeleteProjectResourceByID(ctx context.Context, id string, filePath *string) error
-	FindByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
 }
 
 type resourceRepository struct {
@@ -93,34 +92,14 @@ func (r *resourceRepository) CreateAssetResource(ctx context.Context, file *mult
 	}
 
 	programName := assetResource.Program.ProgramNameTH
-	objectName, filePath := r.generateFilePath(file.Filename, programName, os.Getenv("MINIO_ASSET_BUCKET"))
+	objectName, _ := r.generateFilePath(file.Filename, programName, os.Getenv("MINIO_ASSET_BUCKET"))
 
 	if err := r.uploadFileToMinio(ctx, objectName, file); err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("file upload failed: %w", err)
 	}
 
-	resourceType, err := r.resourceTypeRepo.GetResourceTypeByName(ctx, tx, "file")
-	if err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to get resource type: %w", err)
-	}
-
-	fileExtension, err := r.fileExtensionRepo.GetFileExtension(ctx, tx, file)
-	if err != nil {
-		return nil, err
-	}
-
-	resource := &models.Resource{
-		ProjectResourceID: nil,
-		AssetResourceID:   &assetResource.ID,
-		ResourceName:      &file.Filename,
-		Path:              &filePath,
-		ResourceTypeID:    resourceType.ID,
-		FileExtensionID:   &fileExtension.ID,
-	}
-
-	if err := tx.Create(resource).Error; err != nil {
+	if err := tx.Create(assetResource).Error; err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
@@ -144,21 +123,16 @@ func (r *resourceRepository) FindDetailedResourceByID(ctx context.Context, id st
 	var detailedResource models.DetailedResource
 
 	query := r.db.WithContext(ctx).
-		Table("resources").
+		Table("project_resources").
 		Select(`
         projects.id AS project_id,
         project_resources.id AS project_resource_id,
-        asset_resources.id AS asset_resource_id,
         projects.*,
-        resources.*,
         project_resources.*,
-        asset_resources.*
     `).
-		Joins("LEFT JOIN project_resources ON resources.project_resource_id IS NOT NULL AND project_resources.id = resources.project_resource_id").
-		Joins("LEFT JOIN asset_resources ON resources.asset_resource_id IS NOT NULL AND asset_resources.id = resources.asset_resource_id").
 		Joins("LEFT JOIN projects ON project_resources.project_id IS NOT NULL AND projects.id = project_resources.project_id")
 
-	if err := query.Where("resources.id = ?", id).
+	if err := query.Where("project_resources.id = ?", id).
 		Scan(&detailedResource).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("resource not found")
@@ -201,24 +175,9 @@ func (r *resourceRepository) DeleteAssetResourceByID(ctx context.Context, id str
 	return nil
 }
 
-func (r *resourceRepository) FindByProjectID(ctx context.Context, projectID string) ([]models.Resource, error) {
-	var resources []models.Resource
-	if err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Find(&resources).Error; err != nil {
-		return nil, err
-	}
-	return resources, nil
-}
-
-func (r *resourceRepository) CreateProjectResourceAndResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource, resource *models.Resource) error {
+func (r *resourceRepository) CreateProjectResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource) error {
 	if err := tx.WithContext(ctx).Create(projectResource).Error; err != nil {
 		return err
 	}
-
-	resource.ProjectResourceID = &projectResource.ID
-
-	if err := tx.WithContext(ctx).Create(resource).Error; err != nil {
-		return err
-	}
-
 	return nil
 }

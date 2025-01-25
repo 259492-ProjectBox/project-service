@@ -139,6 +139,19 @@ definitions:
       resource:
         $ref: '#/definitions/models.Resource'
     type: object
+  models.Config:
+    properties:
+      config_name:
+        type: string
+      id:
+        type: integer
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
+      value:
+        type: string
+    type: object
   models.Course:
     properties:
       course_name:
@@ -185,6 +198,8 @@ definitions:
     type: object
   models.Program:
     properties:
+      abbreviation:
+        type: string
       id:
         type: integer
       program_name_en:
@@ -244,18 +259,12 @@ definitions:
     type: object
   models.ProjectResourceConfig:
     properties:
-      file_extension:
-        $ref: '#/definitions/models.FileExtension'
-      file_extension_id:
-        type: integer
       icon_name:
         type: string
       id:
         type: integer
       is_active:
         type: boolean
-      max_file_size:
-        type: integer
       program:
         $ref: '#/definitions/models.Program'
       program_id:
@@ -322,13 +331,25 @@ definitions:
     type: object
   models.Student:
     properties:
+      academic_year:
+        type: integer
       email:
         type: string
       first_name:
         type: string
       id:
-        type: string
+        type: integer
       last_name:
+        type: string
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
+      sec_lab:
+        type: string
+      semester:
+        type: integer
+      student_id:
         type: string
     type: object
 info:
@@ -544,6 +565,42 @@ paths:
       summary: Get calendar by program ID
       tags:
       - Calendar
+  /v1/configs:
+    put:
+      description: Creates a new config or updates an existing config for the given
+        program
+      parameters:
+      - description: Config details
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/models.Config'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully upserted config
+          schema:
+            $ref: '#/definitions/models.Config'
+        "400":
+          description: Invalid program ID or config data
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Program not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upsert config for a program
+      tags:
+      - Config
   /v1/configs/program/{program_id}:
     get:
       description: Fetches all config for a given program

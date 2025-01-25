@@ -14,7 +14,6 @@ type ResourceService interface {
 	DeleteAssetResourceByID(ctx context.Context, id string) error
 	GetDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
 	DeleteProjectResourceByID(ctx context.Context, id string, filePath *string) error
-	GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error)
 }
 
 type resourceService struct {
@@ -44,8 +43,4 @@ func (s *resourceService) GetAssetResourceByProgramID(ctx context.Context, progr
 }
 func (s *resourceService) DeleteAssetResourceByID(ctx context.Context, id string) error {
 	return s.resourceRepository.DeleteAssetResourceByID(ctx, id)
-}
-
-func (s *resourceService) GetResourcesByProjectID(ctx context.Context, projectID string) ([]models.Resource, error) {
-	return s.resourceRepository.FindByProjectID(ctx, projectID)
 }
