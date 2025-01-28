@@ -35,6 +35,7 @@ VALUES
 
 -- Insert Courses
 INSERT INTO "courses" ("course_no", "course_name", "program_id") VALUES
+  ('261492', 'CPE Project', 1),
   ('CS101', 'Introduction to Computer Science', 1 ),
   ('EE101', 'Introduction to Electrical Engineering', 2 ),
   ('ME101', 'Introduction to Mechanical Engineering', 3),

@@ -7,10 +7,9 @@ import (
 	"io"
 	"mime/multipart"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
-
-	"strconv"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/project-box/models"
@@ -25,13 +24,15 @@ type UploadService interface {
 
 type uploadServiceImpl struct {
 	client         *minio.Client
+	courseService  CourseService
 	studentService StudentService
 	configService  ConfigService
 }
 
-func NewUploadService(client *minio.Client, configService ConfigService, studentService StudentService) UploadService {
+func NewUploadService(client *minio.Client, courseService CourseService, configService ConfigService, studentService StudentService) UploadService {
 	return &uploadServiceImpl{
 		client:         client,
+		courseService:  courseService,
 		configService:  configService,
 		studentService: studentService,
 	}
@@ -42,28 +43,10 @@ func matchColumn(col, target string) bool {
 }
 
 func (s *uploadServiceImpl) ProcessStudentEnrollmentFile(ctx context.Context, programId int, file *multipart.FileHeader) error {
-	academicYear, err := s.configService.FindConfigByNameAndProgramId(ctx, "academic year", programId)
+	academicYear, semester, err := s.getAcademicYearAndSemester(ctx, programId)
 	if err != nil {
-		return fmt.Errorf("failed to fetch academic year: %w", err)
+		return err
 	}
-
-	academicYearInt, err := strconv.Atoi(academicYear.Value)
-	if err != nil {
-		return fmt.Errorf("failed to convert academic year: %w", err)
-	}
-
-	semester, err := s.configService.FindConfigByNameAndProgramId(ctx, "semester", programId)
-	if err != nil {
-		return fmt.Errorf("failed to fetch academic year: %w", err)
-	}
-
-	semesterInt, err := strconv.Atoi(semester.Value)
-	if err != nil {
-		return fmt.Errorf("failed to convert academic year: %w", err)
-	}
-
-	var secLecColumn, secLabColumn, studentColumn, nameColumn, cmuAccountColumn int
-	secLecColumn, secLabColumn, studentColumn, nameColumn, cmuAccountColumn = -1, -1, -1, -1, 8
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if ext != ".xlsx" && ext != ".xls" {
@@ -95,39 +78,24 @@ func (s *uploadServiceImpl) ProcessStudentEnrollmentFile(ctx context.Context, pr
 		return errors.New("excel file is empty or does not have enough rows")
 	}
 
-	headerRow := rows[3]
-	for j, col := range headerRow {
-		switch {
-		case matchColumn(col, "SECLEC"):
-			secLecColumn = j
-		case matchColumn(col, "SECLAB"):
-			secLabColumn = j
-		case matchColumn(col, "รหัสนักศึกษา"):
-			studentColumn = j
-		case matchColumn(col, "ชื่อ - นามสกุล"):
-			nameColumn = j
-		}
+	courseNo, err := s.getCourseNo(rows)
+	if err != nil {
+		return err
 	}
 
-	if secLecColumn == -1 || secLabColumn == -1 || studentColumn == -1 || nameColumn == -1 {
-		return errors.New("missing one or more required columns in the header row")
+	course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
+	if err != nil {
+		return err
 	}
 
-	var students []models.Student
-	for _, row := range rows[4:] {
+	studentInfoColumns, err := s.getStudentInfoColumns(rows[3])
+	if err != nil {
+		return err
+	}
 
-		student := models.Student{
-			SecLab:       row[secLabColumn],
-			StudentID:    row[studentColumn],
-			FirstName:    row[nameColumn],
-			LastName:     row[nameColumn+1],
-			Email:        row[cmuAccountColumn],
-			Semester:     semesterInt,
-			AcademicYear: academicYearInt,
-			ProgramID:    programId,
-		}
-
-		students = append(students, student)
+	students, err := s.parseStudents(rows[4:], studentInfoColumns, course.ID, semester, academicYear, programId)
+	if err != nil {
+		return err
 	}
 
 	if err := s.studentService.CreateStudents(ctx, students); err != nil {
@@ -135,6 +103,88 @@ func (s *uploadServiceImpl) ProcessStudentEnrollmentFile(ctx context.Context, pr
 	}
 
 	return nil
+}
+
+func (s *uploadServiceImpl) getAcademicYearAndSemester(ctx context.Context, programId int) (int, int, error) {
+	academicYear, err := s.configService.FindConfigByNameAndProgramId(ctx, "academic year", programId)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to fetch academic year: %w", err)
+	}
+
+	academicYearInt, err := strconv.Atoi(academicYear.Value)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to convert academic year: %w", err)
+	}
+
+	semester, err := s.configService.FindConfigByNameAndProgramId(ctx, "semester", programId)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to fetch semester: %w", err)
+	}
+
+	semesterInt, err := strconv.Atoi(semester.Value)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to convert semester: %w", err)
+	}
+
+	return academicYearInt, semesterInt, nil
+}
+
+func (s *uploadServiceImpl) getCourseNo(rows [][]string) (string, error) {
+	courseRow := rows[1]
+	for j, col := range courseRow {
+		if matchColumn(col, "COURSE NO :") {
+			return rows[1][j+2], nil
+		}
+	}
+	return "", errors.New("course number not found")
+}
+
+func (s *uploadServiceImpl) getStudentInfoColumns(headerRow []string) (map[string]int, error) {
+	columns := map[string]int{
+		"secLecColumn":     -1,
+		"secLabColumn":     -1,
+		"studentColumn":    -1,
+		"nameColumn":       -1,
+		"cmuAccountColumn": 8,
+	}
+
+	for j, col := range headerRow {
+		switch {
+		case matchColumn(col, "SECLEC"):
+			columns["secLecColumn"] = j
+		case matchColumn(col, "SECLAB"):
+			columns["secLabColumn"] = j
+		case matchColumn(col, "รหัสนักศึกษา"):
+			columns["studentColumn"] = j
+		case matchColumn(col, "ชื่อ - นามสกุล"):
+			columns["nameColumn"] = j
+		}
+	}
+
+	if columns["secLecColumn"] == -1 || columns["secLabColumn"] == -1 || columns["studentColumn"] == -1 || columns["nameColumn"] == -1 {
+		return nil, errors.New("missing one or more required columns in the header row")
+	}
+
+	return columns, nil
+}
+
+func (s *uploadServiceImpl) parseStudents(rows [][]string, columns map[string]int, courseID, semesterInt, academicYearInt, programId int) ([]models.Student, error) {
+	var students []models.Student
+	for _, row := range rows {
+		student := models.Student{
+			SecLab:       row[columns["secLabColumn"]],
+			StudentID:    row[columns["studentColumn"]],
+			FirstName:    row[columns["nameColumn"]],
+			LastName:     row[columns["nameColumn"]+1],
+			Email:        row[columns["cmuAccountColumn"]],
+			CourseID:     courseID,
+			Semester:     semesterInt,
+			AcademicYear: academicYearInt,
+			ProgramID:    programId,
+		}
+		students = append(students, student)
+	}
+	return students, nil
 }
 
 func (s *uploadServiceImpl) UploadObject(ctx context.Context, bucketName string, objectName string, file io.Reader, fileSize int64, contentType string) (string, error) {

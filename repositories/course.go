@@ -11,6 +11,8 @@ import (
 type CourseRepository interface {
 	repository[models.Course]
 	GetByCourseAndSemester(ctx context.Context, courseId int, semester int) (*models.Course, error)
+	FindByCourseNo(ctx context.Context, courseNo string) (*models.Course, error)
+	FindByProgramID(ctx context.Context, programID int) (*models.Course, error)
 }
 
 type courseRepositoryImpl struct {
@@ -34,4 +36,20 @@ func (r *courseRepositoryImpl) GetByCourseAndSemester(ctx context.Context, cours
 		return nil, err
 	}
 	return &course, nil
+}
+
+func (r *courseRepositoryImpl) FindByCourseNo(ctx context.Context, courseNo string) (*models.Course, error) {
+	var course models.Course
+	if err := r.db.WithContext(ctx).Where("course_no = ?", courseNo).First(&course).Error; err != nil {
+		return nil, err
+	}
+	return &course, nil
+}
+
+func (r *courseRepositoryImpl) FindByProgramID(ctx context.Context, programID int) (*models.Course, error) {
+	var courses *models.Course
+	if err := r.db.WithContext(ctx).Where("program_id = ?", programID).First(&courses).Error; err != nil {
+		return nil, err
+	}
+	return courses, nil
 }
