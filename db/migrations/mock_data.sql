@@ -42,16 +42,16 @@ INSERT INTO "courses" ("course_no", "course_name", "program_id") VALUES
 
 -- Insert Students
 INSERT INTO "students" 
-  ("student_id", "first_name", "last_name", "email", "sec_lab" , "semester","academic_year",  "program_id") 
+  ("student_id", "first_name", "last_name", "email", "sec_lab" , "semester","academic_year", "course_id" ,"program_id") 
 VALUES
-  ('640610303', 'John', 'Doe', 'john.doe@example.com','001' , 2, 2025,  1),
-  ('640610305', 'James', 'Brown', 'james.brown@example.com','002' , 2,  2025,  1),
-  ('640610306', 'Jane', 'Smith', 'jane.smith@example.com','002' , 2, 2025,   2),
-  ('640610307', 'Emily', 'Clark', 'emily.clark@example.com','003' , 1,2025,  2),
-  ('640610308', 'Mark', 'Johnson', 'mark.johnson@example.com','003' , 2,2025,   3),
-  ('640610309', 'David', 'Wilson', 'david.wilson@example.com','001' , 1,2025,  3),
-  ('640610310', 'Emily', 'Davis', 'emily.davis@example.com', '003' ,1,2025, 4),
-  ('640610311', 'Sophia', 'Taylor', 'sophia.taylor@example.com','002' ,1, 2025,  4);
+  ('640610303', 'John', 'Doe', 'john.doe@example.com','001' , 2, 2025,1,  1),
+  ('640610305', 'James', 'Brown', 'james.brown@example.com','002' , 2,  2025,2,  1),
+  ('640610306', 'Jane', 'Smith', 'jane.smith@example.com','002' , 2, 2025,4,   2),
+  ('640610307', 'Emily', 'Clark', 'emily.clark@example.com','003' , 1,2025, 4, 2),
+  ('640610308', 'Mark', 'Johnson', 'mark.johnson@example.com','003' , 2,2025, 1,  3),
+  ('640610309', 'David', 'Wilson', 'david.wilson@example.com','001' , 1,2025, 2, 3),
+  ('640610310', 'Emily', 'Davis', 'emily.davis@example.com', '003' ,1,2025, 3,4),
+  ('640610311', 'Sophia', 'Taylor', 'sophia.taylor@example.com','002' ,1, 2025,4,  4);
 
 -- Insert mock data into project_roles
 INSERT INTO "project_roles" ("role_name", "program_id") VALUES 

@@ -30,6 +30,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		ProgramID:    project.ProgramID,
 		Program: dtos.Program{
 			ID:            project.Program.ID,
+			Abbreviation:  project.Program.Abbreviation,
 			ProgramNameTH: project.Program.ProgramNameTH,
 			ProgramNameEN: project.Program.ProgramNameEN,
 		},
@@ -41,6 +42,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			ProgramID:  project.Course.ProgramID,
 			Program: dtos.Program{
 				ID:            project.Course.Program.ID,
+				Abbreviation:  project.Course.Program.Abbreviation,
 				ProgramNameTH: project.Program.ProgramNameTH,
 				ProgramNameEN: project.Program.ProgramNameEN,
 			},
@@ -59,6 +61,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			ProgramID: staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
+				Abbreviation:  staff.Program.Abbreviation,
 				ProgramNameTH: staff.Program.ProgramNameTH,
 				ProgramNameEN: staff.Program.ProgramNameEN,
 			},
@@ -76,9 +79,23 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			Email:        member.Email,
 			Semester:     member.Semester,
 			AcademicYear: member.AcademicYear,
-			ProgramID:    member.ProgramID,
+			CourseID:     member.CourseID,
+			Course: dtos.Course{
+				ID:         member.Course.ID,
+				CourseNo:   member.Course.CourseNo,
+				CourseName: member.Course.CourseName,
+				ProgramID:  member.Course.ProgramID,
+				Program: dtos.Program{
+					ID:            member.Course.Program.ID,
+					Abbreviation:  member.Course.Program.Abbreviation,
+					ProgramNameTH: member.Course.Program.ProgramNameEN,
+					ProgramNameEN: member.Course.Program.ProgramNameTH,
+				},
+			},
+			ProgramID: member.ProgramID,
 			Program: dtos.Program{
 				ID:            member.Program.ID,
+				Abbreviation:  member.Program.Abbreviation,
 				ProgramNameTH: member.Program.ProgramNameTH,
 				ProgramNameEN: member.Program.ProgramNameEN,
 			},
@@ -93,6 +110,8 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 
 		projectResource := dtos.ProjectResource{
 			ID:             resource.ID,
+			ResourceName:   resource.ResourceName,
+			Path:           resource.Path,
 			Title:          resource.Title,
 			ResourceTypeID: resource.ResourceTypeID,
 			ResourceType:   resourceType,
@@ -101,8 +120,6 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		}
 
 		if resource.URL != nil {
-			projectResource.ResourceName = resource.ResourceName
-			projectResource.Path = resource.Path
 			projectResource.URL = resource.URL
 		}
 

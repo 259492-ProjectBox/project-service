@@ -107,6 +107,7 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 		Preload("Course.Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
+		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
 		Preload("ProjectResources.PDF.Pages").
 		First(project, "projects.id = ?", id).Error; err != nil {
@@ -147,7 +148,8 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 		Preload("Program").
 		Preload("Course.Program").
 		Preload("Staffs.Program").
-		Preload("Members").
+		Preload("Members.Program").
+		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
 		Find(&projects).Error; err != nil {
 		return nil, err
@@ -283,6 +285,7 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		Course:       projectReq.Course,
 		ProgramID:    projectReq.ProgramID,
 		Members:      projectReq.Members,
+		UpdatedAt:    nil,
 	}
 
 	if err := tx.WithContext(ctx).Create(project).Error; err != nil {

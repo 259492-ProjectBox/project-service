@@ -27,6 +27,7 @@ CREATE TABLE "students" (
   "last_name" varchar,
   "sec_lab" varchar,
   "email" varchar,
+  "course_id" int,
   "semester" int,
   "academic_year" int,
   "program_id" int,

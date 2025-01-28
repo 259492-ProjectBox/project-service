@@ -2,7 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6c609652-2ab1-4ae9-9833-2f9a758e0cee" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrations/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrations/init.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrations/mock_data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrations/mock_data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/program.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/program.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/message.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/message.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,9 +22,9 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="2qQp7IFgh9gRX73vwxU9cANUfLC" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -28,7 +35,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Kingsglaive/Desktop/Work/flood-aid-backend"
+    "last_opened_file_path": "C:/Users/Kingsglaive/Desktop/Work/project/search service"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
