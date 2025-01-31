@@ -1,13 +1,13 @@
 services:
   project_service:
     # build: .
-    image: kunmhing/projectservice:2.3
+    image: kunmhing/projectservice:latest
     container_name: project_service
     restart: unless-stopped
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - .env.prod
     # volumes:
     #   # - .:/app
     #   - project_service_data:/app

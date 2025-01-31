@@ -429,6 +429,88 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/courses/program/{program_id}": {
+            "get": {
+                "description": "Retrieves a list of courses for a given program ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Get courses by program ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved courses",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Course"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/courses/{course_no}": {
+            "get": {
+                "description": "Retrieves a course by its course number",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Get course by course number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Number",
+                        "name": "course_no",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved course",
+                        "schema": {
+                            "$ref": "#/definitions/models.Course"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/programs": {
             "get": {
                 "description": "Retrieves all programs from the database",
@@ -880,94 +962,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/projects/student/{student_id}": {
-            "get": {
-                "description": "Fetches a project by its student ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Get a project by Student ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Student ID",
-                        "name": "student_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved project",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Project"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid student ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Project not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/v1/projects/{id}": {
-            "get": {
-                "description": "Fetches a project by its unique ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Get a project by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Project ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved project",
-                        "schema": {
-                            "$ref": "#/definitions/models.Project"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid project ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Project not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "put": {
                 "description": "Updates a project by its ID with the provided data",
                 "consumes": [
@@ -1497,8 +1492,8 @@ const docTemplate = `{
                 "program_id": {
                     "type": "integer"
                 },
-                "resource": {
-                    "$ref": "#/definitions/models.Resource"
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -1542,20 +1537,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.FileExtension": {
-            "type": "object",
-            "properties": {
-                "extension_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mime_type": {
-                    "type": "string"
-                }
-            }
-        },
         "models.PDF": {
             "type": "object",
             "properties": {
@@ -1568,7 +1549,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.PDFPage"
                     }
                 },
-                "resource_id": {
+                "project_resource_id": {
                     "type": "integer"
                 }
             }
@@ -1675,11 +1656,38 @@ const docTemplate = `{
         "models.ProjectResource": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "resource": {
-                    "$ref": "#/definitions/models.Resource"
+                "path": {
+                    "type": "string"
+                },
+                "pdf": {
+                    "$ref": "#/definitions/models.PDF"
+                },
+                "project": {
+                    "$ref": "#/definitions/models.Project"
+                },
+                "project_id": {
+                    "type": "integer"
+                },
+                "resource_name": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/models.ResourceType"
+                },
+                "resource_type_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -1708,44 +1716,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Resource": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "file_extension": {
-                    "$ref": "#/definitions/models.FileExtension"
-                },
-                "file_extension_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "pdf": {
-                    "$ref": "#/definitions/models.PDF"
-                },
-                "resource_name": {
-                    "type": "string"
-                },
-                "resource_type": {
-                    "$ref": "#/definitions/models.ResourceType"
-                },
-                "resource_type_id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }
@@ -1797,6 +1767,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "academic_year": {
+                    "type": "integer"
+                },
+                "course": {
+                    "$ref": "#/definitions/models.Course"
+                },
+                "course_id": {
                     "type": "integer"
                 },
                 "email": {
