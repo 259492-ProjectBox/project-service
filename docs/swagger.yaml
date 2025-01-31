@@ -15,15 +15,6 @@ definitions:
       title:
         type: string
     type: object
-  dtos.ConfigResponse:
-    properties:
-      config_name:
-        type: string
-      program_id:
-        type: integer
-      value:
-        type: string
-    type: object
   dtos.CreateCalendarRequest:
     properties:
       description:
@@ -48,11 +39,17 @@ definitions:
     properties:
       email:
         type: string
-      first_name:
+      first_name_en:
         type: string
-      last_name:
+      first_name_th:
         type: string
-      prefix:
+      last_name_en:
+        type: string
+      last_name_th:
+        type: string
+      prefix_en:
+        type: string
+      prefix_th:
         type: string
       program_id:
         type: integer
@@ -83,13 +80,19 @@ definitions:
     properties:
       email:
         type: string
-      first_name:
+      first_name_en:
+        type: string
+      first_name_th:
         type: string
       id:
         type: integer
-      last_name:
+      last_name_en:
         type: string
-      prefix:
+      last_name_th:
+        type: string
+      prefix_en:
+        type: string
+      prefix_th:
         type: string
       program_id:
         type: integer
@@ -113,13 +116,19 @@ definitions:
     properties:
       email:
         type: string
-      first_name:
+      first_name_en:
+        type: string
+      first_name_th:
         type: string
       id:
         type: integer
-      last_name:
+      last_name_en:
         type: string
-      prefix:
+      last_name_th:
+        type: string
+      prefix_en:
+        type: string
+      prefix_th:
         type: string
       program_id:
         type: integer
@@ -136,8 +145,8 @@ definitions:
         $ref: '#/definitions/models.Program'
       program_id:
         type: integer
-      resource:
-        $ref: '#/definitions/models.Resource'
+      title:
+        type: string
     type: object
   models.Config:
     properties:
@@ -165,15 +174,6 @@ definitions:
       program_id:
         type: integer
     type: object
-  models.FileExtension:
-    properties:
-      extension_name:
-        type: string
-      id:
-        type: integer
-      mime_type:
-        type: string
-    type: object
   models.PDF:
     properties:
       id:
@@ -182,7 +182,7 @@ definitions:
         items:
           $ref: '#/definitions/models.PDFPage'
         type: array
-      resource_id:
+      project_resource_id:
         type: integer
     type: object
   models.PDFPage:
@@ -252,10 +252,28 @@ definitions:
     type: object
   models.ProjectResource:
     properties:
+      created_at:
+        type: string
       id:
         type: integer
-      resource:
-        $ref: '#/definitions/models.Resource'
+      path:
+        type: string
+      pdf:
+        $ref: '#/definitions/models.PDF'
+      project:
+        $ref: '#/definitions/models.Project'
+      project_id:
+        type: integer
+      resource_name:
+        type: string
+      resource_type:
+        $ref: '#/definitions/models.ResourceType'
+      resource_type_id:
+        type: integer
+      title:
+        type: string
+      url:
+        type: string
     type: object
   models.ProjectResourceConfig:
     properties:
@@ -276,31 +294,6 @@ definitions:
       title:
         type: string
     type: object
-  models.Resource:
-    properties:
-      created_at:
-        type: string
-      file_extension:
-        $ref: '#/definitions/models.FileExtension'
-      file_extension_id:
-        type: integer
-      id:
-        type: integer
-      path:
-        type: string
-      pdf:
-        $ref: '#/definitions/models.PDF'
-      resource_name:
-        type: string
-      resource_type:
-        $ref: '#/definitions/models.ResourceType'
-      resource_type_id:
-        type: integer
-      title:
-        type: string
-      url:
-        type: string
-    type: object
   models.ResourceType:
     properties:
       id:
@@ -312,13 +305,19 @@ definitions:
     properties:
       email:
         type: string
-      first_name:
+      first_name_en:
+        type: string
+      first_name_th:
         type: string
       id:
         type: integer
-      last_name:
+      last_name_en:
         type: string
-      prefix:
+      last_name_th:
+        type: string
+      prefix_en:
+        type: string
+      prefix_th:
         type: string
       program:
         $ref: '#/definitions/models.Program'
@@ -332,6 +331,10 @@ definitions:
   models.Student:
     properties:
       academic_year:
+        type: integer
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
         type: integer
       email:
         type: string
@@ -617,7 +620,7 @@ paths:
           description: Successfully fetched config
           schema:
             items:
-              $ref: '#/definitions/dtos.ConfigResponse'
+              $ref: '#/definitions/models.Config'
             type: array
         "400":
           description: Invalid program ID
@@ -637,6 +640,61 @@ paths:
       summary: Get config by program ID
       tags:
       - Config
+  /v1/courses/{course_no}:
+    get:
+      description: Retrieves a course by its course number
+      parameters:
+      - description: Course Number
+        in: path
+        name: course_no
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved course
+          schema:
+            $ref: '#/definitions/models.Course'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get course by course number
+      tags:
+      - Course
+  /v1/courses/program/{program_id}:
+    get:
+      description: Retrieves a list of courses for a given program ID
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved courses
+          schema:
+            items:
+              $ref: '#/definitions/models.Course'
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get courses by program ID
+      tags:
+      - Course
   /v1/programs:
     get:
       description: Retrieves all programs from the database
@@ -973,34 +1031,6 @@ paths:
       summary: Delete a project by ID
       tags:
       - Project
-    get:
-      description: Fetches a project by its unique ID
-      parameters:
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved project
-          schema:
-            $ref: '#/definitions/models.Project'
-        "400":
-          description: Invalid project ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Project not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get a project by ID
-      tags:
-      - Project
     put:
       consumes:
       - multipart/form-data
@@ -1041,37 +1071,6 @@ paths:
             additionalProperties: true
             type: object
       summary: Update an existing project
-      tags:
-      - Project
-  /v1/projects/student/{student_id}:
-    get:
-      description: Fetches a project by its student ID
-      parameters:
-      - description: Student ID
-        in: path
-        name: student_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved project
-          schema:
-            items:
-              $ref: '#/definitions/models.Project'
-            type: array
-        "400":
-          description: Invalid student ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Project not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get a project by Student ID
       tags:
       - Project
   /v1/staffs:
@@ -1217,6 +1216,100 @@ paths:
       summary: Get staffs by program ID
       tags:
       - Staff
+  /v1/students/{student_id}:
+    get:
+      description: Retrieves a list of students for a given student ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: student_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved students
+          schema:
+            items:
+              $ref: '#/definitions/models.Student'
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get students by student ID
+      tags:
+      - Student
+  /v1/students/{student_id}/check:
+    get:
+      description: Checks if a student has permission to create a project based on
+        their student ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: student_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully checked permission
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid student ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Check student permission for creating a project
+      tags:
+      - Student
+  /v1/students/program/{program_id}/current_year:
+    get:
+      description: Retrieves a list of students for a given program ID, academic year,
+        and semester
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved students
+          schema:
+            items:
+              $ref: '#/definitions/models.Student'
+            type: array
+        "400":
+          description: Invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get students by program ID, academic year, and semester
+      tags:
+      - Student
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

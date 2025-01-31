@@ -58,11 +58,12 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectResourceConfigHandler := handlers.NewProjectResourceConfigHandler(projectResourceConfigService)
 	programService := services.NewProgramService(programRepository)
 	programHandler := handlers.NewProgramHandler(programService)
-	studentRepository := repositories.NewStudentRepository(gormDB)
-	studentService := services.NewStudentService(studentRepository)
+	studentRepository := repositories.NewStudentRepository(gormDB, configRepository)
+	studentService := services.NewStudentService(configRepository, studentRepository)
+	studentHandler := handlers.NewStudentHandler(studentService)
 	uploadService := services.NewUploadService(client, courseService, configService, studentService)
 	uploadHandler := handlers.NewUploadHandler(uploadService)
-	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, staffHandler, courseHandler, configHandler, projectConfigHandler, projectResourceConfigHandler, programHandler, uploadHandler)
+	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, staffHandler, courseHandler, configHandler, projectConfigHandler, projectResourceConfigHandler, programHandler, studentHandler, uploadHandler)
 	if err != nil {
 		return nil, nil, err
 	}

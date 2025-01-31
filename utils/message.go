@@ -53,12 +53,15 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 
 	for _, staff := range project.Staffs {
 		projectMessage.ProjectStaffs = append(projectMessage.ProjectStaffs, dtos.ProjectStaffMessage{
-			ID:        staff.ID,
-			Prefix:    staff.Prefix,
-			FirstName: staff.FirstName,
-			LastName:  staff.LastName,
-			Email:     staff.Email,
-			ProgramID: staff.ProgramID,
+			ID:          staff.ID,
+			PrefixTH:    staff.PrefixTH,
+			PrefixEN:    staff.PrefixEN,
+			FirstNameTH: staff.FirstNameTH,
+			LastNameTH:  staff.LastNameTH,
+			FirstNameEN: staff.FirstNameEN,
+			LastNameEN:  staff.LastNameEN,
+			Email:       staff.Email,
+			ProgramID:   staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
 				Abbreviation:  staff.Program.Abbreviation,

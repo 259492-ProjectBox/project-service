@@ -57,9 +57,45 @@ VALUES
 -- Insert mock data into project_roles
 INSERT INTO "project_roles" ("role_name", "program_id") VALUES 
 ('Advisor', 1),
+('Co Advisor', 1),
+('Committee', 1),
+('External Committee', 1),
+('Advisor', 2),
 ('Co Advisor', 2),
 ('Committee', 2),
-('External Committee', 2);
+('External Committee', 2),
+('Advisor', 3),
+('Co Advisor', 3),
+('Committee', 3),
+('External Committee', 3),
+('Advisor', 4),
+('Co Advisor', 4),
+('Committee', 4),
+('External Committee', 4),
+('Advisor', 5),
+('Co Advisor', 5),
+('Committee', 5),
+('External Committee', 5),
+('Advisor', 6),
+('Co Advisor', 6),
+('Committee', 6),
+('External Committee', 6),
+('Advisor', 7),
+('Co Advisor', 7),
+('Committee', 7),
+('External Committee', 7),
+('Advisor', 8),
+('Co Advisor', 8),
+('Committee', 8),
+('External Committee', 8),
+('Advisor', 9),
+('Co Advisor', 9),
+('Committee', 9),
+('External Committee', 9),
+('Advisor', 10),
+('Co Advisor', 10),
+('Committee', 10),
+('External Committee', 10);
 
 -- Insert Projects
 INSERT INTO "projects" ("project_no", "title_th", "title_en", "abstract_text", "academic_year", "semester","is_public" ,"section_id",  "course_id", "program_id") VALUES
@@ -73,9 +109,9 @@ INSERT INTO "project_students" ("project_id", "student_id") VALUES
   (2, 3),
   (2, 4);
 
-INSERT INTO "staffs" ("prefix", "first_name", "last_name", "email", "program_id") VALUES 
-  ('Dr.', 'Alice', 'Taylor', 'alice.taylor@example.com', 1),
-  ('Prof.', 'Bob', 'Williams', 'bob.williams@example.com', 2);
+INSERT INTO "staffs" ("prefix_th", "prefix_en", "first_name_th", "last_name_th", "first_name_en", "last_name_en", "email", "program_id") VALUES 
+  ('ดร.', 'Dr.', 'อลิซ', 'เทย์เลอร์', 'Alice', 'Taylor', 'alice.taylor@example.com', 1),
+  ('ศร.', 'Prof.', 'บ็อบ', 'วิลเลียมส์', 'Bob', 'Williams', 'bob.williams@example.com', 2);
 
 INSERT INTO "project_staffs" ("project_id", "staff_id", "project_role_id") VALUES 
   (1, 1, 1),

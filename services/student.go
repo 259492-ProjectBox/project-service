@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
@@ -9,28 +10,54 @@ import (
 
 type StudentService interface {
 	CreateStudents(ctx context.Context, students []models.Student) error
+	GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error)
+	GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error)
 }
 
 type studentServiceImpl struct {
 	studentRepo repositories.StudentRepository
+	configRepo  repositories.ConfigRepository
 }
 
-func NewStudentService(studentRepo repositories.StudentRepository) StudentService {
+func NewStudentService(configRepo repositories.ConfigRepository, studentRepo repositories.StudentRepository) StudentService {
 	return &studentServiceImpl{
 		studentRepo: studentRepo,
+		configRepo:  configRepo,
 	}
 }
 
-// CreateStudents creates multiple student records in the database.
 func (s *studentServiceImpl) CreateStudents(ctx context.Context, students []models.Student) error {
-	// Validate input to ensure students slice is not empty
 	if len(students) == 0 {
-		return nil // No students to create
+		return nil
 	}
 
-	if err := s.studentRepo.CreateMany(ctx, students); err != nil {
-		return err
+	return s.studentRepo.CreateMany(ctx, students)
+}
+
+func (s *studentServiceImpl) GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error) {
+	return s.studentRepo.GetStudentByStudentId(ctx, studentId)
+}
+
+func (s *studentServiceImpl) GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error) {
+	academicYearConfig, err := s.configRepo.GetByNameAndProgramId(ctx, "academic year", programId)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	semesterConfig, err := s.configRepo.GetByNameAndProgramId(ctx, "semester", programId)
+	if err != nil {
+		return nil, err
+	}
+
+	academicYear, err := strconv.Atoi(academicYearConfig.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	semester, err := strconv.Atoi(semesterConfig.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.studentRepo.GetStudentByProgramIdOnCurrentYearAndSemester(ctx, programId, academicYear, semester)
 }
