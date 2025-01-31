@@ -401,7 +401,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dtos.ConfigResponse"
+                                "$ref": "#/definitions/models.Config"
                             }
                         }
                     },
@@ -1280,6 +1280,142 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/students/program/{program_id}/current_year": {
+            "get": {
+                "description": "Retrieves a list of students for a given program ID, academic year, and semester",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get students by program ID, academic year, and semester",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved students",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Student"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/students/{student_id}": {
+            "get": {
+                "description": "Retrieves a list of students for a given student ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get students by student ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved students",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Student"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/students/{student_id}/check": {
+            "get": {
+                "description": "Checks if a student has permission to create a project based on their student ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Check student permission for creating a project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully checked permission",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid student ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1302,20 +1438,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.ConfigResponse": {
-            "type": "object",
-            "properties": {
-                "config_name": {
-                    "type": "string"
-                },
-                "program_id": {
-                    "type": "integer"
-                },
-                "value": {
                     "type": "string"
                 }
             }
@@ -1357,13 +1479,22 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "first_name_en": {
                     "type": "string"
                 },
-                "last_name": {
+                "first_name_th": {
                     "type": "string"
                 },
-                "prefix": {
+                "last_name_en": {
+                    "type": "string"
+                },
+                "last_name_th": {
+                    "type": "string"
+                },
+                "prefix_en": {
+                    "type": "string"
+                },
+                "prefix_th": {
                     "type": "string"
                 },
                 "program_id": {
@@ -1411,16 +1542,25 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "first_name_en": {
+                    "type": "string"
+                },
+                "first_name_th": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "last_name": {
+                "last_name_en": {
                     "type": "string"
                 },
-                "prefix": {
+                "last_name_th": {
+                    "type": "string"
+                },
+                "prefix_en": {
+                    "type": "string"
+                },
+                "prefix_th": {
                     "type": "string"
                 },
                 "program_id": {
@@ -1457,16 +1597,25 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "first_name_en": {
+                    "type": "string"
+                },
+                "first_name_th": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "last_name": {
+                "last_name_en": {
                     "type": "string"
                 },
-                "prefix": {
+                "last_name_th": {
+                    "type": "string"
+                },
+                "prefix_en": {
+                    "type": "string"
+                },
+                "prefix_th": {
                     "type": "string"
                 },
                 "program_id": {
@@ -1737,16 +1886,25 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "first_name_en": {
+                    "type": "string"
+                },
+                "first_name_th": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "last_name": {
+                "last_name_en": {
                     "type": "string"
                 },
-                "prefix": {
+                "last_name_th": {
+                    "type": "string"
+                },
+                "prefix_en": {
+                    "type": "string"
+                },
+                "prefix_th": {
                     "type": "string"
                 },
                 "program": {

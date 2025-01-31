@@ -20,7 +20,7 @@ func NewProjectResourceConfigRepository(db *gorm.DB) ProjectResourceConfigReposi
 
 func (r *projectResourceConfigRepositoryImpl) GetProjectResourceConfigsByProgramId(programID int) ([]models.ProjectResourceConfig, error) {
 	var configs []models.ProjectResourceConfig
-	err := r.db.Where("program_id = ?", programID).Preload("Program").Preload("ResourceType").Preload("FileExtension").Find(&configs).Error
+	err := r.db.Where("program_id = ?", programID).Preload("Program").Preload("ResourceType").Find(&configs).Error
 	return configs, err
 }
 

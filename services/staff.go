@@ -37,12 +37,15 @@ func (s *staffServiceImpl) GetAllStaffService(ctx context.Context) ([]dtos.Staff
 	var StaffResponses []dtos.StaffResponse
 	for _, staff := range staffs {
 		StaffResponses = append(StaffResponses, dtos.StaffResponse{
-			ID:        staff.ID,
-			Prefix:    staff.Prefix,
-			FirstName: staff.FirstName,
-			LastName:  staff.LastName,
-			Email:     staff.Email,
-			ProgramID: staff.ProgramID,
+			ID:          staff.ID,
+			PrefixTH:    staff.PrefixTH,
+			PrefixEN:    staff.PrefixEN,
+			FirstNameTH: staff.FirstNameTH,
+			LastNameTH:  staff.LastNameTH,
+			FirstNameEN: staff.FirstNameEN,
+			LastNameEN:  staff.LastNameEN,
+			Email:       staff.Email,
+			ProgramID:   staff.ProgramID,
 		})
 	}
 
@@ -52,11 +55,14 @@ func (s *staffServiceImpl) GetAllStaffService(ctx context.Context) ([]dtos.Staff
 func (s *staffServiceImpl) CreateStaff(ctx context.Context, staffBody *dtos.CreateStaffRequest) (*dtos.StaffResponse, error) {
 
 	staff := &models.Staff{
-		Prefix:    staffBody.Prefix,
-		FirstName: staffBody.FirstName,
-		LastName:  staffBody.LastName,
-		Email:     staffBody.Email,
-		ProgramID: staffBody.ProgramID,
+		PrefixTH:    staffBody.PrefixTH,
+		PrefixEN:    staffBody.PrefixEN,
+		FirstNameTH: staffBody.FirstNameTH,
+		LastNameTH:  staffBody.LastNameTH,
+		FirstNameEN: staffBody.FirstNameEN,
+		LastNameEN:  staffBody.LastNameEN,
+		Email:       staffBody.Email,
+		ProgramID:   staffBody.ProgramID,
 	}
 
 	staff, err := s.staffRepo.Create(ctx, staff)
@@ -65,14 +71,16 @@ func (s *staffServiceImpl) CreateStaff(ctx context.Context, staffBody *dtos.Crea
 	}
 
 	return &dtos.StaffResponse{
-		ID:        staff.ID,
-		Prefix:    staff.Prefix,
-		FirstName: staff.FirstName,
-		LastName:  staff.LastName,
-		Email:     staff.Email,
-		ProgramID: staff.ProgramID,
+		ID:          staff.ID,
+		PrefixTH:    staff.PrefixTH,
+		PrefixEN:    staff.PrefixEN,
+		FirstNameTH: staff.FirstNameTH,
+		LastNameTH:  staff.LastNameTH,
+		FirstNameEN: staff.FirstNameEN,
+		LastNameEN:  staff.LastNameEN,
+		Email:       staff.Email,
+		ProgramID:   staff.ProgramID,
 	}, nil
-
 }
 
 func (s *staffServiceImpl) GetStaffById(ctx context.Context, id int) (*dtos.StaffResponse, error) {
@@ -82,24 +90,30 @@ func (s *staffServiceImpl) GetStaffById(ctx context.Context, id int) (*dtos.Staf
 	}
 
 	return &dtos.StaffResponse{
-		ID:        staff.ID,
-		Prefix:    staff.Prefix,
-		FirstName: staff.FirstName,
-		LastName:  staff.LastName,
-		Email:     staff.Email,
-		ProgramID: staff.ProgramID,
+		ID:          staff.ID,
+		PrefixTH:    staff.PrefixTH,
+		PrefixEN:    staff.PrefixEN,
+		FirstNameTH: staff.FirstNameTH,
+		LastNameTH:  staff.LastNameTH,
+		FirstNameEN: staff.FirstNameEN,
+		LastNameEN:  staff.LastNameEN,
+		Email:       staff.Email,
+		ProgramID:   staff.ProgramID,
 	}, nil
 }
 
 func (s *staffServiceImpl) UpdateStaff(ctx context.Context, staff *dtos.UpdateStaffRequest) (*dtos.StaffResponse, error) {
 	// convert from dto to model
 	updatedStaff := &models.Staff{
-		ID:        staff.ID,
-		Prefix:    staff.Prefix,
-		FirstName: staff.FirstName,
-		LastName:  staff.LastName,
-		Email:     staff.Email,
-		ProgramID: staff.ProgramID,
+		ID:          staff.ID,
+		PrefixTH:    staff.PrefixTH,
+		PrefixEN:    staff.PrefixEN,
+		FirstNameTH: staff.FirstNameTH,
+		LastNameTH:  staff.LastNameTH,
+		FirstNameEN: staff.FirstNameEN,
+		LastNameEN:  staff.LastNameEN,
+		Email:       staff.Email,
+		ProgramID:   staff.ProgramID,
 	}
 	updatedStaff, err := s.staffRepo.Update(ctx, staff.ID, updatedStaff)
 	if err != nil {
@@ -108,14 +122,16 @@ func (s *staffServiceImpl) UpdateStaff(ctx context.Context, staff *dtos.UpdateSt
 
 	// convert to response
 	return &dtos.StaffResponse{
-		ID:        updatedStaff.ID,
-		Prefix:    updatedStaff.Prefix,
-		FirstName: updatedStaff.FirstName,
-		LastName:  updatedStaff.LastName,
-		Email:     updatedStaff.Email,
-		ProgramID: updatedStaff.ProgramID,
+		ID:          updatedStaff.ID,
+		PrefixTH:    updatedStaff.PrefixTH,
+		PrefixEN:    updatedStaff.PrefixEN,
+		FirstNameTH: updatedStaff.FirstNameTH,
+		LastNameTH:  updatedStaff.LastNameTH,
+		FirstNameEN: updatedStaff.FirstNameEN,
+		LastNameEN:  updatedStaff.LastNameEN,
+		Email:       updatedStaff.Email,
+		ProgramID:   updatedStaff.ProgramID,
 	}, nil
-
 }
 
 func (s *staffServiceImpl) DeleteStaff(ctx context.Context, id int) error {
@@ -132,12 +148,15 @@ func (s *staffServiceImpl) GetStaffByProgramId(ctx context.Context, programId in
 	var StaffResponses []dtos.StaffResponse
 	for _, staff := range staffs {
 		StaffResponses = append(StaffResponses, dtos.StaffResponse{
-			ID:        staff.ID,
-			Prefix:    staff.Prefix,
-			FirstName: staff.FirstName,
-			LastName:  staff.LastName,
-			Email:     staff.Email,
-			ProgramID: staff.ProgramID,
+			ID:          staff.ID,
+			PrefixTH:    staff.PrefixTH,
+			PrefixEN:    staff.PrefixEN,
+			FirstNameTH: staff.FirstNameTH,
+			LastNameTH:  staff.LastNameTH,
+			FirstNameEN: staff.FirstNameEN,
+			LastNameEN:  staff.LastNameEN,
+			Email:       staff.Email,
+			ProgramID:   staff.ProgramID,
 		})
 	}
 

@@ -24,6 +24,7 @@ func NewApp(
 	projectConfigHandler handlers.ProjectConfigHandler,
 	projectResourceConfig handlers.ProjectResourceConfigHandler,
 	programHandler handlers.ProgramHandler,
+	studentHandler handlers.StudentHandler,
 	uploadHandler handlers.UploadHandler,
 ) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
@@ -51,6 +52,7 @@ func NewApp(
 		projectConfigHandler,
 		projectResourceConfig,
 		programHandler,
+		studentHandler,
 		uploadHandler,
 	)
 

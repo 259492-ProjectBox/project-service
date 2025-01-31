@@ -29,7 +29,7 @@ func NewConfigHandler(configService services.ConfigService) ConfigHandler {
 // @Tags Config
 // @Produce json
 // @Param program_id path int true "Program ID"
-// @Success 200 {object} []dtos.ConfigResponse "Successfully fetched config"
+// @Success 200 {object} []models.Config "Successfully fetched config"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Program not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
