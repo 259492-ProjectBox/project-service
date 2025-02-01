@@ -1185,6 +1185,49 @@
                 }
             }
         },
+        "/v1/staffs/email/{email}": {
+            "get": {
+                "description": "Retrieves a staff member by their email",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get staff by email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Staff Email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved staff",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.StaffResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid email",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/staffs/program/{program_id}": {
             "get": {
                 "description": "Fetches all staffs for a given program",
@@ -1395,6 +1438,60 @@
                     },
                     "400": {
                         "description": "Invalid student ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/uploads/program/{program_id}/student-enrollment": {
+            "post": {
+                "description": "Uploads and processes a student enrollment file for a given program ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Upload"
+                ],
+                "summary": "Upload student enrollment file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Student Enrollment File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file processed successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID or failed to retrieve the file",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1925,6 +2022,9 @@
                 },
                 "course_id": {
                     "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
                 },
                 "email": {
                     "type": "string"

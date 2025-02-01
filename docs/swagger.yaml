@@ -336,6 +336,8 @@ definitions:
         $ref: '#/definitions/models.Course'
       course_id:
         type: integer
+      created_at:
+        type: string
       email:
         type: string
       first_name:
@@ -1185,6 +1187,35 @@ paths:
       summary: Get all staffs
       tags:
       - Staff
+  /v1/staffs/email/{email}:
+    get:
+      description: Retrieves a staff member by their email
+      parameters:
+      - description: Staff Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved staff
+          schema:
+            $ref: '#/definitions/dtos.StaffResponse'
+        "400":
+          description: Invalid email
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get staff by email
+      tags:
+      - Staff
   /v1/staffs/program/{program_id}:
     get:
       description: Fetches all staffs for a given program
@@ -1310,6 +1341,44 @@ paths:
       summary: Get students by program ID, academic year, and semester
       tags:
       - Student
+  /v1/uploads/program/{program_id}/student-enrollment:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads and processes a student enrollment file for a given program
+        ID
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      - description: Student Enrollment File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file processed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid program ID or failed to retrieve the file
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upload student enrollment file
+      tags:
+      - Upload
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

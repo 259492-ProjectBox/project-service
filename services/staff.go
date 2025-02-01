@@ -15,6 +15,7 @@ type StaffService interface {
 	DeleteStaff(ctx context.Context, id int) error
 	GetStaffByProgramId(ctx context.Context, programId int) ([]dtos.StaffResponse, error)
 	GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error)
+	GetStaffByEmail(ctx context.Context, email string) (*models.Staff, error)
 }
 
 type staffServiceImpl struct {
@@ -161,4 +162,13 @@ func (s *staffServiceImpl) GetStaffByProgramId(ctx context.Context, programId in
 	}
 
 	return StaffResponses, nil
+}
+
+func (s *staffServiceImpl) GetStaffByEmail(ctx context.Context, email string) (*models.Staff, error) {
+	staff, err := s.staffRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return staff, nil
 }

@@ -15,6 +15,7 @@ type StaffHandler interface {
 	CreateStaff(c *gin.Context)
 	UpdateStaff(c *gin.Context)
 	GetAllStaffHandler(c *gin.Context)
+	GetStaffByEmail(c *gin.Context)
 }
 
 type staffHandler struct {
@@ -25,6 +26,25 @@ func NewStaffHandler(staffService services.StaffService) StaffHandler {
 	return &staffHandler{
 		staffService: staffService,
 	}
+}
+
+// @Summary Get staff by email
+// @Description Retrieves a staff member by their email
+// @Tags Staff
+// @Produce json
+// @Param email path string true "Staff Email"
+// @Success 200 {object} dtos.StaffResponse "Successfully retrieved staff"
+// @Failure 400 {object} map[string]interface{} "Invalid email"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /v1/staffs/email/{email} [get]
+func (h *staffHandler) GetStaffByEmail(c *gin.Context) {
+	email := c.Param("email")
+	staff, err := h.staffService.GetStaffByEmail(c.Request.Context(), email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, staff)
 }
 
 // @Summary Get staff by ID

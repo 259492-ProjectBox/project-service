@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"context"
+
 	"github.com/project-box/models"
 	"gorm.io/gorm"
 )
@@ -12,6 +14,7 @@ type StaffRepository interface {
 	CreateStaff(staff *models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
 	GetAllStaffs() ([]models.Staff, error)
+	GetByEmail(ctx context.Context, email string) (*models.Staff, error)
 }
 
 type staffRepositoryImpl struct {
@@ -69,4 +72,12 @@ func (r *staffRepositoryImpl) UpdateStaff(updatedStaff *models.Staff) (*models.S
 		return nil, err
 	}
 	return updatedStaff, nil
+}
+
+func (r *staffRepositoryImpl) GetByEmail(ctx context.Context, email string) (*models.Staff, error) {
+	var staff models.Staff
+	if err := r.db.WithContext(ctx).Where("email = ?", email).Preload("Program").First(&staff).Error; err != nil {
+		return nil, err
+	}
+	return &staff, nil
 }
