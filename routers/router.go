@@ -11,7 +11,7 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resourceHandler handlers.ResourceHandler, courseHandler handlers.CourseHandler, calendarHandler handlers.CalendarHandler, staffHandler handlers.StaffHandler,
-	configHandler handlers.ConfigHandler, projectConfigHandler handlers.ProjectConfigHandler, projectResourceConfigHandler handlers.ProjectResourceConfigHandler, programHandler handlers.ProgramHandler, studentHandler handlers.StudentHandler, uploadHandler handlers.UploadHandler) {
+	configHandler handlers.ConfigHandler, projectConfigHandler handlers.ProjectConfigHandler, projectResourceConfigHandler handlers.ProjectResourceConfigHandler, projectRoleHandler handlers.ProjectRoleHandler, programHandler handlers.ProgramHandler, studentHandler handlers.StudentHandler, uploadHandler handlers.UploadHandler) {
 	r.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Welcome to the api",
@@ -27,6 +27,7 @@ func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resource
 	SetupConfigRouter(router, configHandler)
 	SetupProjectConfigRouter(router, projectConfigHandler)
 	SetupProjectResourceConfigRouter(router, projectResourceConfigHandler)
+	SetupProjectRoleRouter(router, projectRoleHandler)
 	SetUpProgramRoute(router, programHandler)
 	SetupStudentRouter(router, studentHandler)
 	SetupUploadRouter(router, uploadHandler)
