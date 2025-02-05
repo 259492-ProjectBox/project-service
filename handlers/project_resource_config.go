@@ -47,10 +47,10 @@ func (h *projectResourceConfigHandler) GetProjectResourceConfigsByProgramId(c *g
 		return
 	}
 
-	if len(configs) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No configurations found for the given program ID"})
-		return
-	}
+	// if len(configs) == 0 {
+	// 	c.JSON(http.StatusNotFound, gin.H{"error": "No configurations found for the given program ID"})
+	// 	return
+	// }
 
 	c.JSON(http.StatusOK, configs)
 }
