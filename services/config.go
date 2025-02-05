@@ -9,6 +9,7 @@ import (
 
 type ConfigService interface {
 	GetConfigByProgramId(programId int) ([]models.Config, error)
+	DeleteConfig(ctx context.Context, id int) error
 	FindConfigByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error)
 	UpsertConfig(ctx context.Context, config *models.Config) (*models.Config, error)
 }
@@ -46,4 +47,8 @@ func (s *configServiceImpl) UpsertConfig(ctx context.Context, config *models.Con
 		return nil, err
 	}
 	return config, nil
+}
+
+func (s *configServiceImpl) DeleteConfig(ctx context.Context, id int) error {
+	return s.configRepo.Delete(ctx, id)
 }

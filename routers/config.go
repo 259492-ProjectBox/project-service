@@ -10,5 +10,6 @@ func SetupConfigRouter(r *gin.RouterGroup, handler handlers.ConfigHandler) {
 	{
 		configRouteV1.GET("/program/:program_id", handler.GetConfigByProgramId)
 		configRouteV1.PUT("", handler.UpsertConfig)
+		configRouteV1.DELETE(":id", handler.DeleteConfig)
 	}
 }
