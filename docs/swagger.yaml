@@ -294,6 +294,17 @@ definitions:
       title:
         type: string
     type: object
+  models.ProjectRole:
+    properties:
+      id:
+        type: integer
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
+      role_name:
+        type: string
+    type: object
   models.ResourceType:
     properties:
       id:
@@ -604,6 +615,41 @@ paths:
             additionalProperties: true
             type: object
       summary: Upsert config for a program
+      tags:
+      - Config
+  /v1/configs/{id}:
+    delete:
+      description: Deletes a configuration by its ID
+      parameters:
+      - description: Config ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted config
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid config ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Config not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete config by ID
       tags:
       - Config
   /v1/configs/program/{program_id}:
@@ -960,6 +1006,37 @@ paths:
       summary: Delete a project resource
       tags:
       - Resource
+  /v1/projectRoles/program/{program_id}:
+    get:
+      description: Retrieves all project roles for a given program ID
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved project roles
+          schema:
+            items:
+              $ref: '#/definitions/models.ProjectRole'
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all project roles by program ID
+      tags:
+      - ProjectRole
   /v1/projects:
     post:
       consumes:

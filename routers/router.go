@@ -11,13 +11,25 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resourceHandler handlers.ResourceHandler, courseHandler handlers.CourseHandler, calendarHandler handlers.CalendarHandler, staffHandler handlers.StaffHandler,
-	configHandler handlers.ConfigHandler, projectConfigHandler handlers.ProjectConfigHandler, projectResourceConfigHandler handlers.ProjectResourceConfigHandler, programHandler handlers.ProgramHandler, studentHandler handlers.StudentHandler, uploadHandler handlers.UploadHandler) {
+	configHandler handlers.ConfigHandler, projectConfigHandler handlers.ProjectConfigHandler, projectResourceConfigHandler handlers.ProjectResourceConfigHandler, projectRoleHandler handlers.ProjectRoleHandler, programHandler handlers.ProgramHandler, studentHandler handlers.StudentHandler, uploadHandler handlers.UploadHandler) {
 	r.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Welcome to the api",
 		})
 	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Dynamically set Swagger URL based on the request
+	// NOT WORKING YET when build go to main and change the host instead for now
+	// r.GET("/swagger/*any", func(c *gin.Context) {
+	// 	scheme := "http"
+	// 	if c.Request.TLS != nil {
+	// 		scheme = "https"
+	// 	}
+	// 	host := c.Request.Host
+	// 	swaggerURL := fmt.Sprintf("%s://%s/swagger/doc.json", scheme, host)
+	// 	ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL(swaggerURL))(c)
+	// })
 	router := r.Group("api")
 	SetupProjectRouter(router, projectHandler)
 	SetupResourceRouter(router, resourceHandler)
@@ -27,6 +39,7 @@ func SetupRoutes(r *gin.Engine, projectHandler handlers.ProjectHandler, resource
 	SetupConfigRouter(router, configHandler)
 	SetupProjectConfigRouter(router, projectConfigHandler)
 	SetupProjectResourceConfigRouter(router, projectResourceConfigHandler)
+	SetupProjectRoleRouter(router, projectRoleHandler)
 	SetUpProgramRoute(router, programHandler)
 	SetupStudentRouter(router, studentHandler)
 	SetupUploadRouter(router, uploadHandler)

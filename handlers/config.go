@@ -7,11 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/project-box/models"
 	"github.com/project-box/services"
+	"gorm.io/gorm"
 )
 
 type ConfigHandler interface {
 	GetConfigByProgramId(c *gin.Context)
 	UpsertConfig(c *gin.Context)
+	DeleteConfig(c *gin.Context)
 }
 
 type configHandler struct {
@@ -79,4 +81,35 @@ func (h *configHandler) UpsertConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, *config)
+}
+
+// @Summary Delete config by ID
+// @Description Deletes a configuration by its ID
+// @Tags Config
+// @Produce json
+// @Param id path int true "Config ID"
+// @Success 200 {object} map[string]interface{} "Successfully deleted config"
+// @Failure 400 {object} map[string]interface{} "Invalid config ID"
+// @Failure 404 {object} map[string]interface{} "Config not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /v1/configs/{id} [delete]
+func (h *configHandler) DeleteConfig(c *gin.Context) {
+	configIdStr := c.Param("id")
+	configId, err := strconv.Atoi(configIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid config ID"})
+		return
+	}
+
+	err = h.configService.DeleteConfig(c.Request.Context(), configId)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Config not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully deleted config"})
 }

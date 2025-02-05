@@ -422,6 +422,57 @@
                 }
             }
         },
+        "/v1/configs/{id}": {
+            "delete": {
+                "description": "Deletes a configuration by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config"
+                ],
+                "summary": "Delete config by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Config ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted config",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid config ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Config not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/courses/program/{program_id}": {
             "get": {
                 "description": "Retrieves a list of courses for a given program ID",
@@ -886,6 +937,52 @@
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/projectRoles/program/{program_id}": {
+            "get": {
+                "description": "Retrieves all project roles for a given program ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectRole"
+                ],
+                "summary": "Get all project roles by program ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved project roles",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ProjectRole"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -1955,6 +2052,23 @@
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProjectRole": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "role_name": {
                     "type": "string"
                 }
             }
