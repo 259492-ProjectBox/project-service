@@ -20,8 +20,9 @@ type ProjectRepository interface {
 	GetProjectByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
-	UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
+	CreateProjects(ctx context.Context, projectReq []models.ProjectRequest) ([]*dtos.ProjectData, error)
+	CreateProjectWithFiles(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
+	UpdateProjectWithFiles(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	CreateProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error)
 }
 
@@ -78,8 +79,8 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 		Preload("Course.Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
-		Preload("ProjectResources.Resource.ResourceType").
-		Preload("ProjectResources.Resource.FileExtension").
+		Preload("Members.Course.Program").
+		Preload("ProjectResources.ResourceType").
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}
@@ -158,10 +159,13 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 
 	return projects, nil
 }
-func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, projectReq *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
-	tx := r.db.Begin()
-	if tx.Error != nil {
-		return nil, tx.Error
+
+func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, tx *gorm.DB, projectReq *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
+	if tx == nil {
+		tx = r.db.Begin()
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
 	}
 
 	project, err := r.createProject(ctx, tx, projectReq)
@@ -193,10 +197,12 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, proj
 	return projectData, nil
 }
 
-func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, projectReq *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
-	tx := r.db.Begin()
-	if tx.Error != nil {
-		return nil, tx.Error
+func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, tx *gorm.DB, projectReq *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
+	if tx == nil {
+		tx = r.db.Begin()
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
 	}
 
 	if err := r.deleteProjectAssociations(ctx, tx, projectReq.ID); err != nil {
@@ -257,6 +263,55 @@ func (r *projectRepositoryImpl) deleteProjectStaffs(ctx context.Context, tx *gor
 		return err
 	}
 	return nil
+}
+
+func (r *projectRepositoryImpl) CreateProjects(ctx context.Context, projectReqs []models.ProjectRequest) ([]*dtos.ProjectData, error) {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	projects, err := r.createProjectsInTransaction(ctx, tx, projectReqs)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	projectMessages, err := r.getProjectMessages(ctx, projects)
+	if err != nil {
+		return nil, err
+	}
+
+	return projectMessages, nil
+}
+
+func (r *projectRepositoryImpl) createProjectsInTransaction(ctx context.Context, tx *gorm.DB, projectReqs []models.ProjectRequest) ([]*models.Project, error) {
+	var projects []*models.Project
+	for _, projectReq := range projectReqs {
+		project, err := r.createProject(ctx, tx, &projectReq)
+		if err != nil {
+			return nil, err
+		}
+		projects = append(projects, project)
+	}
+	return projects, nil
+}
+
+func (r *projectRepositoryImpl) getProjectMessages(ctx context.Context, projects []*models.Project) ([]*dtos.ProjectData, error) {
+	var projectMessages []*dtos.ProjectData
+	for _, project := range projects {
+		projectMessage, err := r.GetProjectByID(ctx, project.ID)
+		if err != nil {
+			return nil, err
+		}
+		projectMessages = append(projectMessages, projectMessage)
+	}
+	return projectMessages, nil
 }
 
 func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, projectReq *models.ProjectRequest) (*models.Project, error) {

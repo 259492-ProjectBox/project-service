@@ -140,7 +140,7 @@ func (s *uploadServiceImpl) ProcessCreateProjectFile(ctx context.Context, progra
 		return err
 	}
 
-	_, err = s.projectService.CreateProjectsWithFilesTx(ctx, projectRequests, nil, nil)
+	err = s.projectService.CreateProjects(ctx, projectRequests)
 	if err != nil {
 		return err
 	}
