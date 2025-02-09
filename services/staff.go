@@ -2,6 +2,9 @@ package services
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
@@ -16,6 +19,7 @@ type StaffService interface {
 	GetStaffByProgramId(ctx context.Context, programId int) ([]dtos.StaffResponse, error)
 	GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error)
 	GetStaffByEmail(ctx context.Context, email string) (*models.Staff, error)
+	GetStaffByName(ctx context.Context, name string) (*models.Staff, error)
 }
 
 type staffServiceImpl struct {
@@ -28,8 +32,33 @@ func NewStaffService(staffRepo repositories.StaffRepository) StaffService {
 	}
 }
 
+func (s *staffServiceImpl) GetStaffByName(ctx context.Context, name string) (*models.Staff, error) {
+	nameParts := strings.Split(name, " ")
+	fmt.Println(nameParts)
+	if len(nameParts) < 2 {
+		return nil, errors.New("invalid name format")
+	}
+
+	firstName := nameParts[0]
+	lastName := nameParts[1]
+
+	staffs, err := s.staffRepo.GetAllStaffs(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, staff := range staffs {
+		if (staff.FirstNameTH == firstName && staff.LastNameTH == lastName) ||
+			(staff.FirstNameEN == firstName && staff.LastNameEN == lastName) {
+			return &staff, nil
+		}
+	}
+
+	return nil, errors.New("staff not found")
+}
+
 func (s *staffServiceImpl) GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error) {
-	staffs, err := s.staffRepo.GetAllStaffs()
+	staffs, err := s.staffRepo.GetAllStaffs(ctx)
 	if err != nil {
 		return nil, err
 	}

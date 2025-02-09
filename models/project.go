@@ -32,12 +32,8 @@ type ProjectRequest struct {
 	Semester         int               `json:"semester"`
 	SectionID        *string           `json:"section_id"`
 	ProgramID        int               `json:"program_id"`
-	Program          Program           `json:"program"`
 	CourseID         int               `json:"course_id"`
-	Course           Course            `json:"course"`
 	ProjectStaffs    []ProjectStaff    `json:"staffs"`
 	Members          []Student         `json:"members"`
 	ProjectResources []ProjectResource `json:"project_resources"`
-	CreatedAt        *time.Time        `json:"created_at"`
-	UpdatedAt        *time.Time        `json:"updated_at"`
 }

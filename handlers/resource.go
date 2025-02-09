@@ -56,7 +56,11 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 		return
 	}
 
-	h.projectService.PublishProjectMessageToElasticSearch(c, "update", detailedResource.Project.ID)
+	err = h.projectService.PublishProjectMessageToElasticSearch(c, "update", detailedResource.Project.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Failed to publish project message to ElasticSearch"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project Resource deleted successfully"})
 }

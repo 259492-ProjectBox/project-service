@@ -32,6 +32,8 @@ func NewApp(
 	r := gin.New()
 
 	r.Use(
+		gin.Logger(),
+		gin.Recovery(),
 		cors.New(cors.Config{
 			AllowOrigins:     []string{"https://project-service.kunmhing.me", "http://localhost:3000"},
 			AllowCredentials: true,

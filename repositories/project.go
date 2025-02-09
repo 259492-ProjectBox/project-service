@@ -16,13 +16,14 @@ import (
 
 type ProjectRepository interface {
 	repository[models.Project]
+	BeginTransaction(ctx context.Context) *gorm.DB
 	GetProjectMessageByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
 	CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
-	createProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error)
+	CreateProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error)
 }
 
 type projectRepositoryImpl struct {
@@ -51,11 +52,14 @@ func NewProjectRepository(db *gorm.DB, fileExtensionRepo FileExtensionRepository
 		repositoryImpl:           newRepository[models.Project](db),
 	}
 }
-
 func isPDFFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
 
-func (s *projectRepositoryImpl) createProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error) {
-	nextProjectNumber, err := s.projectNumberCounterRepo.GetNextProjectNumber(ctx, tx, project.AcademicYear, project.Semester, project.CourseID)
+func (r *projectRepositoryImpl) BeginTransaction(ctx context.Context) *gorm.DB {
+	return r.db.Begin()
+}
+
+func (r *projectRepositoryImpl) CreateProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error) {
+	nextProjectNumber, err := r.projectNumberCounterRepo.GetNextProjectNumber(ctx, tx, project.AcademicYear, project.Semester, project.CourseID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +71,7 @@ func (s *projectRepositoryImpl) createProjectNumber(ctx context.Context, tx *gor
 func (r *projectRepositoryImpl) GetProjectMessageByID(ctx context.Context, id int) (*dtos.ProjectData, error) {
 	projectData, err := r.GetProjectWithPDFByID(ctx, id)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	return projectData, nil
@@ -88,13 +93,14 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 	projectData := utils.SanitizeProjectMessage(project)
 
 	for i, projectStaff := range project.Staffs {
-		projectRole, err := r.projectStaffRepo.GetProjectStaffByProjectIdAndStaffId(ctx, project.ID, projectStaff.ID)
+		projectStaff, err := r.projectStaffRepo.GetProjectStaffByProjectIdAndStaffId(ctx, project.ID, projectStaff.ID)
 		if err != nil {
 			return nil, err
 		}
 		projectData.ProjectStaffs[i].ProjectRole = dtos.ProjectRole{
-			ID:       projectRole.ProjectRole.ID,
-			RoleName: projectRole.ProjectRole.RoleName,
+			ID:         projectStaff.ProjectRole.ID,
+			RoleNameTH: projectStaff.ProjectRole.RoleNameTH,
+			RoleNameEN: projectStaff.ProjectRole.RoleNameEN,
 		}
 	}
 	return projectData, nil
@@ -122,8 +128,9 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 			return nil, err
 		}
 		projectData.ProjectStaffs[i].ProjectRole = dtos.ProjectRole{
-			ID:       projectStaff.ProjectRole.ID,
-			RoleName: projectStaff.ProjectRole.RoleName,
+			ID:         projectStaff.ProjectRole.ID,
+			RoleNameTH: projectStaff.ProjectRole.RoleNameTH,
+			RoleNameEN: projectStaff.ProjectRole.RoleNameEN,
 		}
 	}
 	return projectData, nil
@@ -157,34 +164,25 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 
 	return projects, nil
 }
-
 func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, projectReq *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
-	tx := r.db.Begin()
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-		tx.Rollback()
-	}()
+	tx := r.BeginTransaction(ctx)
 
 	project, err := r.createProject(ctx, tx, projectReq)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, projectResources, files)
 	if err != nil {
 		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -202,14 +200,6 @@ func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, proj
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-		tx.Rollback()
-	}()
 
 	if err := r.deleteProjectAssociations(ctx, tx, projectReq.ID); err != nil {
 		return nil, err
@@ -267,7 +257,7 @@ func (r *projectRepositoryImpl) deleteProjectStaffs(ctx context.Context, tx *gor
 }
 
 func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, projectReq *models.ProjectRequest) (*models.Project, error) {
-	projectReq, err := r.createProjectNumber(ctx, tx, projectReq)
+	projectReq, err := r.CreateProjectNumber(ctx, tx, projectReq)
 	if err != nil {
 		return nil, err
 	}
@@ -280,12 +270,9 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		AcademicYear: projectReq.AcademicYear,
 		SectionID:    projectReq.SectionID,
 		Semester:     projectReq.Semester,
-		Program:      projectReq.Program,
 		CourseID:     projectReq.CourseID,
-		Course:       projectReq.Course,
 		ProgramID:    projectReq.ProgramID,
 		Members:      projectReq.Members,
-		UpdatedAt:    nil,
 	}
 
 	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
@@ -318,9 +305,6 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 		Semester:     projectReq.Semester,
 		ProgramID:    projectReq.ProgramID,
 		CourseID:     projectReq.CourseID,
-		Program:      projectReq.Program,
-		Course:       projectReq.Course,
-		CreatedAt:    projectReq.CreatedAt,
 		Members:      projectReq.Members,
 	}
 
