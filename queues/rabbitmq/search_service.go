@@ -3,7 +3,6 @@ package queues
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	rabbitmq "github.com/rabbitmq/amqp091-go"
 )
@@ -22,7 +21,6 @@ func PublishMessageFromRabbitMQToElasticSearch(channel *rabbitmq.Channel, operat
 
 	body, err := json.Marshal(message)
 	if err != nil {
-		log.Println("Error marshalling message:", err)
 		return err
 	}
 
@@ -37,7 +35,7 @@ func PublishMessageFromRabbitMQToElasticSearch(channel *rabbitmq.Channel, operat
 		},
 	)
 	if err != nil {
-		log.Println("Error publishing message to RabbitMQ:", err)
+		return err
 	} else {
 		fmt.Println("Message published successfully.")
 	}
