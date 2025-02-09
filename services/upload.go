@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -19,6 +20,7 @@ import (
 
 type UploadService interface {
 	UploadObject(ctx context.Context, bucketName string, objectName string, file io.Reader, fileSize int64, contentType string) (string, error)
+	GetObjectURL(ctx context.Context, bucketName string, objectName string) (*url.URL, error)
 	RemoveObject(ctx context.Context, bucketName string, objectName string, opt minio.RemoveObjectOptions) error
 	ProcessStudentEnrollmentFile(ctx context.Context, programId int, file *multipart.FileHeader) error
 	ProcessCreateProjectFile(ctx context.Context, programId int, file *multipart.FileHeader) error
@@ -417,4 +419,8 @@ func (s *uploadServiceImpl) UploadObject(ctx context.Context, bucketName string,
 
 func (s *uploadServiceImpl) RemoveObject(ctx context.Context, bucketName string, objectName string, opt minio.RemoveObjectOptions) error {
 	return s.client.RemoveObject(ctx, bucketName, objectName, opt)
+}
+
+func (s *uploadServiceImpl) GetObjectURL(ctx context.Context, bucketName string, objectName string) (*url.URL, error) {
+	return s.client.PresignedGetObject(ctx, bucketName, objectName, time.Hour*2, nil)
 }

@@ -10,6 +10,7 @@ import (
 )
 
 type ProgramService interface {
+	GetProgramByID(ctx context.Context, id int) (*models.Program, error)
 	UpdateProgram(ctx context.Context, program *models.Program) (*models.Program, error)
 	CreateProgram(ctx context.Context, program *dtos.CreateProgramRequest) error
 	GetPrograms(ctx context.Context) ([]models.Program, error)
@@ -23,6 +24,10 @@ func NewProgramService(programRepo repositories.ProgramRepository) ProgramServic
 	return &programServiceImpl{
 		programRepo: programRepo,
 	}
+}
+
+func (s *programServiceImpl) GetProgramByID(ctx context.Context, id int) (*models.Program, error) {
+	return s.programRepo.Get(ctx, id)
 }
 
 func (s *programServiceImpl) GetPrograms(ctx context.Context) ([]models.Program, error) {

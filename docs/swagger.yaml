@@ -1,4 +1,3 @@
-basePath: /api
 definitions:
   dtos.CalendarResponse:
     properties:
@@ -302,7 +301,9 @@ definitions:
         $ref: '#/definitions/models.Program'
       program_id:
         type: integer
-      role_name:
+      role_name_en:
+        type: string
+      role_name_th:
         type: string
     type: object
   models.ResourceType:
@@ -1418,6 +1419,44 @@ paths:
       summary: Get students by program ID, academic year, and semester
       tags:
       - Student
+  /v1/uploads/program/{program_id}/create-project:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads and processes a create project file for a given program
+        ID
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      - description: Create Project File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file processed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid program ID or failed to retrieve the file
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upload create project file
+      tags:
+      - Upload
   /v1/uploads/program/{program_id}/student-enrollment:
     post:
       consumes:
@@ -1456,6 +1495,44 @@ paths:
       summary: Upload student enrollment file
       tags:
       - Upload
+  /v2/projectResourceConfigs:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Insert or update project resource configurations. If an ID is provided,
+        it updates the configuration; otherwise, it inserts a new configuration.
+      parameters:
+      - description: configuration to upsert
+        in: body
+        name: configs
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectResourceConfig'
+      - description: Icon file
+        in: formData
+        name: icon
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully upsert configurations
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upsert Project Resource Configurations
+      tags:
+      - ProjectResourceConfig
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

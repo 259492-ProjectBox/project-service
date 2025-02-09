@@ -78,7 +78,6 @@ func NewApp(
 // @description     Type "Bearer" followed by a space and JWT token.
 // @externalDocs.description OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
-
 func main() {
 	configs.InitialEnv(".env")
 

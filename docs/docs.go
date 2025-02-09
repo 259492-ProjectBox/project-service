@@ -1557,6 +1557,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/uploads/program/{program_id}/create-project": {
+            "post": {
+                "description": "Uploads and processes a create project file for a given program ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Upload"
+                ],
+                "summary": "Upload create project file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Create Project File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file processed successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID or failed to retrieve the file",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/uploads/program/{program_id}/student-enrollment": {
             "post": {
                 "description": "Uploads and processes a student enrollment file for a given program ID",
@@ -1596,6 +1650,61 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid program ID or failed to retrieve the file",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/projectResourceConfigs": {
+            "put": {
+                "description": "Insert or update project resource configurations. If an ID is provided, it updates the configuration; otherwise, it inserts a new configuration.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectResourceConfig"
+                ],
+                "summary": "Upsert Project Resource Configurations",
+                "parameters": [
+                    {
+                        "description": "configuration to upsert",
+                        "name": "configs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ProjectResourceConfig"
+                        }
+                    },
+                    {
+                        "type": "file",
+                        "description": "Icon file",
+                        "name": "icon",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully upsert configurations",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2075,7 +2184,10 @@ const docTemplate = `{
                 "program_id": {
                     "type": "integer"
                 },
-                "role_name": {
+                "role_name_en": {
+                    "type": "string"
+                },
+                "role_name_th": {
                     "type": "string"
                 }
             }
@@ -2191,7 +2303,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/api",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",
 	Description:      "This is a sample server celler server.",
