@@ -88,7 +88,6 @@ func (h *projectResourceConfigHandler) UpsertProjectResourceConfig(c *gin.Contex
 // @Tags ProjectResourceConfig
 // @Accept multipart/form-data
 // @Produce json
-// @Param program_id path int true "Program ID"
 // @Param configs formData string true "configuration to upsert"
 // @Param icon formData file false "Icon file"
 // @Success 200 {object} map[string]interface{} "Successfully upsert configurations"
@@ -96,19 +95,13 @@ func (h *projectResourceConfigHandler) UpsertProjectResourceConfig(c *gin.Contex
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /v2/projectResourceConfigs [put]
 func (h *projectResourceConfigHandler) UpsertProjectResourceConfigV2(c *gin.Context) {
-	programIdStr := c.Param("program_id")
-	programId, err := strconv.Atoi(programIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
-		return
-	}
 	var req dtos.CreateProjectResourceConfigRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = h.projectResourceConfigService.UpsertResourceProjectConfigV2(c.Request.Context(), programId, req)
+	err := h.projectResourceConfigService.UpsertResourceProjectConfigV2(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

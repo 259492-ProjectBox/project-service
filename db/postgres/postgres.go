@@ -36,6 +36,7 @@ func migrateModel(db *gorm.DB) error {
 		&models.ProjectRole{},
 		&models.ProjectStaff{},
 		&models.ProjectResource{},
+		&models.ProjectResourceConfig{},
 		&models.AssetResource{},
 		&models.ResourceType{},
 		&models.Staff{},

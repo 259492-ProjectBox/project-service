@@ -85,20 +85,7 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 		return nil, err
 	}
 
-	projectData := utils.SanitizeProjectMessage(project)
-
-	for i, projectStaff := range project.Staffs {
-		projectStaff, err := r.projectStaffRepo.GetProjectStaffByProjectIdAndStaffId(ctx, project.ID, projectStaff.ID)
-		if err != nil {
-			return nil, err
-		}
-		projectData.ProjectStaffs[i].ProjectRole = dtos.ProjectRole{
-			ID:         projectStaff.ProjectRole.ID,
-			RoleNameTH: projectStaff.ProjectRole.RoleNameTH,
-			RoleNameEN: projectStaff.ProjectRole.RoleNameEN,
-		}
-	}
-	return projectData, nil
+	return r.buildProjectData(ctx, project)
 }
 
 func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error) {
@@ -115,6 +102,10 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 		return nil, err
 	}
 
+	return r.buildProjectData(ctx, project)
+}
+
+func (r *projectRepositoryImpl) buildProjectData(ctx context.Context, project *models.Project) (*dtos.ProjectData, error) {
 	projectData := utils.SanitizeProjectMessage(project)
 
 	for i, projectStaff := range project.Staffs {
@@ -127,7 +118,15 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 			RoleNameTH: projectStaff.ProjectRole.RoleNameTH,
 			RoleNameEN: projectStaff.ProjectRole.RoleNameEN,
 		}
+		projectData.ProjectStaffs[i].ProjectRole.Program = dtos.Program{
+			ID:            projectStaff.ProjectRole.ProgramID,
+			Abbreviation:  projectStaff.ProjectRole.Program.Abbreviation,
+			ProgramNameTH: projectStaff.ProjectRole.Program.ProgramNameTH,
+			ProgramNameEN: projectStaff.ProjectRole.Program.ProgramNameEN,
+		}
+		projectData.ProjectStaffs[i].ProjectRole.ProgramID = projectStaff.ProjectRole.ProgramID
 	}
+
 	return projectData, nil
 }
 
@@ -455,7 +454,6 @@ func (r *projectRepositoryImpl) processFile(ctx context.Context, tx *gorm.DB, pr
 	projectResource.PDF = pdf
 	projectResource.ResourceTypeID = resourceType.ID
 	projectResource.ProjectID = project.ID
-	projectResource.CreatedAt = time.Now()
 
 	if err := r.resourceRepo.CreateProjectResource(ctx, tx, projectResource); err != nil {
 		return err
@@ -472,7 +470,6 @@ func (r *projectRepositoryImpl) processURL(ctx context.Context, tx *gorm.DB, pro
 
 	projectResource.ResourceTypeID = resourceType.ID
 	projectResource.ProjectID = project.ID
-	projectResource.CreatedAt = time.Now()
 
 	if err := r.resourceRepo.CreateProjectResource(ctx, tx, projectResource); err != nil {
 		return err

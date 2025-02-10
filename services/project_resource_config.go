@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"mime/multipart"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
@@ -12,7 +14,7 @@ import (
 type ProjectResourceConfigService interface {
 	GetProjectResourceConfigsByProgramId(ctx context.Context, programID int) ([]dtos.ProjectResourceConfig, error)
 	UpsertResourceProjectConfig(config *models.ProjectResourceConfig) error
-	UpsertResourceProjectConfigV2(ctx context.Context, programId int, req dtos.CreateProjectResourceConfigRequest) error
+	UpsertResourceProjectConfigV2(ctx context.Context, req dtos.CreateProjectResourceConfigRequest) error
 }
 
 type projectResourceConfigServiceImpl struct {
@@ -48,7 +50,7 @@ func (s *projectResourceConfigServiceImpl) GetProjectResourceConfigsByProgramId(
 				TypeName: config.ResourceType.TypeName,
 			},
 			ProgramID: config.ProgramID,
-			Program:   models.Program{ID: config.Program.ID, ProgramNameTH: config.Program.ProgramNameTH},
+			Program:   models.Program{ID: config.Program.ID, ProgramNameTH: config.Program.ProgramNameTH, ProgramNameEN: config.Program.ProgramNameEN, Abbreviation: config.Program.Abbreviation},
 		}
 		if config.IconName != nil {
 			objectName := fmt.Sprintf("%s/%s", config.Program.ProgramNameTH, *config.IconName)
@@ -68,30 +70,57 @@ func (s *projectResourceConfigServiceImpl) UpsertResourceProjectConfig(config *m
 	return s.projectResourceConfigRepo.UpsertResourceProjectConfig(config)
 }
 
-func (s *projectResourceConfigServiceImpl) UpsertResourceProjectConfigV2(ctx context.Context, programId int, req dtos.CreateProjectResourceConfigRequest) error {
-	program, err := s.programService.GetProgramByID(ctx, programId)
+func (s *projectResourceConfigServiceImpl) UpsertResourceProjectConfigV2(ctx context.Context, req dtos.CreateProjectResourceConfigRequest) error {
+	program, err := s.programService.GetProgramByID(ctx, *req.ProjectResourceConfig.ProgramID)
 	if err != nil {
 		return err
 	}
 
 	if req.Icon != nil {
-		filePath := fmt.Sprintf("%s/%s", program.ProgramNameTH, req.Icon.Filename)
-		file, err := req.Icon.Open()
-		if err != nil {
+		if err := s.handleExistingIcon(ctx, program.ProgramNameTH, req.ProjectResourceConfig); err != nil {
 			return err
 		}
-		defer file.Close()
 
-		contentType := req.Icon.Header.Get("Content-Type")
-		fileSize := req.Icon.Size
-
-		fmt.Println(filePath)
-		_, err = s.uploadService.UploadObject(ctx, "icons", filePath, file, fileSize, contentType)
-		if err != nil {
+		if err := s.uploadNewIcon(ctx, program.ProgramNameTH, req.Icon, req.ProjectResourceConfig); err != nil {
 			return err
 		}
-		req.ProjectResourceConfig.IconName = &req.Icon.Filename
 	}
 
 	return s.projectResourceConfigRepo.UpsertResourceProjectConfigV2(req.ProjectResourceConfig)
+}
+
+func (s *projectResourceConfigServiceImpl) handleExistingIcon(ctx context.Context, programNameTH string, config *models.ProjectResourceConfig) error {
+	if config.ID != 0 {
+		existingConfig, err := s.projectResourceConfigRepo.Get(ctx, config.ID)
+		if err != nil {
+			return err
+		}
+		if existingConfig.IconName != nil {
+			err := s.uploadService.RemoveObject(ctx, "icons", fmt.Sprintf("%s/%s", programNameTH, *existingConfig.IconName), minio.RemoveObjectOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (s *projectResourceConfigServiceImpl) uploadNewIcon(ctx context.Context, programNameTH string, icon *multipart.FileHeader, config *models.ProjectResourceConfig) error {
+	filePath := fmt.Sprintf("%s/%s", programNameTH, icon.Filename)
+	file, err := icon.Open()
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	contentType := icon.Header.Get("Content-Type")
+	fileSize := icon.Size
+
+	fmt.Println(filePath)
+	_, err = s.uploadService.UploadObject(ctx, "icons", filePath, file, fileSize, contentType)
+	if err != nil {
+		return err
+	}
+	config.IconName = &icon.Filename
+	return nil
 }

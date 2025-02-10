@@ -24,122 +24,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/assetResources": {
-            "post": {
-                "description": "Upload a new asset resource for a specific program",
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Upload an asset resource",
-                "parameters": [
-                    {
-                        "description": "Upload Asset Resource Request",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UploadAssetResource"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.AssetResource"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/assetResources/{id}": {
-            "delete": {
-                "description": "Delete an asset resource by its ID",
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Delete an asset resource",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Asset Resource ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/assetResources/{program_id}": {
-            "get": {
-                "description": "Retrieve all asset resources associated with a specific program",
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Get asset resources by program ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Program ID",
-                        "name": "program_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/models.AssetResource"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/v1/calendars": {
             "put": {
                 "description": "Updates an event by its ID with the provided data",
@@ -902,53 +786,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/projectResources/{id}": {
-            "delete": {
-                "description": "Delete a project resource and its associated file",
-                "tags": [
-                    "Resource"
-                ],
-                "summary": "Delete a project resource",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Resource ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/v1/projectRoles/program/{program_id}": {
             "get": {
                 "description": "Retrieves all project roles for a given program ID",
@@ -1680,13 +1517,11 @@ const docTemplate = `{
                 "summary": "Upsert Project Resource Configurations",
                 "parameters": [
                     {
+                        "type": "string",
                         "description": "configuration to upsert",
                         "name": "configs",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.ProjectResourceConfig"
-                        }
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
@@ -1926,29 +1761,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.UploadAssetResource": {
-            "type": "object"
-        },
-        "models.AssetResource": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "program": {
-                    "$ref": "#/definitions/models.Program"
-                },
-                "program_id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Config": {
             "type": "object",
             "properties": {
@@ -1985,40 +1797,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.Program"
                 },
                 "program_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.PDF": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "pages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.PDFPage"
-                    }
-                },
-                "project_resource_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.PDFPage": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "page_number": {
-                    "type": "integer"
-                },
-                "pdf_id": {
                     "type": "integer"
                 }
             }
@@ -2116,12 +1894,6 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
-                },
-                "pdf": {
-                    "$ref": "#/definitions/models.PDF"
-                },
-                "project": {
-                    "$ref": "#/definitions/models.Project"
                 },
                 "project_id": {
                     "type": "integer"
@@ -2230,17 +2002,8 @@ const docTemplate = `{
                 "prefix_th": {
                     "type": "string"
                 },
-                "program": {
-                    "$ref": "#/definitions/models.Program"
-                },
                 "program_id": {
                     "type": "integer"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Project"
-                    }
                 }
             }
         },
@@ -2249,9 +2012,6 @@ const docTemplate = `{
             "properties": {
                 "academic_year": {
                     "type": "integer"
-                },
-                "course": {
-                    "$ref": "#/definitions/models.Course"
                 },
                 "course_id": {
                     "type": "integer"
@@ -2270,9 +2030,6 @@ const docTemplate = `{
                 },
                 "last_name": {
                     "type": "string"
-                },
-                "program": {
-                    "$ref": "#/definitions/models.Program"
                 },
                 "program_id": {
                     "type": "integer"
@@ -2303,7 +2060,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",
 	Description:      "This is a sample server celler server.",

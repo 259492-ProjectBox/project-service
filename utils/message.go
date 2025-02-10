@@ -119,7 +119,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			ResourceTypeID: resource.ResourceTypeID,
 			ResourceType:   resourceType,
 			ProjectID:      resource.ProjectID,
-			CreatedAt:      formatTime(&resource.CreatedAt),
+			CreatedAt:      formatTime(resource.CreatedAt),
 		}
 
 		if resource.URL != nil {

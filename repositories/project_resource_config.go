@@ -6,6 +6,7 @@ import (
 )
 
 type ProjectResourceConfigRepository interface {
+	repository[models.ProjectResourceConfig]
 	GetProjectResourceConfigsByProgramId(programID int) ([]models.ProjectResourceConfig, error)
 	UpsertResourceProjectConfig(config *models.ProjectResourceConfig) error
 	UpsertResourceProjectConfigV2(config *models.ProjectResourceConfig) error
@@ -13,10 +14,14 @@ type ProjectResourceConfigRepository interface {
 
 type projectResourceConfigRepositoryImpl struct {
 	db *gorm.DB
+	*repositoryImpl[models.ProjectResourceConfig]
 }
 
 func NewProjectResourceConfigRepository(db *gorm.DB) ProjectResourceConfigRepository {
-	return &projectResourceConfigRepositoryImpl{db: db}
+	return &projectResourceConfigRepositoryImpl{
+		db:             db,
+		repositoryImpl: newRepository[models.ProjectResourceConfig](db),
+	}
 }
 
 func (r *projectResourceConfigRepositoryImpl) GetProjectResourceConfigsByProgramId(programID int) ([]models.ProjectResourceConfig, error) {

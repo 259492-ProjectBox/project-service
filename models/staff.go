@@ -9,7 +9,7 @@ type Staff struct {
 	FirstNameEN string    `json:"first_name_en"`
 	LastNameEN  string    `json:"last_name_en"`
 	Email       string    `json:"email" gorm:"unique"`
-	Program     Program   `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
+	Program     Program   `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE" swaggerignore:"true"`
 	ProgramID   int       `json:"program_id"`
-	Projects    []Project `json:"projects" gorm:"many2many:project_staffs;constraint:OnDelete:CASCADE;"`
+	Projects    []Project `json:"projects" gorm:"many2many:project_staffs;constraint:OnDelete:CASCADE;" swaggerignore:"true"`
 }
