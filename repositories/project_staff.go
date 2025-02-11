@@ -47,7 +47,7 @@ func (r *projectStaffRepositoryImpl) GetProjectStaffByProjectIdAndStaffId(ctx co
 	var projectStaff models.ProjectStaff
 	err := r.db.WithContext(ctx).
 		Where("project_id = ? AND staff_id = ?", projectId, staffId).
-		Preload("ProjectRole").
+		Preload("ProjectRole.Program").
 		First(&projectStaff).Error
 
 	if err != nil {

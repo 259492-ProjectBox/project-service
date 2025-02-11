@@ -32,6 +32,8 @@ func NewApp(
 	r := gin.New()
 
 	r.Use(
+		gin.Logger(),
+		gin.Recovery(),
 		cors.New(cors.Config{
 			AllowOrigins:     []string{"https://project-service.kunmhing.me", "http://localhost:3000"},
 			AllowCredentials: true,
@@ -65,18 +67,18 @@ func NewApp(
 // @version         1.0
 // @description     This is a sample server celler server.
 // @termsOfService  http://swagger.io/terms/
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @contact.name    API Support
+// @contact.url     http://www.swagger.io/support
+// @contact.email   support@swagger.io
+// @license.name    Apache 2.0
+// @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath        /api
 // @SecurityDefinitions.apikey BearerAuth
 // @In header
 // @Name Authorization
 // @description     Type "Bearer" followed by a space and JWT token.
 // @externalDocs.description OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
-
 func main() {
 	configs.InitialEnv(".env")
 

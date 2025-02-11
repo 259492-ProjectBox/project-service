@@ -33,15 +33,6 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 	}
 }
 
-// DeleteProjectResource godoc
-// @Summary Delete a project resource
-// @Description Delete a project resource and its associated file
-// @Tags Resource
-// @Param id path int true "Resource ID"
-// @Success 200 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /v1/projectResources/{id} [delete]
 func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	id := c.Param("id")
 	detailedResource, err := h.resourceService.GetDetailedResourceByID(c, id)
@@ -56,19 +47,15 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 		return
 	}
 
-	h.projectService.PublishProjectMessageToElasticSearch(c, "update", detailedResource.Project.ID)
+	err = h.projectService.PublishProjectMessageToElasticSearch(c, "update", detailedResource.Project.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Failed to publish project message to ElasticSearch"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project Resource deleted successfully"})
 }
 
-// GetAssetResourceByProgramID godoc
-// @Summary Get asset resources by program ID
-// @Description Retrieve all asset resources associated with a specific program
-// @Tags Resource
-// @Param program_id path string true "Program ID"
-// @Success 200 {array} []models.AssetResource
-// @Failure 500 {object} map[string]string
-// @Router /v1/assetResources/{program_id} [get]
 func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
 	programId := c.Param("program_id")
 	assetResources, err := h.resourceService.GetAssetResourceByProgramID(c, programId)
@@ -79,14 +66,6 @@ func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
 	c.JSON(http.StatusOK, assetResources)
 }
 
-// UploadAssetResource godoc
-// @Summary Upload an asset resource
-// @Description Upload a new asset resource for a specific program
-// @Tags Resource
-// @Param body body dtos.UploadAssetResource true "Upload Asset Resource Request"
-// @Success 200 {object} models.AssetResource
-// @Failure 400 {object} map[string]string
-// @Router /v1/assetResources [post]
 func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
 	req := &dtos.UploadAssetResource{}
 	if err := c.ShouldBind(req); err != nil {
@@ -102,14 +81,6 @@ func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
 	c.JSON(http.StatusOK, *assetResource)
 }
 
-// DeleteAssetResource godoc
-// @Summary Delete an asset resource
-// @Description Delete an asset resource by its ID
-// @Tags Resource
-// @Param id path int true "Asset Resource ID"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Router /v1/assetResources/{id} [delete]
 func (h *resourceHandler) DeleteAssetResource(c *gin.Context) {
 	id := c.Param("id")
 	err := h.resourceService.DeleteAssetResourceByID(c, id)

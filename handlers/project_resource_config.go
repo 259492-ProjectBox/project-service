@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/services"
 )
@@ -12,6 +13,7 @@ import (
 type ProjectResourceConfigHandler interface {
 	GetProjectResourceConfigsByProgramId(c *gin.Context)
 	UpsertProjectResourceConfig(c *gin.Context)
+	UpsertProjectResourceConfigV2(c *gin.Context)
 }
 
 type projectResourceConfigHandler struct {
@@ -41,7 +43,7 @@ func (h *projectResourceConfigHandler) GetProjectResourceConfigsByProgramId(c *g
 		return
 	}
 
-	configs, err := h.projectResourceConfigService.GetProjectResourceConfigsByProgramId(programId)
+	configs, err := h.projectResourceConfigService.GetProjectResourceConfigsByProgramId(c.Request.Context(), programId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -73,6 +75,33 @@ func (h *projectResourceConfigHandler) UpsertProjectResourceConfig(c *gin.Contex
 	}
 
 	err := h.projectResourceConfigService.UpsertResourceProjectConfig(&projectResourceConfig)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully upsert configurations"})
+}
+
+// @Summary Upsert Project Resource Configurations
+// @Description Insert or update project resource configurations. If an ID is provided, it updates the configuration; otherwise, it inserts a new configuration.
+// @Tags ProjectResourceConfig
+// @Accept multipart/form-data
+// @Produce json
+// @Param configs formData string true "configuration to upsert"
+// @Param icon formData file false "Icon file"
+// @Success 200 {object} map[string]interface{} "Successfully upsert configurations"
+// @Failure 400 {object} map[string]interface{} "Invalid request body"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /v2/projectResourceConfigs [put]
+func (h *projectResourceConfigHandler) UpsertProjectResourceConfigV2(c *gin.Context) {
+	var req dtos.CreateProjectResourceConfigRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.projectResourceConfigService.UpsertResourceProjectConfigV2(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

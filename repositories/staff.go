@@ -13,7 +13,7 @@ type StaffRepository interface {
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
 	CreateStaff(staff *models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
-	GetAllStaffs() ([]models.Staff, error)
+	GetAllStaffs(ctx context.Context) ([]models.Staff, error)
 	GetByEmail(ctx context.Context, email string) (*models.Staff, error)
 }
 
@@ -29,8 +29,7 @@ func NewStaffRepository(db *gorm.DB) StaffRepository {
 	}
 }
 
-// get all staff
-func (r *staffRepositoryImpl) GetAllStaffs() ([]models.Staff, error) {
+func (r *staffRepositoryImpl) GetAllStaffs(ctx context.Context) ([]models.Staff, error) {
 	var staffs []models.Staff
 	if err := r.db.Find(&staffs).Error; err != nil {
 		return nil, err
@@ -47,7 +46,6 @@ func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 	return staff, nil
 }
 
-// get staff by program id
 func (r *staffRepositoryImpl) GetStaffByProgramId(programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 

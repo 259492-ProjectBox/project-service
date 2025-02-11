@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"log"
 	"mime/multipart"
 
 	"github.com/project-box/dtos"
@@ -13,8 +12,9 @@ import (
 )
 
 type ProjectService interface {
-	PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int)
+	PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) error
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
+	CreateProjects(ctx context.Context, project []models.ProjectRequest) error
 	CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	DeleteProject(ctx context.Context, id int) error
@@ -44,27 +44,41 @@ func NewProjectService(
 	}
 }
 
-func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) {
-	go func() {
-		projectMessage, err := s.projectRepo.GetProjectMessageByID(ctx, projectId)
-		if err != nil {
-			log.Printf("Failed to get project message")
-		}
+func (s *projectServiceImpl) CreateProjects(ctx context.Context, projects []models.ProjectRequest) error {
+	projectMessages, err := s.projectRepo.CreateProjects(ctx, projects)
+	if err != nil {
+		return err
+	}
+	for _, projectMessage := range projectMessages {
+		s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
+	}
 
-		if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
-			log.Printf("Failed to publish message to RabbitMQ for action %s: %v", action, err)
-		}
-	}()
+	return nil
+}
+
+func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) error {
+	projectMessage, err := s.projectRepo.GetProjectMessageByID(ctx, projectId)
+	if err != nil {
+		return err
+	}
+
+	if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
-
-	projectMessage, err := s.projectRepo.CreateProjectWithFiles(ctx, project, projectResources, files)
+	projectMessage, err := s.projectRepo.CreateProjectWithFiles(ctx, nil, project, projectResources, files)
 	if err != nil {
 		return nil, err
 	}
 
-	s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
+	err = s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	return projectMessage, nil
 }
@@ -79,12 +93,15 @@ func (s *projectServiceImpl) GetProjectWithPDFByID(ctx context.Context, id int) 
 }
 
 func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
-	projectMessage, err := s.projectRepo.UpdateProjectWithFiles(ctx, project, projectResources, files)
+	projectMessage, err := s.projectRepo.UpdateProjectWithFiles(ctx, nil, project, projectResources, files)
 	if err != nil {
 		return nil, err
 	}
 
-	s.PublishProjectMessageToElasticSearch(ctx, "update", project.ID)
+	err = s.PublishProjectMessageToElasticSearch(ctx, "update", project.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	return projectMessage, nil
 }
@@ -99,7 +116,10 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 		return err
 	}
 
-	s.PublishProjectMessageToElasticSearch(ctx, "delete", project.ID)
+	err = s.PublishProjectMessageToElasticSearch(ctx, "delete", project.ID)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
