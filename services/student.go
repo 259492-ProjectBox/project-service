@@ -2,8 +2,7 @@ package services
 
 import (
 	"context"
-	"strconv"
-	"sync"
+	"fmt"
 
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
@@ -12,23 +11,22 @@ import (
 
 type StudentService interface {
 	CreateStudents(ctx context.Context, students []models.Student) error
-	UpsertStudents(ctx context.Context, students []models.Student) error
-	GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error)
+	UpsertStudents(ctx context.Context, students []models.Student, programId int) ([]models.Student, error)
 	GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error)
 	GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx context.Context, studentId string, programId int) (*models.Student, error)
 }
 
 type studentServiceImpl struct {
-	studentRepo repositories.StudentRepository
-	configRepo  repositories.ConfigRepository
-	db          *gorm.DB
+	studentRepo   repositories.StudentRepository
+	configService ConfigService
+	db            *gorm.DB
 }
 
-func NewStudentService(configRepo repositories.ConfigRepository, studentRepo repositories.StudentRepository, db *gorm.DB) StudentService {
+func NewStudentService(configService ConfigService, studentRepo repositories.StudentRepository, db *gorm.DB) StudentService {
 	return &studentServiceImpl{
-		studentRepo: studentRepo,
-		configRepo:  configRepo,
-		db:          db,
+		studentRepo:   studentRepo,
+		configService: configService,
+		db:            db,
 	}
 }
 
@@ -36,7 +34,6 @@ func (s *studentServiceImpl) CreateStudents(ctx context.Context, students []mode
 	if len(students) == 0 {
 		return nil
 	}
-
 	return s.studentRepo.CreateMany(ctx, students)
 }
 
@@ -45,104 +42,86 @@ func (s *studentServiceImpl) GetStudentByStudentId(ctx context.Context, studentI
 }
 
 func (s *studentServiceImpl) GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error) {
-	academicYearConfig, err := s.configRepo.GetByNameAndProgramId(ctx, "academic year", programId)
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
 	if err != nil {
 		return nil, err
 	}
-
-	semesterConfig, err := s.configRepo.GetByNameAndProgramId(ctx, "semester", programId)
-	if err != nil {
-		return nil, err
-	}
-
-	academicYear, err := strconv.Atoi(academicYearConfig.Value)
-	if err != nil {
-		return nil, err
-	}
-
-	semester, err := strconv.Atoi(semesterConfig.Value)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.studentRepo.GetStudentByProgramIdOnCurrentYearAndSemester(ctx, programId, academicYear, semester)
+	return s.studentRepo.GetStudentByProgramIdOnCurrentYearAndSemester(ctx, programId, semester, academicYear)
 }
 
-func (s *studentServiceImpl) UpsertStudents(ctx context.Context, students []models.Student) error {
+func (s *studentServiceImpl) UpsertStudents(ctx context.Context, students []models.Student, programId int) ([]models.Student, error) {
 	if len(students) == 0 {
-		return nil
+		return nil, nil
+	}
+
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
+	if err != nil {
+		return nil, err
 	}
 
 	tx := s.db.Begin()
 	if tx.Error != nil {
-		return tx.Error
+		return nil, tx.Error
 	}
 
-	errChan := make(chan error, len(students))
-	var wg sync.WaitGroup
-
+	var upsertedStudents []models.Student
 	for _, student := range students {
-		wg.Add(1)
-		go func(student models.Student) {
-			defer wg.Done()
-			if err := s.upsertStudent(ctx, tx, student); err != nil {
-				errChan <- err
-			}
-		}(student)
+		upsertedStudent, err := s.upsertStudent(ctx, tx, &student, semester, academicYear)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		upsertedStudents = append(upsertedStudents, *upsertedStudent)
 	}
 
-	wg.Wait()
-	close(errChan)
-
-	if len(errChan) > 0 {
-		tx.Rollback()
-		return <-errChan
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
 	}
 
-	return tx.Commit().Error
+	return upsertedStudents, nil
 }
 
-func (s *studentServiceImpl) upsertStudent(ctx context.Context, tx *gorm.DB, student models.Student) error {
+func (s *studentServiceImpl) upsertStudent(ctx context.Context, tx *gorm.DB, student *models.Student, semester, academicYear int) (*models.Student, error) {
 	existingStudent, err := s.GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx, student.StudentID, student.ProgramID)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
+		return nil, err
 	}
 
-	if existingStudent != nil {
-		existingStudent.StudentID = student.StudentID
-		existingStudent.SecLab = student.SecLab
-		existingStudent.FirstName = student.FirstName
-		existingStudent.LastName = student.LastName
-		existingStudent.Semester = student.Semester
-		existingStudent.AcademicYear = student.AcademicYear
-		existingStudent.CourseID = student.CourseID
-		existingStudent.ProgramID = student.ProgramID
-		return tx.Save(existingStudent).Error
+	if err == gorm.ErrRecordNotFound {
+		fmt.Printf("Student %s not found in program %d for year %d semester %d, creating new record...\n",
+			student.StudentID, student.ProgramID, semester, academicYear)
+		if err := tx.Create(&student).Error; err != nil {
+			return nil, err
+		}
+		return student, nil
 	}
 
-	return tx.Create(&student).Error
+	existingStudent = updateStudentFields(existingStudent, student)
+	if err := tx.Save(&existingStudent).Error; err != nil {
+		return nil, err
+	}
+
+	return existingStudent, nil
+}
+
+func updateStudentFields(existing, new *models.Student) *models.Student {
+	existing.SecLab = new.SecLab
+	existing.FirstName = new.FirstName
+	existing.LastName = new.LastName
+	if new.Email != nil {
+		existing.Email = new.Email
+	}
+	existing.Semester = new.Semester
+	existing.AcademicYear = new.AcademicYear
+	existing.CourseID = new.CourseID
+	existing.ProgramID = new.ProgramID
+	return existing
 }
 
 func (s *studentServiceImpl) GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx context.Context, studentId string, programId int) (*models.Student, error) {
-	academicYearConfig, err := s.configRepo.GetByNameAndProgramId(ctx, "academic year", programId)
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
 	if err != nil {
 		return nil, err
 	}
-
-	semesterConfig, err := s.configRepo.GetByNameAndProgramId(ctx, "semester", programId)
-	if err != nil {
-		return nil, err
-	}
-
-	academicYear, err := strconv.Atoi(academicYearConfig.Value)
-	if err != nil {
-		return nil, err
-	}
-
-	semester, err := strconv.Atoi(semesterConfig.Value)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.studentRepo.GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx, studentId, programId, academicYear, semester)
+	return s.studentRepo.GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx, studentId, programId, semester, academicYear)
 }

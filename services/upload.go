@@ -100,17 +100,26 @@ func (s *uploadServiceImpl) ProcessStudentEnrollmentFile(ctx context.Context, pr
 		return errors.New("excel file is empty or does not have enough rows")
 	}
 
+	courseNo, err := s.getCourseNo(rows)
+	if err != nil {
+		return err
+	}
+
+	course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
+	if err != nil {
+		return err
+	}
+
 	studentInfoColumns, err := s.getStudentInfoColumns(rows[3])
 	if err != nil {
 		return err
 	}
 
-	students, err := s.parseStudents(ctx, rows[4:], studentInfoColumns, programId)
+	students, err := s.parseStudents(ctx, rows[4:], studentInfoColumns, course.ID, programId)
 	if err != nil {
 		return err
 	}
-
-	if err := s.studentService.UpsertStudents(ctx, students); err != nil {
+	if _, err := s.studentService.UpsertStudents(ctx, students, programId); err != nil {
 		return fmt.Errorf("failed to save student data: %w", err)
 	}
 
@@ -131,12 +140,22 @@ func (s *uploadServiceImpl) ProcessCreateProjectFile(ctx context.Context, progra
 		return errors.New("excel file is empty or does not have enough rows")
 	}
 
-	createProjectInfoColumns, err := s.getCreateProjectInfoColumns(rows[1])
+	courseNo, err := s.getCourseNo(rows)
 	if err != nil {
 		return err
 	}
 
-	projectRequests, err := s.parseProjects(ctx, rows[2:], createProjectInfoColumns, programId)
+	course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
+	if err != nil {
+		return err
+	}
+
+	createProjectInfoColumns, err := s.getCreateProjectInfoColumns(rows[2])
+	if err != nil {
+		return err
+	}
+
+	projectRequests, err := s.parseProjects(ctx, rows[3:], createProjectInfoColumns, course.ID, programId)
 	if err != nil {
 		return err
 	}
@@ -193,7 +212,7 @@ func (s *uploadServiceImpl) getCreateProjectInfoColumns(headerRow []string) (map
 		"titleTHColumn":      -1,
 		"titleENColumn":      -1,
 		"abstractTextColumn": -1,
-		"sectionColumn":      -1,
+		"secLabColumn":       -1,
 		"studentIdColumn":    -1,
 		"studentNameColumn":  -1,
 		"staffColumn":        -1,
@@ -208,8 +227,8 @@ func (s *uploadServiceImpl) getCreateProjectInfoColumns(headerRow []string) (map
 			columns["titleENColumn"] = j
 		case matchColumn(col, "Abstract"):
 			columns["abstractTextColumn"] = j
-		case matchColumn(col, "Section"):
-			columns["sectionColumn"] = j
+		case matchColumn(col, "SECLAB"):
+			columns["secLabColumn"] = j
 		case matchColumn(col, "Student(s)"):
 			columns["studentIdColumn"] = j
 		case matchColumn(col, "ชื่อ - นามสกุล"):
@@ -221,40 +240,38 @@ func (s *uploadServiceImpl) getCreateProjectInfoColumns(headerRow []string) (map
 		}
 	}
 
-	if columns["titleTHColumn"] == -1 || columns["titleENColumn"] == -1 || columns["abstractTextColumn"] == -1 || columns["sectionColumn"] == -1 || columns["studentIdColumn"] == -1 || columns["studentNameColumn"] == -1 || columns["staffColumn"] == -1 || columns["staffRoleColumn"] == -1 {
+	if columns["titleTHColumn"] == -1 || columns["titleENColumn"] == -1 || columns["abstractTextColumn"] == -1 || columns["secLabColumn"] == -1 || columns["studentIdColumn"] == -1 || columns["studentNameColumn"] == -1 || columns["staffColumn"] == -1 || columns["staffRoleColumn"] == -1 {
 		return nil, errors.New("missing one or more required columns in the header row")
 	}
 
 	return columns, nil
 }
 
-func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, columns map[string]int, programId int) ([]models.Student, error) {
-	academicYear, semester, err := s.configService.GetAcademicYearAndSemester(ctx, programId)
-	if err != nil {
-		return nil, err
-	}
-
-	courseNo, err := s.getCourseNo(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
+func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, columns map[string]int, courseId, programId int) ([]models.Student, error) {
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
 	if err != nil {
 		return nil, err
 	}
 
 	var students []models.Student
 	for _, row := range rows {
+		if len(row) <= columns["studentIdColumn"] || len(row) <= columns["secLabColumn"] || len(row) <= columns["studentNameColumn"]+1 {
+			return nil, fmt.Errorf("row does not have enough columns: %v", row)
+		}
+
+		var email *string
+		if len(row) > columns["cmuAccountColumn"] && row[columns["cmuAccountColumn"]] != "" {
+			email = &row[columns["cmuAccountColumn"]]
+		}
 		student := models.Student{
 			StudentID:    row[columns["studentIdColumn"]],
 			SecLab:       row[columns["secLabColumn"]],
 			FirstName:    row[columns["studentNameColumn"]],
 			LastName:     row[columns["studentNameColumn"]+1],
-			Email:        row[columns["cmuAccountColumn"]],
-			Semester:     academicYear,
-			AcademicYear: semester,
-			CourseID:     course.ID,
+			Email:        email,
+			Semester:     semester,
+			AcademicYear: academicYear,
+			CourseID:     courseId,
 			ProgramID:    programId,
 		}
 		students = append(students, student)
@@ -263,8 +280,8 @@ func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, 
 	return students, nil
 }
 
-func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, columns map[string]int, programId int) ([]models.ProjectRequest, error) {
-	academicYear, semester, err := s.configService.GetAcademicYearAndSemester(ctx, programId)
+func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, columns map[string]int, courseId, programId int) ([]models.ProjectRequest, error) {
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
 	if err != nil {
 		return nil, err
 	}
@@ -275,22 +292,15 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			continue
 		}
 
-		courseNo, err := s.getCourseNo(rows)
+		members, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, courseId, programId)
 		if err != nil {
 			return nil, err
 		}
 
-		course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
+		members, err = s.studentService.UpsertStudents(ctx, members, programId)
 		if err != nil {
 			return nil, err
 		}
-
-		members, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, course.ID, programId)
-		if err != nil {
-			return nil, err
-		}
-
-		s.studentService.UpsertStudents(ctx, members)
 
 		projectStaffs, err := s.getProjectStaffs(ctx, rows, rowIdx, columns)
 		if err != nil {
@@ -304,7 +314,7 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			AcademicYear:  academicYear,
 			Semester:      semester,
 			SectionID:     &row[columns["sectionColumn"]],
-			CourseID:      course.ID,
+			CourseID:      courseId,
 			ProgramID:     programId,
 			ProjectStaffs: projectStaffs,
 			Members:       members,

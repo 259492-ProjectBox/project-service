@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/project-box/dtos"
@@ -34,7 +33,6 @@ func NewStaffService(staffRepo repositories.StaffRepository) StaffService {
 
 func (s *staffServiceImpl) GetStaffByName(ctx context.Context, name string) (*models.Staff, error) {
 	nameParts := strings.Split(name, " ")
-	fmt.Println(nameParts)
 	if len(nameParts) < 2 {
 		return nil, errors.New("invalid name format")
 	}

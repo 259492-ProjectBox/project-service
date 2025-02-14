@@ -58,7 +58,7 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectRoleRepository := repositories.NewProjectRoleRepository(gormDB)
 	projectRoleService := services.NewProjectRoleService(projectRoleRepository)
 	studentRepository := repositories.NewStudentRepository(gormDB, configRepository)
-	studentService := services.NewStudentService(configRepository, studentRepository)
+	studentService := services.NewStudentService(configService, studentRepository, gormDB)
 	uploadService := services.NewUploadService(client, programRepository, staffService, projectRoleService, projectService, courseService, configService, studentService)
 	projectResourceConfigService := services.NewProjectResourceConfigService(projectResourceConfigRepository, programService, uploadService)
 	projectResourceConfigHandler := handlers.NewProjectResourceConfigHandler(projectResourceConfigService)

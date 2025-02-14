@@ -11,7 +11,7 @@ import (
 
 type ConfigService interface {
 	GetConfigByProgramId(programId int) ([]models.Config, error)
-	GetAcademicYearAndSemester(ctx context.Context, programId int) (int, int, error)
+	GetCurrentAcademicYearAndSemester(ctx context.Context, programId int) (int, int, error)
 	DeleteConfig(ctx context.Context, id int) error
 	FindConfigByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error)
 	UpsertConfig(ctx context.Context, config *models.Config) (*models.Config, error)
@@ -27,11 +27,7 @@ func NewConfigService(configRepo repositories.ConfigRepository) ConfigService {
 	}
 }
 
-func (s *configServiceImpl) GetAcademicYearAndSemester(ctx context.Context, programId int) (int, int, error) {
-	return s.getAcademicYearAndSemester(ctx, programId)
-}
-
-func (s *configServiceImpl) getAcademicYearAndSemester(ctx context.Context, programId int) (int, int, error) {
+func (s *configServiceImpl) GetCurrentAcademicYearAndSemester(ctx context.Context, programId int) (int, int, error) {
 	academicYear, err := s.FindConfigByNameAndProgramId(ctx, "academic year", programId)
 	if err != nil {
 		return 0, 0, fmt.Errorf("failed to fetch academic year: %w", err)
