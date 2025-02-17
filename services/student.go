@@ -12,6 +12,7 @@ import (
 type StudentService interface {
 	CreateStudents(ctx context.Context, students []models.Student) error
 	UpsertStudents(ctx context.Context, students []models.Student, programId int) ([]models.Student, error)
+	GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error)
 	GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error)
 	GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx context.Context, studentId string, programId int) (*models.Student, error)
 }
@@ -35,10 +36,6 @@ func (s *studentServiceImpl) CreateStudents(ctx context.Context, students []mode
 		return nil
 	}
 	return s.studentRepo.CreateMany(ctx, students)
-}
-
-func (s *studentServiceImpl) GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error) {
-	return s.studentRepo.GetStudentByStudentId(ctx, studentId)
 }
 
 func (s *studentServiceImpl) GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error) {
@@ -116,6 +113,24 @@ func updateStudentFields(existing, new *models.Student) *models.Student {
 	existing.CourseID = new.CourseID
 	existing.ProgramID = new.ProgramID
 	return existing
+}
+
+func (s *studentServiceImpl) GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error) {
+	student, err := s.studentRepo.GetStudentByStudentId(ctx, studentId)
+	if err != nil {
+		return nil, err
+	}
+
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, student.ProgramID)
+	if err != nil {
+		return nil, err
+	}
+
+	if student.AcademicYear != academicYear || student.Semester != semester {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return student, nil
 }
 
 func (s *studentServiceImpl) GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx context.Context, studentId string, programId int) (*models.Student, error) {

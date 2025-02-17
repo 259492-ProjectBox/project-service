@@ -34,16 +34,10 @@ func NewStudentHandler(studentService services.StudentService) StudentHandler {
 // @Success 200 {array} models.Student "Successfully retrieved students"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /v1/students/{student_id}/program/{program_id} [get]
+// @Router /v1/students/{student_id}[get]
 func (h *studentHandler) GetStudentByStudentId(c *gin.Context) {
 	studentId := c.Param("student_id")
-	programIdStr := c.Param("program_id")
-	programId, err := strconv.Atoi(programIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
-		return
-	}
-	students, err := h.studentService.GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(c.Request.Context(), studentId, programId)
+	students, err := h.studentService.GetStudentByStudentId(c.Request.Context(), studentId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -60,16 +54,10 @@ func (h *studentHandler) GetStudentByStudentId(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Successfully checked permission"
 // @Failure 400 {object} map[string]interface{} "Invalid student ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /v1/students/{student_id}/program/{program_id}/check [get]
+// @Router /v1/students/{student_id}/check [get]
 func (h *studentHandler) CheckStudentPermissionForCreateProject(c *gin.Context) {
 	studentId := c.Param("student_id")
-	programIdStr := c.Param("program_id")
-	programId, err := strconv.Atoi(programIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
-		return
-	}
-	student, err := h.studentService.GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(c.Request.Context(), studentId, programId)
+	student, err := h.studentService.GetStudentByStudentId(c.Request.Context(), studentId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusOK, gin.H{"has_permission": false})
