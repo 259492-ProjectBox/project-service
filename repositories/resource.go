@@ -91,8 +91,8 @@ func (r *resourceRepository) CreateAssetResource(ctx context.Context, file *mult
 		return nil, fmt.Errorf("failed to preload program: %w", err)
 	}
 
-	programName := assetResource.Program.ProgramNameTH
-	objectName, _ := r.generateFilePath(file.Filename, programName, os.Getenv("MINIO_ASSET_BUCKET"))
+	programNameTH := assetResource.Program.ProgramNameTH
+	objectName, _ := r.generateFilePath(file.Filename, programNameTH, os.Getenv("MINIO_ASSET_BUCKET"))
 
 	if err := r.uploadFileToMinio(ctx, objectName, file); err != nil {
 		tx.Rollback()
