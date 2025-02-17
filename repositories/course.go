@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/project-box/models"
 	"gorm.io/gorm"
@@ -28,8 +27,6 @@ func NewCourseRepository(db *gorm.DB) CourseRepository {
 }
 
 func (r *courseRepositoryImpl) GetByCourseAndSemester(ctx context.Context, courseID int, semester int) (*models.Course, error) {
-	fmt.Println("courseID", courseID)
-	fmt.Println("semester", semester)
 	filters := map[string]interface{}{"id": courseID, "semester": semester}
 	var course models.Course
 	if err := r.db.WithContext(ctx).Where(filters).First(&course).Error; err != nil {

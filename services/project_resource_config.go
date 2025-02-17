@@ -116,7 +116,6 @@ func (s *projectResourceConfigServiceImpl) uploadNewIcon(ctx context.Context, pr
 	contentType := icon.Header.Get("Content-Type")
 	fileSize := icon.Size
 
-	fmt.Println(filePath)
 	_, err = s.uploadService.UploadObject(ctx, "icons", filePath, file, fileSize, contentType)
 	if err != nil {
 		return err
