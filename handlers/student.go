@@ -34,7 +34,7 @@ func NewStudentHandler(studentService services.StudentService) StudentHandler {
 // @Success 200 {array} models.Student "Successfully retrieved students"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /v1/students/{student_id}[get]
+// @Router /v1/students/{student_id} [get]
 func (h *studentHandler) GetStudentByStudentId(c *gin.Context) {
 	studentId := c.Param("student_id")
 	students, err := h.studentService.GetStudentByStudentId(c.Request.Context(), studentId)
