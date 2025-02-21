@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -386,12 +387,15 @@ func generateUniqueFileName(fileName string) string {
 	return fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileName)
 }
 
-func buildFilePath(bucketName, programName, title, uniqueFileName string) string {
-	return fmt.Sprintf("%s/%s/%s/%s", bucketName, programName, title, uniqueFileName)
+func buildFilePath(bucketName, programName, courseNo string, projectNo string, title, uniqueFileName string) string {
+	return fmt.Sprintf("%s/%s/%s/%s/%s/%s",
+		bucketName, programName, courseNo, projectNo, title, uniqueFileName)
 }
 
-func buildObjectName(programName, title, uniqueFileName string) string {
-	return fmt.Sprintf("%s/%s/%s", programName, title, uniqueFileName)
+func buildObjectName(programName, courseNo string, projectNo string, title, uniqueFileName string) string {
+	projectNo = strings.ReplaceAll(projectNo, "/", "_")
+	return fmt.Sprintf("%s/%s/%s/%s/%s",
+		programName, courseNo, projectNo, title, uniqueFileName)
 }
 
 func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context, tx *gorm.DB, project *models.Project, projectResources []*models.ProjectResource, files []*multipart.FileHeader) ([]string, error) {
@@ -420,11 +424,10 @@ func (r *projectRepositoryImpl) processFile(ctx context.Context, tx *gorm.DB, pr
 	if projectResource.Title == nil {
 		return fmt.Errorf("title is required")
 	}
-
 	title := projectResource.Title
 	uniqueFileName := generateUniqueFileName(file.Filename)
-	objectName := buildObjectName(project.Program.ProgramNameTH, *title, uniqueFileName)
-	filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, *title, uniqueFileName)
+	objectName := buildObjectName(project.Program.ProgramNameTH, project.Course.CourseNo, project.ProjectNo, *title, uniqueFileName)
+	filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, project.Course.CourseNo, project.ProjectNo, *title, uniqueFileName)
 
 	if err := r.uploadRepo.UploadFile(ctx, r.projectBucketName, objectName, file, minio.PutObjectOptions{}); err != nil {
 		return err
