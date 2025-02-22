@@ -93,6 +93,7 @@ CREATE TABLE "staffs" (
   "first_name_en" varchar,
   "last_name_en" varchar,
   "email" varchar UNIQUE,
+  "is_resigned" bool DEFAULT false,
   "program_id" int
 );
 

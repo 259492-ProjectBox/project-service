@@ -9,6 +9,7 @@ type ProjectStaffMessage struct {
 	FirstNameEN string      `json:"first_name_en"`
 	LastNameEN  string      `json:"last_name_en"`
 	Email       string      `json:"email"`
+	IsResigned  bool        `json:"is_resigned"`
 	ProgramID   int         `json:"program_id"`
 	Program     Program     `json:"program"`
 	ProjectRole ProjectRole `json:"project_role"`
@@ -22,6 +23,7 @@ type CreateStaffRequest struct {
 	FirstNameEN string `json:"first_name_en"`
 	LastNameEN  string `json:"last_name_en"`
 	Email       string `json:"email"`
+	IsResigned  bool   `json:"is_resigned"`
 	ProgramID   int    `json:"program_id"`
 }
 
@@ -34,6 +36,7 @@ type UpdateStaffRequest struct {
 	FirstNameEN string `json:"first_name_en"`
 	LastNameEN  string `json:"last_name_en"`
 	Email       string `json:"email"`
+	IsResigned  bool   `json:"is_resigned"`
 	ProgramID   int    `json:"program_id"`
 }
 
@@ -46,5 +49,6 @@ type StaffResponse struct {
 	FirstNameEN string `json:"first_name_en"`
 	LastNameEN  string `json:"last_name_en"`
 	Email       string `json:"email"`
+	IsResigned  bool   `json:"is_resigned"`
 	ProgramID   int    `json:"program_id"`
 }
