@@ -12,6 +12,7 @@ type StaffRepository interface {
 	GetStaffById(id int) (*models.Staff, error)
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
 	CreateStaff(staff *models.Staff) error
+	UpsertStaffs(ctx context.Context, staffs []models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
 	GetAllStaffs(ctx context.Context) ([]models.Staff, error)
 	GetByEmail(ctx context.Context, email string) (*models.Staff, error)
@@ -49,7 +50,7 @@ func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 func (r *staffRepositoryImpl) GetStaffByProgramId(programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 
-	if err := r.db.Where("program_id = ?", programId).Find(&staffs).Error; err != nil {
+	if err := r.db.Where("program_id = ? AND is_resigned = false", programId).Find(&staffs).Error; err != nil {
 		return nil, err
 	}
 
@@ -78,4 +79,45 @@ func (r *staffRepositoryImpl) GetByEmail(ctx context.Context, email string) (*mo
 		return nil, err
 	}
 	return &staff, nil
+}
+
+func (r *staffRepositoryImpl) UpsertStaffs(ctx context.Context, staffs []models.Staff) error {
+	if len(staffs) == 0 {
+		return nil
+	}
+
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	for _, staff := range staffs {
+		if err := r.upsertStaff(ctx, tx, staff); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit().Error
+}
+
+func (s *staffRepositoryImpl) upsertStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {
+	existingStaff, err := s.GetByEmail(ctx, staff.Email)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+
+	if existingStaff != nil {
+		existingStaff.PrefixTH = staff.PrefixTH
+		existingStaff.PrefixEN = staff.PrefixEN
+		existingStaff.FirstNameTH = staff.FirstNameTH
+		existingStaff.LastNameTH = staff.LastNameTH
+		existingStaff.FirstNameEN = staff.FirstNameEN
+		existingStaff.LastNameEN = staff.LastNameEN
+		existingStaff.ProgramID = staff.ProgramID
+		existingStaff.IsResigned = staff.IsResigned
+		return tx.Save(existingStaff).Error
+	}
+
+	return tx.Create(&staff).Error
 }

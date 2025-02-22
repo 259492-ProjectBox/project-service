@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/url"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,6 +24,7 @@ type UploadService interface {
 	RemoveObject(ctx context.Context, bucketName string, objectName string, opt minio.RemoveObjectOptions) error
 	ProcessStudentEnrollmentFile(ctx context.Context, programId int, file *multipart.FileHeader) error
 	ProcessCreateProjectFile(ctx context.Context, programId int, file *multipart.FileHeader) error
+	ProcessCreateStaffFile(ctx context.Context, programId int, file *multipart.FileHeader) error
 }
 
 type uploadServiceImpl struct {
@@ -168,6 +170,71 @@ func (s *uploadServiceImpl) ProcessCreateProjectFile(ctx context.Context, progra
 	return nil
 }
 
+func (s *uploadServiceImpl) ProcessCreateStaffFile(ctx context.Context, programId int, file *multipart.FileHeader) error {
+	if err := s.validateFileType(file); err != nil {
+		return err
+	}
+
+	rows, err := s.readExcelFile(file)
+	if err != nil {
+		return err
+	}
+
+	if len(rows) < 3 {
+		return errors.New("excel file is empty or does not have enough rows")
+	}
+
+	staffInfoColumns, err := s.getStaffInfoColumns(rows[1])
+	if err != nil {
+		return err
+	}
+
+	staffs, err := s.parseStaffs(rows[2:], staffInfoColumns, programId)
+	if err != nil {
+		return err
+	}
+
+	if err := s.staffService.UpsertStaffs(ctx, staffs); err != nil {
+		return fmt.Errorf("failed to save staff data: %w", err)
+	}
+
+	return nil
+}
+
+func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]int, error) {
+	columns := map[string]int{
+		"staffPrefixTHColumn":   -1,
+		"staffPrefixENColumn":   -1,
+		"staffNameTHColumn":     -1,
+		"staffNameENColumn":     -1,
+		"staffEmailColumn":      -1,
+		"staffIsResignedColumn": -1,
+	}
+
+	for j, col := range headerRow {
+		switch {
+		case matchColumn(col, "Prefix (TH)"):
+			columns["staffPrefixTHColumn"] = j
+		case matchColumn(col, "Prefix (EN)"):
+			columns["staffPrefixENColumn"] = j
+		case matchColumn(col, "ชื่อ-นามสกุล (TH)"):
+			columns["staffNameTHColumn"] = j
+		case matchColumn(col, "ชื่อ-นามสกุล (EN)"):
+			columns["staffNameENColumn"] = j
+		case matchColumn(col, "Email (required)"):
+			columns["staffEmailColumn"] = j
+		case matchColumn(col, "IsResigned"):
+			columns["staffIsResignedColumn"] = j
+		}
+	}
+
+	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 ||  columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsResignedColumn"] == -1 {
+		return nil, errors.New("missing one or more required columns in the header row")
+	}
+
+	return columns, nil
+}
+
 func (s *uploadServiceImpl) getCourseNo(rows [][]string) (string, error) {
 	courseRow := rows[1]
 	for j, col := range courseRow {
@@ -278,6 +345,39 @@ func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, 
 	}
 
 	return students, nil
+}
+
+func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int, programId int) ([]models.Staff, error) {
+	var staffs []models.Staff
+	for _, row := range rows {
+		if len(row) <= columns["staffPrefixTHColumn"] || len(row) <= columns["staffPrefixENColumn"] || len(row) <= columns["staffNameTHColumn"] || len(row) <= columns["staffNameTHColumn"]+1 || len(row) <= columns["staffNameENColumn"] || len(row) <= columns["staffNameENColumn"]+1 || len(row) <= columns["staffEmailColumn"] || len(row) <= columns["staffIsResignedColumn"] {
+			return nil, fmt.Errorf("row does not have enough columns: %v", row)
+		}
+
+		if row[columns["staffEmailColumn"]] == "" {
+			return nil, fmt.Errorf("row does not have staff email: %v", row)
+		}
+
+		isResigned, err := strconv.ParseBool(row[columns["staffIsResignedColumn"]])
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for Is Resigned: %v", row[columns["staffIsResignedColumn"]])
+		}
+
+		staff := models.Staff{
+			PrefixTH:    row[columns["staffPrefixTHColumn"]],
+			PrefixEN:    row[columns["staffPrefixENColumn"]],
+			FirstNameTH: row[columns["staffNameTHColumn"]],
+			LastNameTH:  row[columns["staffNameTHColumn"]+1],
+			FirstNameEN: row[columns["staffNameENColumn"]],
+			LastNameEN:  row[columns["staffNameENColumn"]+1],
+			Email:       row[columns["staffEmailColumn"]],
+			IsResigned:  isResigned,
+			ProgramID:   programId,
+		}
+		staffs = append(staffs, staff)
+	}
+
+	return staffs, nil
 }
 
 func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, columns map[string]int, courseId, programId int) ([]models.ProjectRequest, error) {

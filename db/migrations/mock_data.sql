@@ -110,9 +110,9 @@ INSERT INTO "project_students" ("project_id", "student_id") VALUES
   (2, 3),
   (2, 4);
 
-INSERT INTO "staffs" ("prefix_th", "prefix_en", "first_name_th", "last_name_th", "first_name_en", "last_name_en", "email", "program_id") VALUES 
-  ('ดร.', 'Dr.', 'อลิซ', 'เทย์เลอร์', 'Alice', 'Taylor', 'alice.taylor@example.com', 1),
-  ('ศร.', 'Prof.', 'บ็อบ', 'วิลเลียมส์', 'Bob', 'Williams', 'bob.williams@example.com', 2);
+INSERT INTO "staffs" ("prefix_th", "prefix_en", "first_name_th", "last_name_th", "first_name_en", "last_name_en", "email", "program_id" , "is_resigned") VALUES 
+  ('ดร.', 'Dr.', 'อลิซ', 'เทย์เลอร์', 'Alice', 'Taylor', 'alice.taylor@example.com', 1 , false),
+  ('ศร.', 'Prof.', 'บ็อบ', 'วิลเลียมส์', 'Bob', 'Williams', 'bob.williams@example.com', 2 ,false);
 
 INSERT INTO "project_staffs" ("project_id", "staff_id", "project_role_id") VALUES 
   (1, 1, 1),

@@ -61,6 +61,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			FirstNameEN: staff.FirstNameEN,
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
+			IsResigned:  staff.IsResigned,
 			ProgramID:   staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
@@ -91,8 +92,8 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 				Program: dtos.Program{
 					ID:            member.Course.Program.ID,
 					Abbreviation:  member.Course.Program.Abbreviation,
-					ProgramNameTH: member.Course.Program.ProgramNameEN,
-					ProgramNameEN: member.Course.Program.ProgramNameTH,
+					ProgramNameTH: member.Course.Program.ProgramNameTH,
+					ProgramNameEN: member.Course.Program.ProgramNameEN,
 				},
 			},
 			ProgramID: member.ProgramID,

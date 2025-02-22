@@ -15,6 +15,7 @@ type StaffService interface {
 	GetStaffById(ctx context.Context, id int) (*dtos.StaffResponse, error)
 	UpdateStaff(ctx context.Context, staff *dtos.UpdateStaffRequest) (*dtos.StaffResponse, error)
 	DeleteStaff(ctx context.Context, id int) error
+	UpsertStaffs(ctx context.Context, staffs []models.Staff) error
 	GetStaffByProgramId(ctx context.Context, programId int) ([]dtos.StaffResponse, error)
 	GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error)
 	GetStaffByEmail(ctx context.Context, email string) (*models.Staff, error)
@@ -184,6 +185,7 @@ func (s *staffServiceImpl) GetStaffByProgramId(ctx context.Context, programId in
 			FirstNameEN: staff.FirstNameEN,
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
+			IsResigned:  staff.IsResigned,
 			ProgramID:   staff.ProgramID,
 		})
 	}
@@ -198,4 +200,8 @@ func (s *staffServiceImpl) GetStaffByEmail(ctx context.Context, email string) (*
 	}
 
 	return staff, nil
+}
+
+func (s *staffServiceImpl) UpsertStaffs(ctx context.Context, staffs []models.Staff) error {
+	return s.staffRepo.UpsertStaffs(ctx, staffs)
 }
