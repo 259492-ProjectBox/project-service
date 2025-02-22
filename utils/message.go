@@ -61,6 +61,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			FirstNameEN: staff.FirstNameEN,
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
+			IsResigned:  staff.IsResigned,
 			ProgramID:   staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
