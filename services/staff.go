@@ -126,6 +126,7 @@ func (s *staffServiceImpl) GetStaffById(ctx context.Context, id int) (*dtos.Staf
 		LastNameTH:  staff.LastNameTH,
 		FirstNameEN: staff.FirstNameEN,
 		LastNameEN:  staff.LastNameEN,
+		IsResigned:  staff.IsResigned,
 		Email:       staff.Email,
 		ProgramID:   staff.ProgramID,
 	}, nil
@@ -141,6 +142,7 @@ func (s *staffServiceImpl) UpdateStaff(ctx context.Context, staff *dtos.UpdateSt
 		LastNameTH:  staff.LastNameTH,
 		FirstNameEN: staff.FirstNameEN,
 		LastNameEN:  staff.LastNameEN,
+		IsResigned:  staff.IsResigned,
 		Email:       staff.Email,
 		ProgramID:   staff.ProgramID,
 	}
@@ -158,6 +160,7 @@ func (s *staffServiceImpl) UpdateStaff(ctx context.Context, staff *dtos.UpdateSt
 		LastNameTH:  updatedStaff.LastNameTH,
 		FirstNameEN: updatedStaff.FirstNameEN,
 		LastNameEN:  updatedStaff.LastNameEN,
+		IsResigned:  staff.IsResigned,
 		Email:       updatedStaff.Email,
 		ProgramID:   updatedStaff.ProgramID,
 	}, nil
