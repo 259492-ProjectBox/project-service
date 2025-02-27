@@ -228,7 +228,7 @@ func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]
 		}
 	}
 
-	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 ||  columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsResignedColumn"] == -1 {
+	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 || columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsResignedColumn"] == -1 {
 		return nil, errors.New("missing one or more required columns in the header row")
 	}
 
@@ -351,7 +351,7 @@ func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int,
 	var staffs []models.Staff
 	for _, row := range rows {
 		if len(row) <= columns["staffPrefixTHColumn"] || len(row) <= columns["staffPrefixENColumn"] || len(row) <= columns["staffNameTHColumn"] || len(row) <= columns["staffNameTHColumn"]+1 || len(row) <= columns["staffNameENColumn"] || len(row) <= columns["staffNameENColumn"]+1 || len(row) <= columns["staffEmailColumn"] || len(row) <= columns["staffIsResignedColumn"] {
-			return nil, fmt.Errorf("row does not have enough columns: %v", row)
+			continue
 		}
 
 		if row[columns["staffEmailColumn"]] == "" {

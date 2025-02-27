@@ -50,7 +50,7 @@ func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 func (r *staffRepositoryImpl) GetStaffByProgramId(programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 
-	if err := r.db.Where("program_id = ? AND is_resigned = false", programId).Find(&staffs).Error; err != nil {
+	if err := r.db.Where("program_id = ?", programId).Find(&staffs).Error; err != nil {
 		return nil, err
 	}
 
