@@ -16,6 +16,7 @@ import (
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
 	"github.com/xuri/excelize/v2"
+	"gorm.io/gorm"
 )
 
 type UploadService interface {
@@ -35,13 +36,15 @@ type uploadServiceImpl struct {
 	projectRoleService ProjectRoleService
 	configService      ConfigService
 	projectService     ProjectService
+	projectRepo        repositories.ProjectRepository
 	programRepo        repositories.ProgramRepository
 }
 
-func NewUploadService(client *minio.Client, programRepo repositories.ProgramRepository, staffService StaffService, projectRoleService ProjectRoleService, projectService ProjectService, courseService CourseService, configService ConfigService, studentService StudentService) UploadService {
+func NewUploadService(client *minio.Client, programRepo repositories.ProgramRepository, projectRepo repositories.ProjectRepository, staffService StaffService, projectRoleService ProjectRoleService, projectService ProjectService, courseService CourseService, configService ConfigService, studentService StudentService) UploadService {
 	return &uploadServiceImpl{
 		client:             client,
 		programRepo:        programRepo,
+		projectRepo:        projectRepo,
 		staffService:       staffService,
 		projectRoleService: projectRoleService,
 		projectService:     projectService,
@@ -388,8 +391,14 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 
 	var projectRequests []models.ProjectRequest
 	for rowIdx, row := range rows {
-		if !s.isValidProjectRow(row, columns) {
+		if !s.isValidProjectRow(ctx, row, columns) {
 			continue
+		}
+
+		if duplicateProject, err := s.projectRepo.GetProjectByTitleTHOrTitleEN(ctx, row[columns["titleTHColumn"]], row[columns["titleENColumn"]]); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		} else if duplicateProject != nil {
+			return nil, fmt.Errorf("project with title TH: %s and title EN: %s already exists", row[columns["titleTHColumn"]], row[columns["titleENColumn"]])
 		}
 
 		members, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, courseId, programId)
@@ -413,7 +422,7 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			AbstractText:  &row[columns["abstractTextColumn"]],
 			AcademicYear:  academicYear,
 			Semester:      semester,
-			SectionID:     &row[columns["sectionColumn"]],
+			SectionID:     &row[columns["secLabColumn"]],
 			CourseID:      courseId,
 			ProgramID:     programId,
 			ProjectStaffs: projectStaffs,
@@ -425,16 +434,14 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 	return projectRequests, nil
 }
 
-func (s *uploadServiceImpl) isValidProjectRow(row []string, columns map[string]int) bool {
+func (s *uploadServiceImpl) isValidProjectRow(ctx context.Context, row []string, columns map[string]int) bool {
 	return len(row) > columns["titleTHColumn"] &&
 		len(row) > columns["titleENColumn"] &&
 		len(row) > columns["abstractTextColumn"] &&
-		len(row) > columns["sectionColumn"] &&
 		len(row) > columns["courseNoColumn"] &&
 		!(row[columns["titleTHColumn"]] == "" &&
 			row[columns["titleENColumn"]] == "" &&
 			row[columns["abstractTextColumn"]] == "" &&
-			row[columns["sectionColumn"]] == "" &&
 			row[columns["courseNoColumn"]] == "")
 }
 
