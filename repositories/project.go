@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -21,7 +22,7 @@ type ProjectRepository interface {
 	GetProjectByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectsByStudentId(ctx context.Context, studentId string) ([]models.Project, error)
-	GetProjectByTitleTHOrTitleEN(ctx context.Context, titleTH, titleEN string) (*models.Project, error)
+	CheckDuplicateProjectByTitleAndSemester(ctx context.Context, titleTH, titleEN string, academicYear, semester int) (bool, error)
 	CreateProjects(ctx context.Context, projectReq []models.ProjectRequest) ([]*dtos.ProjectData, error)
 	CreateProjectWithFiles(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	UpdateProjectWithFiles(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
@@ -482,12 +483,19 @@ func (r *projectRepositoryImpl) processURL(ctx context.Context, tx *gorm.DB, pro
 	return nil
 }
 
-func (r *projectRepositoryImpl) GetProjectByTitleTHOrTitleEN(ctx context.Context, titleTH, titleEN string) (*models.Project, error) {
+func (r *projectRepositoryImpl) CheckDuplicateProjectByTitleAndSemester(ctx context.Context, titleTH, titleEN string, academicYear, semester int) (bool, error) {
+
 	var project models.Project
-	if err := r.db.WithContext(ctx).
-		Where("title_th = ? OR title_en = ?", titleTH, titleEN).
-		First(&project).Error; err != nil {
-		return nil, err
+	err := r.db.WithContext(ctx).
+		Where("(title_th = ? OR title_en = ?) AND academic_year = ? AND semester = ?", titleTH, titleEN, academicYear, semester).
+		First(&project).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
 	}
-	return &project, nil
+
+	return true, nil
 }

@@ -14,7 +14,7 @@ import (
 type ProjectService interface {
 	PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) error
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
-	GetProjectByTitleTHOrTitleEN(ctx context.Context, titleTH, titleEN string) (*models.Project, error)
+	CheckDuplicateProjectByTitleAndSemester(ctx context.Context, titleTH, titleEN string, academicYear, semester int) (bool, error)
 	CreateProjects(ctx context.Context, project []models.ProjectRequest) error
 	CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
@@ -93,13 +93,13 @@ func (s *projectServiceImpl) GetProjectWithPDFByID(ctx context.Context, id int) 
 	return project, nil
 }
 
-func (s *projectServiceImpl) GetProjectByTitleTHOrTitleEN(ctx context.Context, titleTH, titleEN string) (*models.Project, error) {
-	project, err := s.projectRepo.GetProjectByTitleTHOrTitleEN(ctx, titleTH, titleEN)
+func (s *projectServiceImpl) CheckDuplicateProjectByTitleAndSemester(ctx context.Context, titleTH, titleEN string, academicYear, semester int) (bool, error) {
+	isDuplicate, err := s.projectRepo.CheckDuplicateProjectByTitleAndSemester(ctx, titleTH, titleEN, academicYear, semester)
 	if err != nil {
-		return nil, err
+		return true, err
 	}
 
-	return project, nil
+	return isDuplicate, nil
 }
 
 func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
