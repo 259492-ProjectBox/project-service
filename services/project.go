@@ -14,6 +14,7 @@ import (
 type ProjectService interface {
 	PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) error
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
+	GetProjectByTitleTHOrTitleEN(ctx context.Context, titleTH, titleEN string) (*dtos.ProjectData, error)
 	CreateProjects(ctx context.Context, project []models.ProjectRequest) error
 	CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
 	UpdateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error)
@@ -85,6 +86,15 @@ func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project
 
 func (s *projectServiceImpl) GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error) {
 	project, err := s.projectRepo.GetProjectWithPDFByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
+}
+
+func (s *projectServiceImpl) GetProjectByTitleTHOrTitleEN(ctx context.Context, titleTH, titleEN string) (*dtos.ProjectData, error) {
+	project, err := s.projectRepo.GetProjectByTitleTHOrTitleEN(ctx, titleTH, titleEN)
 	if err != nil {
 		return nil, err
 	}
