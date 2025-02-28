@@ -16,6 +16,7 @@ import (
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
 	"github.com/xuri/excelize/v2"
+	"gorm.io/gorm"
 )
 
 type UploadService interface {
@@ -394,11 +395,9 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			continue
 		}
 
-		duplicateProject, err := s.projectRepo.GetProjectByTitleTHOrTitleEN(ctx, row[columns["titleTHColumn"]], row[columns["titleENColumn"]])
-		if err != nil {
+		if duplicateProject, err := s.projectRepo.GetProjectByTitleTHOrTitleEN(ctx, row[columns["titleTHColumn"]], row[columns["titleENColumn"]]); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
-		}
-		if duplicateProject != nil {
+		} else if duplicateProject != nil {
 			return nil, fmt.Errorf("project with title TH: %s and title EN: %s already exists", row[columns["titleTHColumn"]], row[columns["titleENColumn"]])
 		}
 
@@ -423,7 +422,7 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			AbstractText:  &row[columns["abstractTextColumn"]],
 			AcademicYear:  academicYear,
 			Semester:      semester,
-			SectionID:     &row[columns["sectionColumn"]],
+			SectionID:     &row[columns["secLabColumn"]],
 			CourseID:      courseId,
 			ProgramID:     programId,
 			ProjectStaffs: projectStaffs,
@@ -436,16 +435,13 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 }
 
 func (s *uploadServiceImpl) isValidProjectRow(ctx context.Context, row []string, columns map[string]int) bool {
-
 	return len(row) > columns["titleTHColumn"] &&
 		len(row) > columns["titleENColumn"] &&
 		len(row) > columns["abstractTextColumn"] &&
-		len(row) > columns["sectionColumn"] &&
 		len(row) > columns["courseNoColumn"] &&
 		!(row[columns["titleTHColumn"]] == "" &&
 			row[columns["titleENColumn"]] == "" &&
 			row[columns["abstractTextColumn"]] == "" &&
-			row[columns["sectionColumn"]] == "" &&
 			row[columns["courseNoColumn"]] == "")
 }
 
