@@ -8,6 +8,7 @@ import (
 	"github.com/project-box/dtos"
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
+	"gorm.io/gorm"
 )
 
 type StaffService interface {
@@ -41,19 +42,15 @@ func (s *staffServiceImpl) GetStaffByName(ctx context.Context, name string) (*mo
 	firstName := nameParts[0]
 	lastName := nameParts[1]
 
-	staffs, err := s.staffRepo.GetAllStaffs(ctx)
+	staff, err := s.staffRepo.GetStaffByFirstNameAndLastName(ctx, firstName, lastName)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("staff not found " + firstName + " " + lastName)
+		}
 		return nil, err
 	}
 
-	for _, staff := range staffs {
-		if (staff.FirstNameTH == firstName && staff.LastNameTH == lastName) ||
-			(staff.FirstNameEN == firstName && staff.LastNameEN == lastName) {
-			return &staff, nil
-		}
-	}
-
-	return nil, errors.New("staff not found")
+	return staff, nil
 }
 
 func (s *staffServiceImpl) GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error) {

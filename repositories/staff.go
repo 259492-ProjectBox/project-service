@@ -9,6 +9,7 @@ import (
 
 type StaffRepository interface {
 	repository[models.Staff]
+	GetStaffByFirstNameAndLastName(ctx context.Context, firstNameTH, lastNameTH string) (*models.Staff, error)
 	GetStaffById(id int) (*models.Staff, error)
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
 	CreateStaff(staff *models.Staff) error
@@ -120,4 +121,15 @@ func (s *staffRepositoryImpl) upsertStaff(ctx context.Context, tx *gorm.DB, staf
 	}
 
 	return tx.Create(&staff).Error
+}
+
+func (r *staffRepositoryImpl) GetStaffByFirstNameAndLastName(ctx context.Context, firstName, lastName string) (*models.Staff, error) {
+	var staff models.Staff
+	err := r.db.Where("(first_name_th = ? AND last_name_th = ?) OR (first_name_en = ? AND last_name_en = ?)",
+		firstName, lastName, firstName, lastName).
+		First(&staff).Error
+	if err != nil {
+		return nil, err
+	}
+	return &staff, nil
 }
