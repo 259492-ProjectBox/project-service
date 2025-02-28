@@ -16,7 +16,6 @@ import (
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
 	"github.com/xuri/excelize/v2"
-	"gorm.io/gorm"
 )
 
 type UploadService interface {
@@ -395,13 +394,15 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			continue
 		}
 
-		if duplicateProject, err := s.projectRepo.GetProjectByTitleTHOrTitleEN(ctx, row[columns["titleTHColumn"]], row[columns["titleENColumn"]]); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		isProjectDuplicate, err := s.projectRepo.CheckDuplicateProjectByTitleAndSemester(ctx, row[columns["titleTHColumn"]], row[columns["titleENColumn"]], academicYear, semester)
+		if err != nil {
 			return nil, err
-		} else if duplicateProject != nil {
+		}
+		if isProjectDuplicate {
 			return nil, fmt.Errorf("project with title TH: %s and title EN: %s already exists", row[columns["titleTHColumn"]], row[columns["titleENColumn"]])
 		}
 
-		members, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, courseId, programId)
+		members, isSecLabSameOverAllMember, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, courseId, programId)
 		if err != nil {
 			return nil, err
 		}
@@ -416,13 +417,21 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			return nil, err
 		}
 
+		titleTH := &row[columns["titleTHColumn"]]
+		titleEN := &row[columns["titleENColumn"]]
+		abstractText := &row[columns["abstractTextColumn"]]
+		sectionValue := row[columns["secLabColumn"]]
+		var sectionID *string
+		if isSecLabSameOverAllMember {
+			sectionID = &sectionValue
+		}
 		project := models.ProjectRequest{
-			TitleTH:       &row[columns["titleTHColumn"]],
-			TitleEN:       &row[columns["titleENColumn"]],
-			AbstractText:  &row[columns["abstractTextColumn"]],
+			TitleTH:       titleTH,
+			TitleEN:       titleEN,
+			AbstractText:  abstractText,
 			AcademicYear:  academicYear,
 			Semester:      semester,
-			SectionID:     &row[columns["secLabColumn"]],
+			SectionID:     sectionID,
 			CourseID:      courseId,
 			ProgramID:     programId,
 			ProjectStaffs: projectStaffs,
@@ -445,13 +454,20 @@ func (s *uploadServiceImpl) isValidProjectRow(ctx context.Context, row []string,
 			row[columns["courseNoColumn"]] == "")
 }
 
-func (s *uploadServiceImpl) getProjectMembers(rows [][]string, rowIdx int, columns map[string]int, semester, academicYear, courseId, programId int) ([]models.Student, error) {
+func (s *uploadServiceImpl) getProjectMembers(rows [][]string, rowIdx int, columns map[string]int, semester, academicYear, courseId, programId int) ([]models.Student, bool, error) {
 	var members []models.Student
 	memberIdx := 0
+	currentSeclab := ""
+	isSecLabSameOverAllMember := true
 	for rowIdx+memberIdx < len(rows) &&
 		columns["studentIdColumn"] < len(rows[rowIdx+memberIdx]) &&
 		len(rows[rowIdx+memberIdx]) > columns["studentIdColumn"] &&
 		rows[rowIdx+memberIdx][columns["studentIdColumn"]] != "" {
+
+		if currentSeclab != "" && currentSeclab != rows[rowIdx+memberIdx][columns["secLabColumn"]] {
+			isSecLabSameOverAllMember = false
+		}
+		currentSeclab = rows[rowIdx+memberIdx][columns["secLabColumn"]]
 
 		student := models.Student{
 			StudentID:    rows[rowIdx+memberIdx][columns["studentIdColumn"]],
@@ -466,7 +482,7 @@ func (s *uploadServiceImpl) getProjectMembers(rows [][]string, rowIdx int, colum
 		members = append(members, student)
 		memberIdx++
 	}
-	return members, nil
+	return members, isSecLabSameOverAllMember, nil
 }
 
 func (s *uploadServiceImpl) getProjectStaffs(ctx context.Context, rows [][]string, rowIdx int, columns map[string]int) ([]models.ProjectStaff, error) {
