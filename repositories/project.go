@@ -250,13 +250,13 @@ func (r *projectRepositoryImpl) deleteProjectAssociations(ctx context.Context, t
 		return err
 	}
 
-	if err := r.deleteProjectReousources(ctx, tx, projectID); err != nil {
+	if err := r.deleteProjectResources(ctx, tx, projectID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *projectRepositoryImpl) deleteProjectReousources(ctx context.Context, tx *gorm.DB, projectID int) error {
+func (r *projectRepositoryImpl) deleteProjectResources(ctx context.Context, tx *gorm.DB, projectID int) error {
 	var projectResources []models.ProjectResource
 	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Find(&projectResources).Error; err != nil {
 		return err
@@ -264,7 +264,9 @@ func (r *projectRepositoryImpl) deleteProjectReousources(ctx context.Context, tx
 
 	for _, projectResource := range projectResources {
 		if projectResource.Path != nil {
-			if err := r.uploadRepo.DeleteUploadedFile(ctx, r.projectBucketName, *projectResource.Path, minio.RemoveObjectOptions{}); err != nil {
+			// Trim the bucket name from the path
+			objectPath := strings.TrimPrefix(*projectResource.Path, r.projectBucketName+"/")
+			if err := r.uploadRepo.DeleteUploadedFile(ctx, r.projectBucketName, objectPath, minio.RemoveObjectOptions{}); err != nil {
 				return err
 			}
 		}
