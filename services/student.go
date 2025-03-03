@@ -120,16 +120,6 @@ func (s *studentServiceImpl) GetStudentByStudentId(ctx context.Context, studentI
 	if err != nil {
 		return nil, err
 	}
-
-	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, student.ProgramID)
-	if err != nil {
-		return nil, err
-	}
-
-	if student.AcademicYear != academicYear || student.Semester != semester {
-		return nil, gorm.ErrRecordNotFound
-	}
-
 	return student, nil
 }
 
