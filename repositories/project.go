@@ -250,6 +250,29 @@ func (r *projectRepositoryImpl) deleteProjectAssociations(ctx context.Context, t
 		return err
 	}
 
+	if err := r.deleteProjectReousources(ctx, tx, projectID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *projectRepositoryImpl) deleteProjectReousources(ctx context.Context, tx *gorm.DB, projectID int) error {
+	var projectResources []models.ProjectResource
+	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Find(&projectResources).Error; err != nil {
+		return err
+	}
+
+	for _, projectResource := range projectResources {
+		if projectResource.Path != nil {
+			if err := r.uploadRepo.DeleteUploadedFile(ctx, r.projectBucketName, *projectResource.Path, minio.RemoveObjectOptions{}); err != nil {
+				return err
+			}
+		}
+
+		if err := tx.WithContext(ctx).Delete(&projectResource).Error; err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -390,6 +413,7 @@ func generateUniqueFileName(fileName string) string {
 }
 
 func buildFilePath(bucketName, programName, courseNo string, projectNo string, title, uniqueFileName string) string {
+	projectNo = strings.ReplaceAll(projectNo, "/", "_")
 	return fmt.Sprintf("%s/%s/%s/%s/%s/%s",
 		bucketName, programName, courseNo, projectNo, title, uniqueFileName)
 }
