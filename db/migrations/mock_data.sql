@@ -6,7 +6,8 @@ INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
   ('word','application/msword'),
   ('zip','application/vnd.rar'),
   ('pdf','application/pdf'),
-  ('powerpoint','application/vnd.ms-powerpoint');
+  ('powerpoint','application/vnd.ms-powerpoint'),
+  ('excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   
 -- Insert programs
 INSERT INTO "programs" ("abbreviation", "program_name_en", "program_name_th") 
