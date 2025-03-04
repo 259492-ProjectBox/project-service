@@ -9,6 +9,7 @@ import (
 	rabbitMQQueue "github.com/project-box/queues/rabbitmq"
 	"github.com/project-box/repositories"
 	rabbitmq "github.com/rabbitmq/amqp091-go"
+	"gorm.io/gorm"
 )
 
 type ProjectService interface {
@@ -57,17 +58,36 @@ func (s *projectServiceImpl) CreateProjects(ctx context.Context, projects []mode
 	return nil
 }
 
-func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) error {
+func (s *projectServiceImpl) getProjectMessage(ctx context.Context, projectId int) (*dtos.ProjectData, error) {
 	projectMessage, err := s.projectRepo.GetProjectMessageByID(ctx, projectId)
-	if err != nil {
-		return err
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
 	}
 
-	if err = rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
+	if projectMessage == nil {
+		projectMessage = &dtos.ProjectData{
+			ID: projectId,
+		}
+	}
+
+	return projectMessage, nil
+}
+
+func (s *projectServiceImpl) publishMessage(ctx context.Context, action string, projectMessage *dtos.ProjectData) error {
+	if err := rabbitMQQueue.PublishMessageFromRabbitMQToElasticSearch(s.rabbitMQChannel, action, projectMessage); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *projectServiceImpl) PublishProjectMessageToElasticSearch(ctx context.Context, action string, projectId int) error {
+	projectMessage, err := s.getProjectMessage(ctx, projectId)
+	if err != nil {
+		return err
+	}
+
+	return s.publishMessage(ctx, action, projectMessage)
 }
 
 func (s *projectServiceImpl) CreateProjectWithFiles(ctx context.Context, project *models.ProjectRequest, projectResources []*models.ProjectResource, files []*multipart.FileHeader) (*dtos.ProjectData, error) {
@@ -117,19 +137,12 @@ func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project
 }
 
 func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
-	project, err := s.projectRepo.GetProjectByID(ctx, id)
-	if err != nil {
-		return err
-	}
 
 	if err := s.projectRepo.Delete(ctx, id); err != nil {
 		return err
 	}
-
-	err = s.PublishProjectMessageToElasticSearch(ctx, "delete", project.ID)
-	if err != nil {
+	if err := s.PublishProjectMessageToElasticSearch(ctx, "delete", id); err != nil {
 		return err
 	}
-
 	return nil
 }
