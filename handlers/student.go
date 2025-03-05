@@ -12,6 +12,7 @@ import (
 
 type StudentHandler interface {
 	GetsStudentByProgramIdOnCurrentYearAndSemester(c *gin.Context)
+	GetsStudentByProgramIdOnAcademicYearAndSemester(c *gin.Context)
 	GetStudentByStudentId(c *gin.Context)
 	CheckStudentPermissionForCreateProject(c *gin.Context)
 }
@@ -74,8 +75,8 @@ func (h *studentHandler) CheckStudentPermissionForCreateProject(c *gin.Context) 
 	c.JSON(http.StatusOK, gin.H{"has_permission": hasPermission})
 }
 
-// @Summary Get students by program ID, academic year, and semester
-// @Description Retrieves a list of students for a given program ID, academic year, and semester
+// @Summary Get students by program ID and current year
+// @Description Retrieves a list of students for a given program ID and current year
 // @Tags Student
 // @Produce json
 // @Param program_id path int true "Program ID"
@@ -92,6 +93,48 @@ func (h *studentHandler) GetsStudentByProgramIdOnCurrentYearAndSemester(c *gin.C
 	}
 
 	students, err := h.studentService.GetStudentByProgramIdOnCurrentYearAndSemester(c.Request.Context(), programId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, students)
+}
+
+// @Summary Get students by program ID, academic year, and semester
+// @Description Retrieves a list of students for a given program ID, academic year, and semester
+// @Tags Student
+// @Produce json
+// @Param program_id path int true "Program ID"
+// @Param academic_year query int true "Academic Year"
+// @Param semester query int true "Semester"
+// @Success 200 {array} models.Student "Successfully retrieved students"
+// @Failure 400 {object} map[string]interface{} "Invalid parameters"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /v1/students/program/{program_id} [get]
+func (h *studentHandler) GetsStudentByProgramIdOnAcademicYearAndSemester(c *gin.Context) {
+	programIdStr := c.Param("program_id")
+	programId, err := strconv.Atoi(programIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
+		return
+	}
+
+	academicYearStr := c.Query("academic_year")
+	academicYear, err := strconv.Atoi(academicYearStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
+		return
+	}
+
+	semesterStr := c.Query("semester")
+	semester, err := strconv.Atoi(semesterStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
+		return
+	}
+
+	students, err := h.studentService.GetStudentByProgramIdOnAcademicYearAndSemester(c.Request.Context(), programId, academicYear, semester)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

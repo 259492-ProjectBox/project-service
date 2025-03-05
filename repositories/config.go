@@ -11,6 +11,7 @@ type ConfigRepository interface {
 	repository[models.Config]
 	GetConfigByProgramId(programId int) ([]models.Config, error)
 	GetByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error)
+	GetByName(ctx context.Context, name string) (*models.Config, error)
 }
 
 type configRepositoryImpl struct {
@@ -25,7 +26,6 @@ func NewConfigRepository(db *gorm.DB) ConfigRepository {
 	}
 }
 
-// get all config from program id
 func (r *configRepositoryImpl) GetConfigByProgramId(programId int) ([]models.Config, error) {
 	var configs []models.Config
 	if err := r.db.Where("program_id = ?", programId).Preload("Program").Find(&configs).Error; err != nil {
@@ -40,6 +40,15 @@ func (r *configRepositoryImpl) GetConfigByProgramId(programId int) ([]models.Con
 func (r *configRepositoryImpl) GetByNameAndProgramId(ctx context.Context, name string, programId int) (*models.Config, error) {
 	var config models.Config
 	err := r.db.WithContext(ctx).Where("config_name = ? AND program_id = ?", name, programId).Preload("Program").First(&config).Error
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+func (r *configRepositoryImpl) GetByName(ctx context.Context, name string) (*models.Config, error) {
+	var config models.Config
+	err := r.db.WithContext(ctx).Where("config_name = ? ", name).Preload("Program").First(&config).Error
 	if err != nil {
 		return nil, err
 	}

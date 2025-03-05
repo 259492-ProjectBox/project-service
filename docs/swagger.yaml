@@ -1,5 +1,12 @@
 basePath: /api
 definitions:
+  dtos.AcademicYearResponse:
+    properties:
+      year_ad:
+        type: integer
+      year_be:
+        type: integer
+    type: object
   dtos.CalendarResponse:
     properties:
       description:
@@ -43,6 +50,8 @@ definitions:
         type: string
       first_name_th:
         type: string
+      is_resigned:
+        type: boolean
       last_name_en:
         type: string
       last_name_th:
@@ -86,6 +95,8 @@ definitions:
         type: string
       id:
         type: integer
+      is_resigned:
+        type: boolean
       last_name_en:
         type: string
       last_name_th:
@@ -122,6 +133,8 @@ definitions:
         type: string
       id:
         type: integer
+      is_resigned:
+        type: boolean
       last_name_en:
         type: string
       last_name_th:
@@ -283,6 +296,8 @@ definitions:
         type: string
       id:
         type: integer
+      is_resigned:
+        type: boolean
       last_name_en:
         type: string
       last_name_th:
@@ -527,6 +542,26 @@ paths:
       summary: Delete config by ID
       tags:
       - Config
+  /v1/configs/academic-years:
+    get:
+      description: Retrieves all academic years
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved academic years
+          schema:
+            items:
+              $ref: '#/definitions/dtos.AcademicYearResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all academic years
+      tags:
+      - Config
   /v1/configs/program/{program_id}:
     get:
       description: Fetches all config for a given program
@@ -563,6 +598,96 @@ paths:
       summary: Get config by program ID
       tags:
       - Config
+  /v1/courses:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new course
+      parameters:
+      - description: Course data
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created course
+          schema:
+            $ref: '#/definitions/models.Course'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new course
+      tags:
+      - Course
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing course
+      parameters:
+      - description: Course data
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated course
+          schema:
+            $ref: '#/definitions/models.Course'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing course
+      tags:
+      - Course
+  /v1/courses/{course_id}:
+    delete:
+      description: Deletes a course by its ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: course_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully deleted course
+        "400":
+          description: Invalid course ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a course
+      tags:
+      - Course
   /v1/courses/{course_no}:
     get:
       description: Retrieves a course by its course number
@@ -1230,10 +1355,52 @@ paths:
       summary: Check student permission for creating a project
       tags:
       - Student
-  /v1/students/program/{program_id}/current_year:
+  /v1/students/program/{program_id}:
     get:
       description: Retrieves a list of students for a given program ID, academic year,
         and semester
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      - description: Academic Year
+        in: query
+        name: academic_year
+        required: true
+        type: integer
+      - description: Semester
+        in: query
+        name: semester
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved students
+          schema:
+            items:
+              $ref: '#/definitions/models.Student'
+            type: array
+        "400":
+          description: Invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get students by program ID, academic year, and semester
+      tags:
+      - Student
+  /v1/students/program/{program_id}/current_year:
+    get:
+      description: Retrieves a list of students for a given program ID and current
+        year
       parameters:
       - description: Program ID
         in: path
@@ -1259,7 +1426,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get students by program ID, academic year, and semester
+      summary: Get students by program ID and current year
       tags:
       - Student
   /v1/uploads/program/{program_id}/create-project:
@@ -1298,6 +1465,43 @@ paths:
             additionalProperties: true
             type: object
       summary: Upload create project file
+      tags:
+      - Upload
+  /v1/uploads/program/{program_id}/create-staff:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads and processes a create staff file for a given program ID
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      - description: Create Staff File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file processed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid program ID or failed to retrieve the file
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upload create staff file
       tags:
       - Upload
   /v1/uploads/program/{program_id}/student-enrollment:

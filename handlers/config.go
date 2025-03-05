@@ -12,6 +12,7 @@ import (
 
 type ConfigHandler interface {
 	GetConfigByProgramId(c *gin.Context)
+	GetAllAcademicYear(c *gin.Context)
 	UpsertConfig(c *gin.Context)
 	DeleteConfig(c *gin.Context)
 }
@@ -55,6 +56,23 @@ func (h *configHandler) GetConfigByProgramId(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// @Summary Get all academic years
+// @Description Retrieves all academic years
+// @Tags Config
+// @Produce json
+// @Success 200 {array} dtos.AcademicYearResponse "Successfully retrieved academic years"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /v1/configs/academic-years [get]
+func (h *configHandler) GetAllAcademicYear(c *gin.Context) {
+	academicYears, err := h.configService.GetAllAcademicYear(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, academicYears)
 }
 
 // @Summary Upsert config for a program
