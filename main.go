@@ -35,7 +35,7 @@ func NewApp(
 		gin.Logger(),
 		gin.Recovery(),
 		cors.New(cors.Config{
-			AllowOrigins:     []string{"https://project-service.kunmhing.me", "http://localhost:3000"},
+			AllowOrigins:     []string{"https://project-service.kunmhing.me", "http://localhost:3000", "https://pbox.cpe.eng.cmu.ac.th"},
 			AllowCredentials: true,
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
