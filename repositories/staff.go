@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/project-box/models"
 	"gorm.io/gorm"
@@ -13,7 +14,7 @@ type StaffRepository interface {
 	GetStaffById(id int) (*models.Staff, error)
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
 	CreateStaff(staff *models.Staff) error
-	UpsertStaffs(ctx context.Context, staffs []models.Staff) error
+	CreateStaffs(ctx context.Context, staffs []models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
 	GetAllStaffs(ctx context.Context) ([]models.Staff, error)
 	GetByEmail(ctx context.Context, email string) (*models.Staff, error)
@@ -82,7 +83,7 @@ func (r *staffRepositoryImpl) GetByEmail(ctx context.Context, email string) (*mo
 	return &staff, nil
 }
 
-func (r *staffRepositoryImpl) UpsertStaffs(ctx context.Context, staffs []models.Staff) error {
+func (r *staffRepositoryImpl) CreateStaffs(ctx context.Context, staffs []models.Staff) error {
 	if len(staffs) == 0 {
 		return nil
 	}
@@ -93,13 +94,20 @@ func (r *staffRepositoryImpl) UpsertStaffs(ctx context.Context, staffs []models.
 	}
 
 	for _, staff := range staffs {
-		if err := r.upsertStaff(ctx, tx, staff); err != nil {
+		if err := r.createStaff(ctx, tx, staff); err != nil {
 			tx.Rollback()
+			if errors.Is(err, gorm.ErrDuplicatedKey) {
+				return errors.New("duplicate entry for unique_email_program key: staff " + staff.FirstNameTH + " " + staff.LastNameTH)
+			}
 			return err
 		}
 	}
 
 	return tx.Commit().Error
+}
+
+func (s *staffRepositoryImpl) createStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {
+	return tx.Save(&staff).Error
 }
 
 func (s *staffRepositoryImpl) upsertStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {

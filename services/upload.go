@@ -196,7 +196,7 @@ func (s *uploadServiceImpl) ProcessCreateStaffFile(ctx context.Context, programI
 		return err
 	}
 
-	if err := s.staffService.UpsertStaffs(ctx, staffs); err != nil {
+	if err := s.staffService.CreateStaffs(ctx, staffs); err != nil {
 		return fmt.Errorf("failed to save staff data: %w", err)
 	}
 

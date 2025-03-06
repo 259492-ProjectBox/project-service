@@ -260,6 +260,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/configs/academic-years": {
+            "get": {
+                "description": "Retrieves all academic years",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config"
+                ],
+                "summary": "Get all academic years",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved academic years",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.AcademicYearResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/configs/program/{program_id}": {
             "get": {
                 "description": "Fetches all config for a given program",
@@ -364,6 +394,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/courses": {
+            "put": {
+                "description": "Updates an existing course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Update an existing course",
+                "parameters": [
+                    {
+                        "description": "Course data",
+                        "name": "course",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Course"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated course",
+                        "schema": {
+                            "$ref": "#/definitions/models.Course"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Create a new course",
+                "parameters": [
+                    {
+                        "description": "Course data",
+                        "name": "course",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Course"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created course",
+                        "schema": {
+                            "$ref": "#/definitions/models.Course"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/courses/program/{program_id}": {
             "get": {
                 "description": "Retrieves a list of courses for a given program ID",
@@ -395,6 +519,46 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/courses/{course_id}": {
+            "delete": {
+                "description": "Deletes a course by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Delete a course",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Course ID",
+                        "name": "course_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successfully deleted course"
+                    },
+                    "400": {
+                        "description": "Invalid course ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1258,7 +1422,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/students/program/{program_id}/current_year": {
+        "/v1/students/program/{program_id}": {
             "get": {
                 "description": "Retrieves a list of students for a given program ID, academic year, and semester",
                 "produces": [
@@ -1268,6 +1432,66 @@ const docTemplate = `{
                     "Student"
                 ],
                 "summary": "Get students by program ID, academic year, and semester",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Academic Year",
+                        "name": "academic_year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Semester",
+                        "name": "semester",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved students",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Student"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/students/program/{program_id}/current_year": {
+            "get": {
+                "description": "Retrieves a list of students for a given program ID and current year",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get students by program ID and current year",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1448,6 +1672,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/uploads/program/{program_id}/create-staff": {
+            "post": {
+                "description": "Uploads and processes a create staff file for a given program ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Upload"
+                ],
+                "summary": "Upload create staff file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Create Staff File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file processed successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID or failed to retrieve the file",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/uploads/program/{program_id}/student-enrollment": {
             "post": {
                 "description": "Uploads and processes a student enrollment file for a given program ID",
@@ -1557,6 +1835,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dtos.AcademicYearResponse": {
+            "type": "object",
+            "properties": {
+                "year_ad": {
+                    "type": "integer"
+                },
+                "year_be": {
+                    "type": "integer"
+                }
+            }
+        },
         "dtos.CalendarResponse": {
             "type": "object",
             "properties": {
@@ -1622,6 +1911,9 @@ const docTemplate = `{
                 },
                 "first_name_th": {
                     "type": "string"
+                },
+                "is_resigned": {
+                    "type": "boolean"
                 },
                 "last_name_en": {
                     "type": "string"
@@ -1689,6 +1981,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_resigned": {
+                    "type": "boolean"
+                },
                 "last_name_en": {
                     "type": "string"
                 },
@@ -1743,6 +2038,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_resigned": {
+                    "type": "boolean"
                 },
                 "last_name_en": {
                     "type": "string"
@@ -1989,6 +2287,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_resigned": {
+                    "type": "boolean"
                 },
                 "last_name_en": {
                     "type": "string"

@@ -8,6 +8,7 @@ import (
 func SetupConfigRouter(r *gin.RouterGroup, handler handlers.ConfigHandler) {
 	configRouteV1 := r.Group("/v1/configs")
 	{
+		configRouteV1.GET("/academic-years", handler.GetAllAcademicYear)
 		configRouteV1.GET("/program/:program_id", handler.GetConfigByProgramId)
 		configRouteV1.PUT("", handler.UpsertConfig)
 		configRouteV1.DELETE(":id", handler.DeleteConfig)
