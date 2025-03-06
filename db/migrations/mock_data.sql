@@ -1,4 +1,4 @@
--- Insert File extensions 
+-- Insert File extensions
 INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
   ('jpeg','image/jpeg'),
   ('text','text/plain'),
@@ -6,7 +6,7 @@ INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
   ('word','application/msword'),
   ('zip','application/vnd.rar'),
   ('pdf','application/pdf'),
-  ('powerpoint','application/vnd.ms-powerpoint'),
+  ('powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation'),
   ('excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
   ('autocad','application/acad');
   
@@ -100,10 +100,24 @@ INSERT INTO "resource_types" ("type_name") VALUES
 ('url');
 
 INSERT INTO "project_configs" ("title", "is_active", "program_id") VALUES
-  ('title_th',true, 1),
-  ('title_en', true, 1),
-  ('abstract_text', true, 1),
-  ('academic_year', true, 1),
-  ('semester', true, 1),
-  ('section_id', true, 1),
-  ('course_id', true, 1);
+  ('title_th', true, 1), ('title_en', true, 1), ('abstract_text', true, 1),
+  ('academic_year', true, 1), ('semester', true, 1), ('section_id', true, 1), ('course_id', true, 1),
+  ('title_th', true, 2), ('title_en', true, 2), ('abstract_text', true, 2),
+  ('academic_year', true, 2), ('semester', true, 2), ('section_id', true, 2), ('course_id', true, 2),
+  ('title_th', true, 3), ('title_en', true, 3), ('abstract_text', true, 3),
+  ('academic_year', true, 3), ('semester', true, 3), ('section_id', true, 3), ('course_id', true, 3),
+  ('title_th', true, 4), ('title_en', true, 4), ('abstract_text', true, 4),
+  ('academic_year', true, 4), ('semester', true, 4), ('section_id', true, 4), ('course_id', true, 4),
+  ('title_th', true, 5), ('title_en', true, 5), ('abstract_text', true, 5),
+  ('academic_year', true, 5), ('semester', true, 5), ('section_id', true, 5), ('course_id', true, 5),
+  ('title_th', true, 6), ('title_en', true, 6), ('abstract_text', true, 6),
+  ('academic_year', true, 6), ('semester', true, 6), ('section_id', true, 6), ('course_id', true, 6),
+  ('title_th', true, 7), ('title_en', true, 7), ('abstract_text', true, 7),
+  ('academic_year', true, 7), ('semester', true, 7), ('section_id', true, 7), ('course_id', true, 7),
+  ('title_th', true, 8), ('title_en', true, 8), ('abstract_text', true, 8),
+  ('academic_year', true, 8), ('semester', true, 8), ('section_id', true, 8), ('course_id', true, 8),
+  ('title_th', true, 9), ('title_en', true, 9), ('abstract_text', true, 9),
+  ('academic_year', true, 9), ('semester', true, 9), ('section_id', true, 9), ('course_id', true, 9),
+  ('title_th', true, 10), ('title_en', true, 10), ('abstract_text', true, 10),
+  ('academic_year', true, 10), ('semester', true, 10), ('section_id', true, 10), ('course_id', true, 10);
+
