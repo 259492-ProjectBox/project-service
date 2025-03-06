@@ -84,6 +84,7 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 		Preload("Members.Program").
 		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
+		Preload("ProjectResources.FileExtension").
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
 	}
@@ -100,6 +101,7 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 		Preload("Members.Program").
 		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
+		Preload("ProjectResources.FileExtension").
 		Preload("ProjectResources.PDF.Pages").
 		First(project, "projects.id = ?", id).Error; err != nil {
 		return nil, err
@@ -155,6 +157,7 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 		Preload("Members.Program").
 		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
+		Preload("ProjectResources.FileExtension").
 		Find(&projects).Error; err != nil {
 		return nil, err
 	}
@@ -471,7 +474,6 @@ func (r *projectRepositoryImpl) processFile(ctx context.Context, tx *gorm.DB, pr
 	if err != nil {
 		return err
 	}
-
 	var pdf *models.PDF
 	if isPDFFile(fileExtension.MimeType) {
 		pdf, err = utils.ReadPdf(file)
@@ -479,11 +481,11 @@ func (r *projectRepositoryImpl) processFile(ctx context.Context, tx *gorm.DB, pr
 			return err
 		}
 	}
-
 	projectResource.ResourceName = &file.Filename
 	projectResource.Path = &filePath
 	projectResource.PDF = pdf
 	projectResource.ResourceTypeID = resourceType.ID
+	projectResource.FileExtensionID = &fileExtension.ID
 	projectResource.ProjectID = project.ID
 
 	if err := r.resourceRepo.CreateProjectResource(ctx, tx, projectResource); err != nil {

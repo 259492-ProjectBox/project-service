@@ -113,14 +113,20 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		}
 
 		projectResource := dtos.ProjectResource{
-			ID:             resource.ID,
-			ResourceName:   resource.ResourceName,
-			Path:           resource.Path,
-			Title:          resource.Title,
-			ResourceTypeID: resource.ResourceTypeID,
-			ResourceType:   resourceType,
-			ProjectID:      resource.ProjectID,
-			CreatedAt:      formatTime(resource.CreatedAt),
+			ID:              resource.ID,
+			ResourceName:    resource.ResourceName,
+			Path:            resource.Path,
+			Title:           resource.Title,
+			ResourceTypeID:  resource.ResourceTypeID,
+			ResourceType:    resourceType,
+			FileExtensionID: resource.FileExtensionID,
+			FileExtension: dtos.FileExtension{
+				ID:            resource.FileExtension.ID,
+				ExtensionName: resource.FileExtension.ExtensionName,
+				MimeType:      resource.FileExtension.MimeType,
+			},
+			ProjectID: resource.ProjectID,
+			CreatedAt: formatTime(resource.CreatedAt),
 		}
 
 		if resource.URL != nil {
