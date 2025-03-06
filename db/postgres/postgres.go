@@ -66,7 +66,7 @@ func NewPostgresDatabase() *gorm.DB {
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		configs.Host, configs.User, configs.Password, configs.DBName, configs.Port, configs.SSLMode,
 	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{TranslateError: true})
 
 	if err != nil {
 		log.Println(err)

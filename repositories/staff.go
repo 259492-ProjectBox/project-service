@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/project-box/models"
 	"gorm.io/gorm"
@@ -95,6 +96,9 @@ func (r *staffRepositoryImpl) CreateStaffs(ctx context.Context, staffs []models.
 	for _, staff := range staffs {
 		if err := r.createStaff(ctx, tx, staff); err != nil {
 			tx.Rollback()
+			if errors.Is(err, gorm.ErrDuplicatedKey) {
+				return errors.New("duplicate entry for unique_email_program key: staff " + staff.FirstNameTH + " " + staff.LastNameTH)
+			}
 			return err
 		}
 	}
