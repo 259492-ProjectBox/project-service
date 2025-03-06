@@ -2,7 +2,7 @@ package models
 
 type ProjectResourceConfig struct {
 	ID             int          `json:"id" gorm:"primaryKey;autoIncrement"`
-	Title          string       `json:"title" gorm:"unique"`
+	Title          string       `json:"title"`
 	IconName       *string      `json:"icon_name"`
 	IsActive       bool         `json:"is_active"`
 	ResourceTypeID *int         `json:"resource_type_id"`
