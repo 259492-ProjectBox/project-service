@@ -7,7 +7,7 @@ INSERT INTO "file_extensions" ("extension_name","mime_type") VALUES
   ('zip','application/vnd.rar'),
   ('pdf','application/pdf'),
   ('powerpoint','application/vnd.ms-powerpoint'),
-  ('excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  ('excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
   ('autocad','application/acad');
   
 -- Insert programs
