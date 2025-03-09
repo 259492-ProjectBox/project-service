@@ -14,7 +14,8 @@ type StaffHandler interface {
 	GetStaffByProgramId(c *gin.Context)
 	CreateStaff(c *gin.Context)
 	UpdateStaff(c *gin.Context)
-	GetAllStaffHandler(c *gin.Context)
+	GetAllStaff(c *gin.Context)
+	GetAllStaffByProgramId(c *gin.Context)
 	GetStaffByEmail(c *gin.Context)
 }
 
@@ -150,11 +151,37 @@ func (h *staffHandler) UpdateStaff(c *gin.Context) {
 // @Success 200 {object} []dtos.StaffResponse "Successfully retrieved staffs"
 // @Failure 404 {object} map[string]interface{} "Staffs not found"
 // @Router /v1/staffs/GetAllStaffs [get]
-func (h *staffHandler) GetAllStaffHandler(c *gin.Context) {
-	staffs, err := h.staffService.GetAllStaffService(c)
+func (h *staffHandler) GetAllStaff(c *gin.Context) {
+	staffs, err := h.staffService.GetAllStaff(c)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Staffs not found"})
 		return
 	}
+	c.JSON(http.StatusOK, staffs)
+}
+
+// @Summary Get all staffs by program id
+// @Description Fetches all staffs by program id
+// @Tags Staff
+// @Produce  json
+// @Param program_id path int true "Program ID"
+// @Success 200 {object} []models.Staff "Successfully retrieved staffs"
+// @Failure 400 {object} map[string]interface{} "Invalid program ID"
+// @Failure 404 {object} map[string]interface{} "Staffs not found"
+// @Router /v1/staffs/program/{program_id}/all [get]
+func (h *staffHandler) GetAllStaffByProgramId(c *gin.Context) {
+	programIdStr := c.Param("program_id")
+	programId, err := strconv.Atoi(programIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
+		return
+	}
+
+	staffs, err := h.staffService.GetAllStaffByProgramId(c.Request.Context(), programId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Staffs not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, staffs)
 }
