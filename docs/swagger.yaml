@@ -988,6 +988,36 @@ paths:
       summary: Get Project Resource Config by Program ID
       tags:
       - ProjectResourceConfig
+  /v1/projectResources/{id}:
+    delete:
+      description: Deletes a project resource by its ID
+      parameters:
+      - description: Resource ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project Resource deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Resource not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete resource record
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a project resource
+      tags:
+      - Resource
   /v1/projectRoles/program/{program_id}:
     get:
       description: Retrieves all project roles for a given program ID

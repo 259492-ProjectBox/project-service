@@ -33,6 +33,15 @@ func NewResourceHandler(minioClient *minio.Client, resourceService services.Reso
 	}
 }
 
+// @Summary Delete a project resource
+// @Description Deletes a project resource by its ID
+// @Tags Resource
+// @Produce json
+// @Param id path string true "Resource ID"
+// @Success 200 {object} map[string]interface{} "Project Resource deleted successfully"
+// @Failure 404 {object} map[string]interface{} "Resource not found"
+// @Failure 500 {object} map[string]interface{} "Failed to delete resource record"
+// @Router /v1/projectResources/{id} [delete]
 func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	id := c.Param("id")
 	detailedResource, err := h.resourceService.GetDetailedResourceByID(c, id)
