@@ -1379,6 +1379,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/staffs/program/{program_id}/all": {
+            "get": {
+                "description": "Fetches all staffs by program id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get all staffs by program id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved staffs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Staff"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Staffs not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/staffs/{id}": {
             "get": {
                 "description": "Fetches an staff by their ID",
@@ -2099,6 +2145,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.FileExtension": {
+            "type": "object",
+            "properties": {
+                "extension_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mime_type": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Program": {
             "type": "object",
             "properties": {
@@ -2186,6 +2246,12 @@ const docTemplate = `{
             "properties": {
                 "created_at": {
                     "type": "string"
+                },
+                "file_extension": {
+                    "$ref": "#/definitions/models.FileExtension"
+                },
+                "file_extension_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"

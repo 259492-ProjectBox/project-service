@@ -13,10 +13,11 @@ type StaffRepository interface {
 	GetStaffByFirstNameAndLastName(ctx context.Context, firstNameTH, lastNameTH string) (*models.Staff, error)
 	GetStaffById(id int) (*models.Staff, error)
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
+	GetAllStaffs(ctx context.Context) ([]models.Staff, error)
+	GetAllStaffByProgramId(ctx context.Context, programId int) ([]models.Staff, error)
 	CreateStaff(staff *models.Staff) error
 	CreateStaffs(ctx context.Context, staffs []models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
-	GetAllStaffs(ctx context.Context) ([]models.Staff, error)
 	GetByEmail(ctx context.Context, email string) (*models.Staff, error)
 }
 
@@ -140,4 +141,21 @@ func (r *staffRepositoryImpl) GetStaffByFirstNameAndLastName(ctx context.Context
 		return nil, err
 	}
 	return &staff, nil
+}
+
+func (r *staffRepositoryImpl) GetAllStaffByProgramId(ctx context.Context, programId int) ([]models.Staff, error) {
+	var program1Staffs []models.Staff
+	var otherStaffs []models.Staff
+
+	err := r.db.WithContext(ctx).Where("program_id = ?", programId).Preload("Program").Find(&program1Staffs).Error
+	if err != nil {
+		return nil, err
+	}
+	err = r.db.WithContext(ctx).Where("email NOT IN (?)", r.db.Model(&models.Staff{}).Select("Email").Where("program_id = ?", programId)).Preload("Program").Find(&otherStaffs).Error
+	if err != nil {
+		return nil, err
+	}
+	// Merge results
+	staffs := append(program1Staffs, otherStaffs...)
+	return staffs, nil
 }

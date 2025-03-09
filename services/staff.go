@@ -18,7 +18,8 @@ type StaffService interface {
 	DeleteStaff(ctx context.Context, id int) error
 	CreateStaffs(ctx context.Context, staffs []models.Staff) error
 	GetStaffByProgramId(ctx context.Context, programId int) ([]dtos.StaffResponse, error)
-	GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error)
+	GetAllStaff(ctx context.Context) ([]dtos.StaffResponse, error)
+	GetAllStaffByProgramId(ctx context.Context, programId int) ([]models.Staff, error)
 	GetStaffByEmail(ctx context.Context, email string) (*models.Staff, error)
 	GetStaffByName(ctx context.Context, name string) (*models.Staff, error)
 }
@@ -53,7 +54,16 @@ func (s *staffServiceImpl) GetStaffByName(ctx context.Context, name string) (*mo
 	return staff, nil
 }
 
-func (s *staffServiceImpl) GetAllStaffService(ctx context.Context) ([]dtos.StaffResponse, error) {
+func (s *staffServiceImpl) GetAllStaffByProgramId(ctx context.Context, programId int) ([]models.Staff, error) {
+	staffs, err := s.staffRepo.GetAllStaffByProgramId(ctx, programId)
+	if err != nil {
+		return nil, err
+	}
+
+	return staffs, nil
+}
+
+func (s *staffServiceImpl) GetAllStaff(ctx context.Context) ([]dtos.StaffResponse, error) {
 	staffs, err := s.staffRepo.GetAllStaffs(ctx)
 	if err != nil {
 		return nil, err
