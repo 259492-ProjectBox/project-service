@@ -12,6 +12,7 @@ type StudentRepository interface {
 	GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error)
 	GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx context.Context, studentId string, programId, academicYear, semester int) (*models.Student, error)
 	GetStudentByProgramIdOnAcademicYearAndSemester(ctx context.Context, programId, academicYear, semester int) ([]models.Student, error)
+	CheckStudentDuplicateProjectOnCurrentYearAndSemester(ctx context.Context, studentId string, academicYear, semester int) (bool, error)
 }
 
 type studentRepositoryImpl struct {
@@ -26,6 +27,20 @@ func NewStudentRepository(db *gorm.DB, configRepo ConfigRepository) StudentRepos
 		configRepo:     configRepo,
 		repositoryImpl: newRepository[models.Student](db),
 	}
+}
+
+func (r *studentRepositoryImpl) CheckStudentDuplicateProjectOnCurrentYearAndSemester(ctx context.Context, studentId string, academicYear, semester int) (bool, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).
+		Model(&models.Project{}).
+		Joins("JOIN project_students ON project_students.project_id = projects.id").
+		Joins("JOIN students ON students.id = project_students.student_id").
+		Where("projects.academic_year = ? AND projects.semester = ?", academicYear, semester).
+		Where("students.student_id = ?", studentId).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
 
 func (r *studentRepositoryImpl) GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error) {

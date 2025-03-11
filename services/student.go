@@ -13,9 +13,11 @@ type StudentService interface {
 	CreateStudents(ctx context.Context, students []models.Student) error
 	UpsertStudents(ctx context.Context, students []models.Student, programId int) ([]models.Student, error)
 	GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error)
+	GetStudentByStudentIdOnCurrentYearAndSemester(ctx context.Context, studentId string) (*models.Student, error)
 	GetStudentByProgramIdOnCurrentYearAndSemester(ctx context.Context, programId int) ([]models.Student, error)
 	GetStudentByProgramIdOnAcademicYearAndSemester(ctx context.Context, programId, academicYear, semester int) ([]models.Student, error)
 	GetStudentByStudentIdAndProgramIdOnCurrentYearAndSemester(ctx context.Context, studentId string, programId int) (*models.Student, error)
+	CheckStudentDuplicateProjectOnCurrentYearAndSemester(ctx context.Context, student *models.Student) (bool, error)
 }
 
 type studentServiceImpl struct {
@@ -49,6 +51,32 @@ func (s *studentServiceImpl) GetStudentByProgramIdOnCurrentYearAndSemester(ctx c
 
 func (s *studentServiceImpl) GetStudentByProgramIdOnAcademicYearAndSemester(ctx context.Context, programId int, academicYear, semester int) ([]models.Student, error) {
 	return s.studentRepo.GetStudentByProgramIdOnAcademicYearAndSemester(ctx, programId, academicYear, semester)
+}
+
+func (s *studentServiceImpl) GetStudentByStudentIdOnCurrentYearAndSemester(ctx context.Context, studentId string) (*models.Student, error) {
+	student, err := s.studentRepo.GetStudentByStudentId(ctx, studentId)
+	if err != nil {
+		return nil, err
+	}
+
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, student.ProgramID)
+	if err != nil {
+		return nil, err
+	}
+
+	if student.AcademicYear != academicYear || student.Semester != semester {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return student, nil
+}
+
+func (s *studentServiceImpl) CheckStudentDuplicateProjectOnCurrentYearAndSemester(ctx context.Context, student *models.Student) (bool, error) {
+	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, student.ProgramID)
+	if err != nil {
+		return false, err
+	}
+	return s.studentRepo.CheckStudentDuplicateProjectOnCurrentYearAndSemester(ctx, student.StudentID, academicYear, semester)
 }
 
 func (s *studentServiceImpl) UpsertStudents(ctx context.Context, students []models.Student, programId int) ([]models.Student, error) {
