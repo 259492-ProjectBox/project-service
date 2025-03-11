@@ -58,7 +58,7 @@ func (h *studentHandler) GetStudentByStudentId(c *gin.Context) {
 // @Router /v1/students/{student_id}/check [get]
 func (h *studentHandler) CheckStudentPermissionForCreateProject(c *gin.Context) {
 	studentId := c.Param("student_id")
-	student, err := h.studentService.GetStudentByStudentId(c.Request.Context(), studentId)
+	student, err := h.studentService.GetStudentByStudentIdOnCurrentYearAndSemester(c.Request.Context(), studentId) // student มีสิทธิ์สร้างไหมต้องปีตรงกันกับ config
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusOK, gin.H{"has_permission": false})
@@ -67,12 +67,17 @@ func (h *studentHandler) CheckStudentPermissionForCreateProject(c *gin.Context) 
 		}
 		return
 	}
-	var hasPermission bool
-	if student != nil {
-		hasPermission = true
+
+	isExist, err := h.studentService.CheckStudentDuplicateProjectOnCurrentYearAndSemester(c.Request.Context(), student)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	if isExist {
+		c.JSON(http.StatusOK, gin.H{"has_permission": false})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"has_permission": hasPermission})
+	c.JSON(http.StatusOK, gin.H{"has_permission": true})
 }
 
 // @Summary Get students by program ID and current year
