@@ -16,6 +16,8 @@ type Project struct {
 	Staffs           []Staff           `json:"staffs" gorm:"many2many:project_staffs;constraint:OnDelete:CASCADE;"`
 	Members          []Student         `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 	ProjectResources []ProjectResource `json:"project_resources"`
+	Keywords         []Keyword         `json:"keywords" gorm:"many2many:project_keywords;constraint:OnDelete:CASCADE;"`
+	IsPublic         bool              `json:"is_public"`
 	CreatedAt        *time.Time        `json:"created_at" gorm:"default:CURRENT_DATE"`
 	UpdatedAt        *time.Time        `json:"updated_at"`
 }

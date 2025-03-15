@@ -31,6 +31,7 @@ type ProjectData struct {
 	Program          Program               `json:"program"`
 	ProjectStaffs    []ProjectStaffMessage `json:"staffs"`
 	Members          []Student             `json:"members"`
+	Keywords         []Keyword             `json:"keywords"`
 	ProjectResources []ProjectResource     `json:"project_resources"`
 	CreatedAt        string                `json:"created_at"`
 	UpdatedAt        string                `json:"updated_at"`

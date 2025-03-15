@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/project-box/models"
 	"net/http"
 	"strconv"
 
@@ -12,10 +13,10 @@ import (
 type StaffHandler interface {
 	GetStaffById(c *gin.Context)
 	GetStaffByProgramId(c *gin.Context)
+	GetStaffByProgramIdV2(c *gin.Context)
 	CreateStaff(c *gin.Context)
 	UpdateStaff(c *gin.Context)
 	GetAllStaff(c *gin.Context)
-	GetAllStaffByProgramId(c *gin.Context)
 	GetStaffByEmail(c *gin.Context)
 }
 
@@ -71,6 +72,35 @@ func (h *staffHandler) GetStaffById(c *gin.Context) {
 	c.JSON(http.StatusOK, staff)
 }
 
+func groupStaffsByEmail(staffs []dtos.StaffResponse) []dtos.StaffResponseWithPrograms {
+	staffMap := make(map[string]*dtos.StaffResponseWithPrograms)
+	for _, staff := range staffs {
+		if existingStaff, exists := staffMap[staff.Email]; exists {
+			existingStaff.Programs = append(existingStaff.Programs, staff.Program)
+		} else {
+			staffMap[staff.Email] = &dtos.StaffResponseWithPrograms{
+				ID:          staff.ID,
+				PrefixTH:    staff.PrefixTH,
+				PrefixEN:    staff.PrefixEN,
+				FirstNameTH: staff.FirstNameTH,
+				LastNameTH:  staff.LastNameTH,
+				FirstNameEN: staff.FirstNameEN,
+				LastNameEN:  staff.LastNameEN,
+				Email:       staff.Email,
+				IsActive:    staff.IsActive,
+				Programs:    []models.Program{staff.Program},
+			}
+		}
+	}
+
+	var response []dtos.StaffResponseWithPrograms
+	for _, staff := range staffMap {
+		response = append(response, *staff)
+	}
+
+	return response
+}
+
 // @Summary Get staffs by program ID
 // @Description Fetches all staffs for a given program
 // @Tags Staff
@@ -86,12 +116,15 @@ func (h *staffHandler) GetStaffByProgramId(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid program ID"})
 		return
 	}
+
 	staffs, err := h.staffService.GetStaffByProgramId(c, programId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Staffs not found"})
 		return
 	}
-	c.JSON(http.StatusOK, staffs)
+
+	response := groupStaffsByEmail(staffs)
+	c.JSON(http.StatusOK, response)
 }
 
 // @Summary Create a new staff
@@ -157,7 +190,8 @@ func (h *staffHandler) GetAllStaff(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Staffs not found"})
 		return
 	}
-	c.JSON(http.StatusOK, staffs)
+	response := groupStaffsByEmail(staffs)
+	c.JSON(http.StatusOK, response)
 }
 
 // @Summary Get all staffs by program id
@@ -168,8 +202,8 @@ func (h *staffHandler) GetAllStaff(c *gin.Context) {
 // @Success 200 {object} []models.Staff "Successfully retrieved staffs"
 // @Failure 400 {object} map[string]interface{} "Invalid program ID"
 // @Failure 404 {object} map[string]interface{} "Staffs not found"
-// @Router /v1/staffs/program/{program_id}/all [get]
-func (h *staffHandler) GetAllStaffByProgramId(c *gin.Context) {
+// @Router /v2/staffs/program/{program_id} [get]
+func (h *staffHandler) GetStaffByProgramIdV2(c *gin.Context) {
 	programIdStr := c.Param("program_id")
 	programId, err := strconv.Atoi(programIdStr)
 	if err != nil {

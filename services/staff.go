@@ -98,10 +98,11 @@ func (s *staffServiceImpl) CreateStaff(ctx context.Context, staffBody *dtos.Crea
 		FirstNameEN: staffBody.FirstNameEN,
 		LastNameEN:  staffBody.LastNameEN,
 		Email:       staffBody.Email,
+		IsActive:    staffBody.IsActive,
 		ProgramID:   staffBody.ProgramID,
 	}
 
-	staff, err := s.staffRepo.Create(ctx, staff)
+	staff, err := s.staffRepo.CreateStaff(ctx, staff)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +115,10 @@ func (s *staffServiceImpl) CreateStaff(ctx context.Context, staffBody *dtos.Crea
 		LastNameTH:  staff.LastNameTH,
 		FirstNameEN: staff.FirstNameEN,
 		LastNameEN:  staff.LastNameEN,
+		IsActive:    staff.IsActive,
 		Email:       staff.Email,
 		ProgramID:   staff.ProgramID,
+		Program:     staff.Program,
 	}, nil
 }
 
@@ -133,7 +136,7 @@ func (s *staffServiceImpl) GetStaffById(ctx context.Context, id int) (*dtos.Staf
 		LastNameTH:  staff.LastNameTH,
 		FirstNameEN: staff.FirstNameEN,
 		LastNameEN:  staff.LastNameEN,
-		IsResigned:  staff.IsResigned,
+		IsActive:    staff.IsActive,
 		Email:       staff.Email,
 		ProgramID:   staff.ProgramID,
 	}, nil
@@ -149,7 +152,7 @@ func (s *staffServiceImpl) UpdateStaff(ctx context.Context, staff *dtos.UpdateSt
 		LastNameTH:  staff.LastNameTH,
 		FirstNameEN: staff.FirstNameEN,
 		LastNameEN:  staff.LastNameEN,
-		IsResigned:  staff.IsResigned,
+		IsActive:    staff.IsActive,
 		Email:       staff.Email,
 		ProgramID:   staff.ProgramID,
 	}
@@ -167,7 +170,7 @@ func (s *staffServiceImpl) UpdateStaff(ctx context.Context, staff *dtos.UpdateSt
 		LastNameTH:  updatedStaff.LastNameTH,
 		FirstNameEN: updatedStaff.FirstNameEN,
 		LastNameEN:  updatedStaff.LastNameEN,
-		IsResigned:  staff.IsResigned,
+		IsActive:    staff.IsActive,
 		Email:       updatedStaff.Email,
 		ProgramID:   updatedStaff.ProgramID,
 	}, nil
@@ -195,7 +198,7 @@ func (s *staffServiceImpl) GetStaffByProgramId(ctx context.Context, programId in
 			FirstNameEN: staff.FirstNameEN,
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
-			IsResigned:  staff.IsResigned,
+			IsActive:    staff.IsActive,
 			ProgramID:   staff.ProgramID,
 		})
 	}

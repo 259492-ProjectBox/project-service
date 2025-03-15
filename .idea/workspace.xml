@@ -5,31 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c609652-2ab1-4ae9-9833-2f9a758e0cee" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/project service.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/project service.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dtos/keyword.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/handlers/keyword.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/keyword.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/project_keyword.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/repositories/keyword.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/routers/keyword.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/keyword.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/postgres/postgres.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/postgres/postgres.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrations/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrations/init.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dtos/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dtos/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/resource.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dtos/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/staff.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/staff.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/section.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/repositories/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/repositories/project_number_counter.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/project_number_counter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/repositories/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/resource.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/repositories/section.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/repositories/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/student.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/calendar.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/course.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/routers/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/staff.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/staff.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routers/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/routers/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/project_resource_config.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/project_resource_config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/resource.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/staff.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/upload.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/upload.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/message.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/multipart_to_bytes.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/multipart_to_bytes.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/wire.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wire_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/wire_gen.go" afterDir="false" />
     </list>
@@ -37,6 +39,14 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
@@ -58,6 +68,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
     "Go Build.go run main.go.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -67,7 +78,7 @@
     "git-widget-placeholder": "main",
     "go.import.settings.migrated": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/thanawin.s/Desktop/works/project-box/project-service",
+    "last_opened_file_path": "/Users/thanawin.s/Desktop/works/project-box/project-service/models",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -80,6 +91,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/models" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="project service" />
@@ -136,7 +152,7 @@
       <workItem from="1742008581785" duration="215000" />
       <workItem from="1742008804666" duration="471000" />
       <workItem from="1742009282180" duration="1446000" />
-      <workItem from="1742010732585" duration="3049000" />
+      <workItem from="1742010732585" duration="9445000" />
     </task>
     <servers />
   </component>

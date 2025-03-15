@@ -19,6 +19,7 @@ func NewApp(
 	resourceHandler handlers.ResourceHandler,
 	staffHandler handlers.StaffHandler,
 	configHandler handlers.ConfigHandler,
+	keywordHandler handlers.KeywordHandler,
 	projectConfigHandler handlers.ProjectConfigHandler,
 	projectResourceConfig handlers.ProjectResourceConfigHandler,
 	projectRoleHandler handlers.ProjectRoleHandler,
@@ -54,6 +55,7 @@ func NewApp(
 		programHandler,
 		studentHandler,
 		uploadHandler,
+		keywordHandler,
 	)
 
 	return r, nil

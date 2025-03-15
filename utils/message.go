@@ -48,7 +48,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			FirstNameEN: staff.FirstNameEN,
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
-			IsResigned:  staff.IsResigned,
+			IsActive:    staff.IsActive,
 			ProgramID:   staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
@@ -80,6 +80,19 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		})
 	}
 
+	for _, keyword := range project.Keywords {
+		projectMessage.Keywords = append(projectMessage.Keywords, dtos.Keyword{
+			ID:      keyword.ID,
+			Keyword: keyword.Keyword,
+			Program: dtos.Program{
+				ID:            keyword.Program.ID,
+				Abbreviation:  keyword.Program.Abbreviation,
+				ProgramNameTH: keyword.Program.ProgramNameTH,
+				ProgramNameEN: keyword.Program.ProgramNameEN,
+			},
+			ProgramID: keyword.ProgramID,
+		})
+	}
 	for _, resource := range project.ProjectResources {
 		resourceType := dtos.ResourceType{
 			ID:       resource.ResourceTypeID,

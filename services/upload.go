@@ -188,12 +188,12 @@ func (s *uploadServiceImpl) ProcessCreateStaffFile(ctx context.Context, programI
 
 func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]int, error) {
 	columns := map[string]int{
-		"staffPrefixTHColumn":   -1,
-		"staffPrefixENColumn":   -1,
-		"staffNameTHColumn":     -1,
-		"staffNameENColumn":     -1,
-		"staffEmailColumn":      -1,
-		"staffIsResignedColumn": -1,
+		"staffPrefixTHColumn": -1,
+		"staffPrefixENColumn": -1,
+		"staffNameTHColumn":   -1,
+		"staffNameENColumn":   -1,
+		"staffEmailColumn":    -1,
+		"staffIsActiveColumn": -1,
 	}
 
 	for j, col := range headerRow {
@@ -208,12 +208,12 @@ func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]
 			columns["staffNameENColumn"] = j
 		case matchColumn(col, "Email (required)"):
 			columns["staffEmailColumn"] = j
-		case matchColumn(col, "IsResigned"):
-			columns["staffIsResignedColumn"] = j
+		case matchColumn(col, "InActive"):
+			columns["staffIsActiveColumn"] = j
 		}
 	}
 
-	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 || columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsResignedColumn"] == -1 {
+	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 || columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsActiveColumn"] == -1 {
 		return nil, errors.New("missing one or more required columns in the header row")
 	}
 
@@ -334,7 +334,7 @@ func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, 
 func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int, programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 	for _, row := range rows {
-		if len(row) <= columns["staffPrefixTHColumn"] || len(row) <= columns["staffPrefixENColumn"] || len(row) <= columns["staffNameTHColumn"] || len(row) <= columns["staffNameTHColumn"]+1 || len(row) <= columns["staffNameENColumn"] || len(row) <= columns["staffNameENColumn"]+1 || len(row) <= columns["staffEmailColumn"] || len(row) <= columns["staffIsResignedColumn"] {
+		if len(row) <= columns["staffPrefixTHColumn"] || len(row) <= columns["staffPrefixENColumn"] || len(row) <= columns["staffNameTHColumn"] || len(row) <= columns["staffNameTHColumn"]+1 || len(row) <= columns["staffNameENColumn"] || len(row) <= columns["staffNameENColumn"]+1 || len(row) <= columns["staffEmailColumn"] || len(row) <= columns["staffIsActiveColumn"] {
 			continue
 		}
 
@@ -342,9 +342,9 @@ func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int,
 			return nil, fmt.Errorf("row does not have staff email: %v", row)
 		}
 
-		isResigned, err := strconv.ParseBool(row[columns["staffIsResignedColumn"]])
+		isActive, err := strconv.ParseBool(row[columns["staffIsActiveColumn"]])
 		if err != nil {
-			return nil, fmt.Errorf("invalid value for Is Resigned: %v", row[columns["staffIsResignedColumn"]])
+			return nil, fmt.Errorf("invalid value for Is Resigned: %v", row[columns["staffIsActiveColumn"]])
 		}
 
 		staff := models.Staff{
@@ -355,7 +355,7 @@ func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int,
 			FirstNameEN: row[columns["staffNameENColumn"]],
 			LastNameEN:  row[columns["staffNameENColumn"]+1],
 			Email:       row[columns["staffEmailColumn"]],
-			IsResigned:  isResigned,
+			IsActive:    isActive,
 			ProgramID:   programId,
 		}
 		staffs = append(staffs, staff)
@@ -503,13 +503,13 @@ func (s *uploadServiceImpl) UploadObject(ctx context.Context, bucketName string,
 		return "", fmt.Errorf("failed to upload object: %w", err)
 	}
 
-	URL, err := s.client.PresignedGetObject(ctx, bucketName, objectName, time.Hour*24*7, nil)
+	url, err := s.client.PresignedGetObject(ctx, bucketName, objectName, time.Hour*24*7, nil)
 	if err != nil {
 		_ = s.RemoveObject(ctx, bucketName, objectName, minio.RemoveObjectOptions{})
 		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
 	}
 
-	return URL.String(), nil
+	return url.String(), nil
 }
 
 func (s *uploadServiceImpl) RemoveObject(ctx context.Context, bucketName string, objectName string, opt minio.RemoveObjectOptions) error {
