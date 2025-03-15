@@ -62,7 +62,7 @@ func (r *projectRepositoryImpl) CreateProjectNumber(ctx context.Context, tx *gor
 	if err != nil {
 		return nil, err
 	}
-	projectNumber := utils.FormatProjectID(project.Semester, project.AcademicYear, nextProjectNumber)
+	projectNumber := utils.FormatProjectID(nextProjectNumber)
 	project.ProjectNo = projectNumber
 	return project, nil
 }
@@ -426,16 +426,16 @@ func generateUniqueFileName(fileName string) string {
 	return fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileName)
 }
 
-func buildFilePath(bucketName, programName, projectNo string, title, uniqueFileName string) string {
+func buildFilePath(bucketName, programName string, academiceYear, semester int, projectNo string, title, uniqueFileName string) string {
 	projectNo = strings.ReplaceAll(projectNo, "/", "_")
-	return fmt.Sprintf("%s/%s/%s/%s/%s",
-		bucketName, programName, projectNo, title, uniqueFileName)
+	return fmt.Sprintf("%s/%s/%d-%d/%s/%s/%s",
+		bucketName, programName, academiceYear, semester, projectNo, title, uniqueFileName)
 }
 
-func buildObjectName(programName, projectNo string, title, uniqueFileName string) string {
+func buildObjectName(programName string, academiceYear, semester int, projectNo string, title, uniqueFileName string) string {
 	projectNo = strings.ReplaceAll(projectNo, "/", "_")
-	return fmt.Sprintf("%s/%s/%s/%s",
-		programName, projectNo, title, uniqueFileName)
+	return fmt.Sprintf("%s/%d-%d/%s/%s/%s",
+		programName, academiceYear, semester, projectNo, title, uniqueFileName)
 }
 
 func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context, tx *gorm.DB, project *models.Project, projectResources []*models.ProjectResource, files []*multipart.FileHeader) ([]string, error) {
@@ -466,8 +466,8 @@ func (r *projectRepositoryImpl) processFile(ctx context.Context, tx *gorm.DB, pr
 	}
 	title := projectResource.Title
 	uniqueFileName := generateUniqueFileName(file.Filename)
-	objectName := buildObjectName(project.Program.ProgramNameTH, project.ProjectNo, *title, uniqueFileName)
-	filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, project.ProjectNo, *title, uniqueFileName)
+	objectName := buildObjectName(project.Program.ProgramNameTH, project.AcademicYear, project.Semester, project.ProjectNo, *title, uniqueFileName)
+	filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, project.AcademicYear, project.Semester, project.ProjectNo, *title, uniqueFileName)
 
 	if err := r.uploadRepo.UploadFile(ctx, r.projectBucketName, objectName, file, minio.PutObjectOptions{}); err != nil {
 		return err

@@ -220,16 +220,6 @@ func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]
 	return columns, nil
 }
 
-func (s *uploadServiceImpl) getCourseNo(rows [][]string) (string, error) {
-	courseRow := rows[1]
-	for j, col := range courseRow {
-		if matchColumn(col, "COURSE NO :") {
-			return rows[1][j+2], nil
-		}
-	}
-	return "", errors.New("course number not found")
-}
-
 func (s *uploadServiceImpl) getStudentInfoColumns(headerRow []string) (map[string]int, error) {
 	columns := map[string]int{
 		"secLecColumn":      -1,
