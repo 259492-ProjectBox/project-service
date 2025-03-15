@@ -29,8 +29,6 @@ type ProjectData struct {
 	SectionID        *string               `json:"section_id"`
 	ProgramID        int                   `json:"program_id"`
 	Program          Program               `json:"program"`
-	CourseID         int                   `json:"course_id"`
-	Course           Course                `json:"course"`
 	ProjectStaffs    []ProjectStaffMessage `json:"staffs"`
 	Members          []Student             `json:"members"`
 	ProjectResources []ProjectResource     `json:"project_resources"`

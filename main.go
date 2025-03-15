@@ -16,10 +16,8 @@ import (
 
 func NewApp(
 	projectHandler handlers.ProjectHandler,
-	calendarHandler handlers.CalendarHandler,
 	resourceHandler handlers.ResourceHandler,
 	staffHandler handlers.StaffHandler,
-	courseHandler handlers.CourseHandler,
 	configHandler handlers.ConfigHandler,
 	projectConfigHandler handlers.ProjectConfigHandler,
 	projectResourceConfig handlers.ProjectResourceConfigHandler,
@@ -48,8 +46,6 @@ func NewApp(
 		r,
 		projectHandler,
 		resourceHandler,
-		courseHandler,
-		calendarHandler,
 		staffHandler,
 		configHandler,
 		projectConfigHandler,

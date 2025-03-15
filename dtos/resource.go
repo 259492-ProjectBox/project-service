@@ -1,11 +1,5 @@
 package dtos
 
-import (
-	"mime/multipart"
-
-	"github.com/project-box/models"
-)
-
 type ProjectResource struct {
 	ID              int           `json:"id" gorm:"primaryKey;autoIncrement"`
 	Title           *string       `json:"title"`
@@ -19,8 +13,4 @@ type ProjectResource struct {
 	FileExtension   FileExtension `json:"file_extension" gorm:"foreignKey:FileExtensionID;constraint:OnDelete:CASCADE"`
 	ProjectID       int           `json:"project_id"`
 	CreatedAt       string        `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-}
-type UploadAssetResource struct {
-	File          *multipart.FileHeader `form:"file"`
-	AssetResource *models.AssetResource `form:"asset_resource"`
 }

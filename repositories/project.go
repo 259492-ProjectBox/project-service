@@ -58,7 +58,7 @@ func NewProjectRepository(db *gorm.DB, fileExtensionRepo FileExtensionRepository
 func isPDFFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
 
 func (r *projectRepositoryImpl) CreateProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error) {
-	nextProjectNumber, err := r.projectNumberCounterRepo.GetNextProjectNumber(ctx, tx, project.AcademicYear, project.Semester, project.CourseID)
+	nextProjectNumber, err := r.projectNumberCounterRepo.GetNextProjectNumber(ctx, tx, project.AcademicYear, project.Semester)
 	if err != nil {
 		return nil, err
 	}
@@ -79,10 +79,8 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 	project := &models.Project{}
 	if err := r.db.WithContext(ctx).
 		Preload("Program").
-		Preload("Course.Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
-		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
 		Preload("ProjectResources.FileExtension").
 		First(project, "projects.id = ?", id).Error; err != nil {
@@ -96,10 +94,8 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 	project := &models.Project{}
 	if err := r.db.WithContext(ctx).
 		Preload("Program").
-		Preload("Course.Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
-		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
 		Preload("ProjectResources.FileExtension").
 		Preload("ProjectResources.PDF.Pages").
@@ -152,10 +148,8 @@ func (r *projectRepositoryImpl) GetProjectsByStudentId(ctx context.Context, stud
 	if err := r.db.WithContext(ctx).
 		Where("id IN ?", projectIds).
 		Preload("Program").
-		Preload("Course.Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
-		Preload("Members.Course.Program").
 		Preload("ProjectResources.ResourceType").
 		Preload("ProjectResources.FileExtension").
 		Find(&projects).Error; err != nil {
@@ -181,20 +175,29 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, tx *
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, projectResources, files)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
 		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
 		tx.Rollback()
 		return nil, err
 	}
 
 	projectData, err := r.GetProjectByID(ctx, project.ID)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
 		tx.Rollback()
 		return nil, err
 	}
@@ -223,20 +226,29 @@ func (r *projectRepositoryImpl) UpdateProjectWithFiles(ctx context.Context, tx *
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, projectResources, files)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
 		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
 		tx.Rollback()
 		return nil, err
 	}
 
 	projectData, err := r.GetProjectByID(ctx, project.ID)
 	if err != nil {
-		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
 		tx.Rollback()
 		return nil, err
 	}
@@ -358,8 +370,6 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		AcademicYear: projectReq.AcademicYear,
 		SectionID:    projectReq.SectionID,
 		Semester:     projectReq.Semester,
-		CourseID:     projectReq.CourseID,
-		ProgramID:    projectReq.ProgramID,
 		Members:      projectReq.Members,
 	}
 
@@ -367,7 +377,7 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		return nil, err
 	}
 
-	if err := tx.WithContext(ctx).Preload("Program").Preload("Course").First(project).Error; err != nil {
+	if err := tx.WithContext(ctx).Preload("Program").First(project).Error; err != nil {
 		return nil, err
 	}
 
@@ -392,7 +402,6 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 		SectionID:    projectReq.SectionID,
 		Semester:     projectReq.Semester,
 		ProgramID:    projectReq.ProgramID,
-		CourseID:     projectReq.CourseID,
 		Members:      projectReq.Members,
 	}
 
@@ -400,7 +409,7 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 		return nil, err
 	}
 
-	if err := tx.WithContext(ctx).Preload("Program").Preload("Course").First(project).Error; err != nil {
+	if err := tx.WithContext(ctx).Preload("Program").First(project).Error; err != nil {
 		return nil, err
 	}
 
@@ -417,16 +426,16 @@ func generateUniqueFileName(fileName string) string {
 	return fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileName)
 }
 
-func buildFilePath(bucketName, programName, courseNo string, projectNo string, title, uniqueFileName string) string {
-	projectNo = strings.ReplaceAll(projectNo, "/", "_")
-	return fmt.Sprintf("%s/%s/%s/%s/%s/%s",
-		bucketName, programName, courseNo, projectNo, title, uniqueFileName)
-}
-
-func buildObjectName(programName, courseNo string, projectNo string, title, uniqueFileName string) string {
+func buildFilePath(bucketName, programName, projectNo string, title, uniqueFileName string) string {
 	projectNo = strings.ReplaceAll(projectNo, "/", "_")
 	return fmt.Sprintf("%s/%s/%s/%s/%s",
-		programName, courseNo, projectNo, title, uniqueFileName)
+		bucketName, programName, projectNo, title, uniqueFileName)
+}
+
+func buildObjectName(programName, projectNo string, title, uniqueFileName string) string {
+	projectNo = strings.ReplaceAll(projectNo, "/", "_")
+	return fmt.Sprintf("%s/%s/%s/%s",
+		programName, projectNo, title, uniqueFileName)
 }
 
 func (r *projectRepositoryImpl) handleCreateProjectResources(ctx context.Context, tx *gorm.DB, project *models.Project, projectResources []*models.ProjectResource, files []*multipart.FileHeader) ([]string, error) {
@@ -457,8 +466,8 @@ func (r *projectRepositoryImpl) processFile(ctx context.Context, tx *gorm.DB, pr
 	}
 	title := projectResource.Title
 	uniqueFileName := generateUniqueFileName(file.Filename)
-	objectName := buildObjectName(project.Program.ProgramNameTH, project.Course.CourseNo, project.ProjectNo, *title, uniqueFileName)
-	filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, project.Course.CourseNo, project.ProjectNo, *title, uniqueFileName)
+	objectName := buildObjectName(project.Program.ProgramNameTH, project.ProjectNo, *title, uniqueFileName)
+	filePath := buildFilePath(r.projectBucketName, project.Program.ProgramNameTH, project.ProjectNo, *title, uniqueFileName)
 
 	if err := r.uploadRepo.UploadFile(ctx, r.projectBucketName, objectName, file, minio.PutObjectOptions{}); err != nil {
 		return err

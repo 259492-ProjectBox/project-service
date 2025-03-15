@@ -33,8 +33,6 @@ var AppSet = wire.NewSet(
 
 var HandlerSet = wire.NewSet(
 	handlers.NewProjectHandler,
-	handlers.NewCalendarHandler,
-	handlers.NewCourseHandler,
 	handlers.NewResourceHandler,
 	handlers.NewStaffHandler,
 	handlers.NewConfigHandler,
@@ -48,8 +46,6 @@ var HandlerSet = wire.NewSet(
 
 var ServiceSet = wire.NewSet(
 	services.NewProjectService,
-	services.NewCalendarService,
-	services.NewCourseService,
 	services.NewResourceService,
 	services.NewStaffService,
 	services.NewConfigService,
@@ -68,11 +64,8 @@ var RepositorySet = wire.NewSet(
 	repositories.NewStaffRepository,
 	repositories.NewFileExtensionRepository,
 	repositories.NewProgramRepository,
-	repositories.NewCourseRepository,
-	repositories.NewSectionRepository,
 	repositories.NewResourceRepository,
 	repositories.NewResourceTypeRepository,
-	repositories.NewCalendarRepository,
 	repositories.NewConfigRepository,
 	repositories.NewProjectConfigRepository,
 	repositories.NewProjectResourceConfigRepository,

@@ -7,21 +7,31 @@
     <list default="true" id="6c609652-2ab1-4ae9-9833-2f9a758e0cee" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/project service.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/project service.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants/constant.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrations/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrations/init.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrations/mock_data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrations/mock_data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/postgres/postgres.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/postgres/postgres.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/student.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/course.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/asset_resource.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/calandar.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/course.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/detail_resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/detail_resource.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/project_number_counter.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/project_number_counter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/student.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/repositories/course.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/course.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/section.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/project_number_counter.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/project_number_counter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/section.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/calendar.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/course.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/routers/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/routers/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/project_resource_config.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/project_resource_config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/upload.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/upload.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/message.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/wire.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wire_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/wire_gen.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,26 +56,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/thanawin.s/Desktop/works/project-box/project-service&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Go Build.go run main.go.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/thanawin.s/Desktop/works/project-box/project-service",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Problems",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.general",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="project service" />
@@ -76,12 +90,13 @@
       <filePath value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
-    <configuration name="go build project.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+    <configuration name="go run main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="project service" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="FILE" />
+      <package value="github.com/project-box" />
       <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/services/project.go" />
+      <filePath value="$PROJECT_DIR$/services/project.go|$PROJECT_DIR$/main.go" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
@@ -96,7 +111,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build project.go" />
+        <item itemvalue="Go Build.go run main.go" />
       </list>
     </recent_temporary>
   </component>
@@ -120,7 +135,8 @@
       <workItem from="1742007470574" duration="1089000" />
       <workItem from="1742008581785" duration="215000" />
       <workItem from="1742008804666" duration="471000" />
-      <workItem from="1742009282180" duration="230000" />
+      <workItem from="1742009282180" duration="1446000" />
+      <workItem from="1742010732585" duration="3049000" />
     </task>
     <servers />
   </component>
@@ -128,7 +144,11 @@
     <option name="version" value="3" />
   </component>
   <component name="VgoProject">
-    <integration-enabled>false</integration-enabled>
+    <auto-vendoring-mode>false</auto-vendoring-mode>
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
