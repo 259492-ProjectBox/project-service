@@ -13,8 +13,6 @@ type Project struct {
 	SectionID        *string           `json:"section_id"`
 	Program          Program           `json:"program" gorm:"foreignKey:ProgramID;constraint:OnDelete:CASCADE"`
 	ProgramID        int               `json:"program_id"`
-	CourseID         int               `json:"course_id"`
-	Course           Course            `json:"course" gorm:"foreignKey:CourseID;constraint:OnDelete:SET NULL"`
 	Staffs           []Staff           `json:"staffs" gorm:"many2many:project_staffs;constraint:OnDelete:CASCADE;"`
 	Members          []Student         `json:"members" gorm:"many2many:project_students;constraint:OnDelete:CASCADE;"`
 	ProjectResources []ProjectResource `json:"project_resources"`
