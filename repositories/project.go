@@ -81,6 +81,7 @@ func (r *projectRepositoryImpl) GetProjectByID(ctx context.Context, id int) (*dt
 		Preload("Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
+		Preload("Keywords.Program").
 		Preload("ProjectResources.ResourceType").
 		Preload("ProjectResources.FileExtension").
 		First(project, "projects.id = ?", id).Error; err != nil {
@@ -96,6 +97,7 @@ func (r *projectRepositoryImpl) GetProjectWithPDFByID(ctx context.Context, id in
 		Preload("Program").
 		Preload("Staffs.Program").
 		Preload("Members.Program").
+		Preload("Keywords.Program").
 		Preload("ProjectResources.ResourceType").
 		Preload("ProjectResources.FileExtension").
 		Preload("ProjectResources.PDF.Pages").
@@ -175,29 +177,21 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, tx *
 
 	uploadedFilePaths, err := r.handleCreateProjectResources(ctx, tx, project, projectResources, files)
 	if err != nil {
-		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
-		if err != nil {
-			return nil, err
-		}
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		tx.Rollback()
 		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
-		if err != nil {
-			return nil, err
-		}
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		tx.Rollback()
 		return nil, err
 	}
 
+	fmt.Println(project)
 	projectData, err := r.GetProjectByID(ctx, project.ID)
 	if err != nil {
-		err := r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
-		if err != nil {
-			return nil, err
-		}
+		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})
 		tx.Rollback()
 		return nil, err
 	}
@@ -369,8 +363,11 @@ func (r *projectRepositoryImpl) createProject(ctx context.Context, tx *gorm.DB, 
 		AbstractText: projectReq.AbstractText,
 		AcademicYear: projectReq.AcademicYear,
 		SectionID:    projectReq.SectionID,
+		IsPublic:     projectReq.IsPublic,
+		ProgramID:    projectReq.ProgramID,
 		Semester:     projectReq.Semester,
 		Members:      projectReq.Members,
+		Keywords:     projectReq.Keywords,
 	}
 
 	if err := tx.WithContext(ctx).Create(project).Error; err != nil {
@@ -400,6 +397,7 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 		AbstractText: projectReq.AbstractText,
 		AcademicYear: projectReq.AcademicYear,
 		SectionID:    projectReq.SectionID,
+		IsPublic:     projectReq.IsPublic,
 		Semester:     projectReq.Semester,
 		ProgramID:    projectReq.ProgramID,
 		Members:      projectReq.Members,
@@ -428,13 +426,13 @@ func generateUniqueFileName(fileName string) string {
 
 func buildFilePath(bucketName, programName string, academiceYear, semester int, projectNo string, title, uniqueFileName string) string {
 	projectNo = strings.ReplaceAll(projectNo, "/", "_")
-	return fmt.Sprintf("%s/%s/%d-%d/%s/%s/%s",
+	return fmt.Sprintf("%s/%s/%d-%d-%s/%s/%s",
 		bucketName, programName, academiceYear, semester, projectNo, title, uniqueFileName)
 }
 
 func buildObjectName(programName string, academiceYear, semester int, projectNo string, title, uniqueFileName string) string {
 	projectNo = strings.ReplaceAll(projectNo, "/", "_")
-	return fmt.Sprintf("%s/%d-%d/%s/%s/%s",
+	return fmt.Sprintf("%s/%d-%d-%s/%s/%s",
 		programName, academiceYear, semester, projectNo, title, uniqueFileName)
 }
 

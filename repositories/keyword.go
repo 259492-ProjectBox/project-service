@@ -6,7 +6,8 @@ import (
 )
 
 type KeywordRepository interface {
-	FindAll(programID string) ([]models.Keyword, error)
+	FindAll() ([]models.Keyword, error)
+	FindAllByProgramId(programID string) ([]models.Keyword, error)
 	FindByID(id string) (models.Keyword, error)
 	Create(keyword models.Keyword) error
 	Update(keyword models.Keyword) error
@@ -21,15 +22,21 @@ func NewKeywordRepository(db *gorm.DB) KeywordRepository {
 	return &keywordRepository{DB: db}
 }
 
-func (r *keywordRepository) FindAll(programID string) ([]models.Keyword, error) {
+func (r *keywordRepository) FindAll() ([]models.Keyword, error) {
 	var keywords []models.Keyword
-	err := r.DB.Where("program_id = ?", programID).Find(&keywords).Error
+	err := r.DB.Preload("Program").Find(&keywords).Error
+	return keywords, err
+}
+
+func (r *keywordRepository) FindAllByProgramId(programID string) ([]models.Keyword, error) {
+	var keywords []models.Keyword
+	err := r.DB.Where("program_id = ?", programID).Preload("Program").Find(&keywords).Error
 	return keywords, err
 }
 
 func (r *keywordRepository) FindByID(id string) (models.Keyword, error) {
 	var keyword models.Keyword
-	err := r.DB.First(&keyword, id).Error
+	err := r.DB.Preload("Program").First(&keyword, id).Error
 	return keyword, err
 }
 

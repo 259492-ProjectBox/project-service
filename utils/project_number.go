@@ -6,7 +6,7 @@ import (
 )
 
 func FormatProjectID(nextProjectNumber int) string {
-	return fmt.Sprintf("P%04d", nextProjectNumber)
+	return fmt.Sprintf("P%03d", nextProjectNumber)
 }
 
 func IsValidProjectNumberFormat(projectNo string) error {

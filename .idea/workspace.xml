@@ -6,8 +6,21 @@
   <component name="ChangeListManager">
     <list default="true" id="6c609652-2ab1-4ae9-9833-2f9a758e0cee" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrations/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrations/init.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dtos/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/dtos/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/keyword.go" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/keyword.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/keyword.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/keyword.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/repositories/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/upload.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/upload.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/staff.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/keyword.go" beforeDir="false" afterPath="$PROJECT_DIR$/routers/keyword.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/routers/staff.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/keyword.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/keyword.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/staff.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/staff.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/message.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/message.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/project_number.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/project_number.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -127,7 +140,7 @@
       <workItem from="1742008581785" duration="215000" />
       <workItem from="1742008804666" duration="471000" />
       <workItem from="1742009282180" duration="1446000" />
-      <workItem from="1742010732585" duration="10959000" />
+      <workItem from="1742010732585" duration="18318000" />
     </task>
     <servers />
   </component>

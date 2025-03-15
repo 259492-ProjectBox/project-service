@@ -35,7 +35,7 @@ func NewStaffRepository(db *gorm.DB) StaffRepository {
 
 func (r *staffRepositoryImpl) GetAllStaffs(ctx context.Context) ([]models.Staff, error) {
 	var staffs []models.Staff
-	if err := r.db.WithContext(ctx).Find(&staffs).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Program").Find(&staffs).Error; err != nil {
 		return nil, err
 	}
 	return staffs, nil
@@ -43,7 +43,7 @@ func (r *staffRepositoryImpl) GetAllStaffs(ctx context.Context) ([]models.Staff,
 
 func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 	var staff *models.Staff
-	if err := r.db.Where("id = ?", id).First(&staff).Error; err != nil {
+	if err := r.db.Where("id = ?", id).Preload("Program").First(&staff).Error; err != nil {
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 func (r *staffRepositoryImpl) GetStaffByProgramId(programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 
-	if err := r.db.Where("program_id = ?", programId).Find(&staffs).Error; err != nil {
+	if err := r.db.Where("program_id = ?", programId).Preload("Program").Find(&staffs).Error; err != nil {
 		return nil, err
 	}
 

@@ -27,6 +27,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		AcademicYear: project.AcademicYear,
 		SectionID:    project.SectionID,
 		Semester:     project.Semester,
+		IsPublic:     project.IsPublic,
 		ProgramID:    project.ProgramID,
 		Program: dtos.Program{
 			ID:            project.Program.ID,

@@ -1,11 +1,13 @@
 package services
 
 import (
+	"context"
 	"github.com/project-box/models"
 	"github.com/project-box/repositories"
 )
 
 type KeywordService interface {
+	GetAllKeywords(ctx context.Context) ([]models.Keyword, error)
 	GetKeywords(programID string) ([]models.Keyword, error)
 	GetKeyword(id string) (models.Keyword, error)
 	CreateKeyword(keyword models.Keyword) error
@@ -21,8 +23,12 @@ func NewKeywordService(repo repositories.KeywordRepository) KeywordService {
 	return &keywordService{repo: repo}
 }
 
+func (s *keywordService) GetAllKeywords(ctx context.Context) ([]models.Keyword, error) {
+	return s.repo.FindAll()
+}
+
 func (s *keywordService) GetKeywords(programID string) ([]models.Keyword, error) {
-	return s.repo.FindAll(programID)
+	return s.repo.FindAllByProgramId(programID)
 }
 
 func (s *keywordService) GetKeyword(id string) (models.Keyword, error) {

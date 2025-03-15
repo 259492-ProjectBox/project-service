@@ -4,7 +4,7 @@ import "time"
 
 type Project struct {
 	ID               int               `json:"id" gorm:"primaryKey;autoIncrement"`
-	ProjectNo        string            `json:"project_no" gorm:"unique"`
+	ProjectNo        string            `json:"project_no"`
 	TitleTH          *string           `json:"title_th"`
 	TitleEN          *string           `json:"title_en"`
 	AbstractText     *string           `json:"abstract_text"`
@@ -32,8 +32,9 @@ type ProjectRequest struct {
 	Semester         int               `json:"semester"`
 	SectionID        *string           `json:"section_id"`
 	ProgramID        int               `json:"program_id"`
-	CourseID         int               `json:"course_id"`
+	IsPublic         bool              `json:"is_public"`
 	ProjectStaffs    []ProjectStaff    `json:"staffs"`
+	Keywords         []Keyword         `json:"keywords"`
 	Members          []Student         `json:"members"`
 	ProjectResources []ProjectResource `json:"project_resources"`
 }

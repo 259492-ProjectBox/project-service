@@ -22,7 +22,7 @@ definitions:
         type: string
       first_name_th:
         type: string
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -67,7 +67,7 @@ definitions:
         type: string
       id:
         type: integer
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -77,6 +77,8 @@ definitions:
         type: string
       prefix_th:
         type: string
+      program:
+        $ref: '#/definitions/models.Program'
       program_id:
         type: integer
     type: object
@@ -90,7 +92,7 @@ definitions:
         type: string
       id:
         type: integer
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -159,6 +161,10 @@ definitions:
         type: integer
       is_public:
         type: boolean
+      keywords:
+        items:
+          $ref: '#/definitions/models.Keyword'
+        type: array
       members:
         items:
           $ref: '#/definitions/models.Student'
@@ -311,163 +317,6 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /keywords:
-    get:
-      consumes:
-      - application/json
-      description: Get all keywords for a specific program
-      parameters:
-      - description: Program ID
-        in: query
-        name: program_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Keyword'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get all keywords
-      tags:
-      - keywords
-    post:
-      consumes:
-      - application/json
-      description: Create a new keyword
-      parameters:
-      - description: Keyword
-        in: body
-        name: keyword
-        required: true
-        schema:
-          $ref: '#/definitions/models.Keyword'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.Keyword'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Create a keyword
-      tags:
-      - keywords
-  /keywords/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a keyword by ID
-      parameters:
-      - description: Keyword ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Delete a keyword
-      tags:
-      - keywords
-    get:
-      consumes:
-      - application/json
-      description: Get a keyword by ID
-      parameters:
-      - description: Keyword ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Keyword'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get a keyword
-      tags:
-      - keywords
-    put:
-      consumes:
-      - application/json
-      description: Update an existing keyword
-      parameters:
-      - description: Keyword ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Keyword
-        in: body
-        name: keyword
-        required: true
-        schema:
-          $ref: '#/definitions/models.Keyword'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Keyword'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Update a keyword
-      tags:
-      - keywords
   /v1/configs:
     put:
       description: Creates a new config or updates an existing config for the given
@@ -595,6 +444,181 @@ paths:
       summary: Get config by program ID
       tags:
       - Config
+  /v1/keywords:
+    get:
+      consumes:
+      - application/json
+      description: Get all keywords for a specific program
+      parameters:
+      - description: Program ID
+        in: query
+        name: program_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Keyword'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get keywords by program
+      tags:
+      - Keywords
+    post:
+      consumes:
+      - application/json
+      description: Create a new keyword
+      parameters:
+      - description: Keyword
+        in: body
+        name: keyword
+        required: true
+        schema:
+          $ref: '#/definitions/models.Keyword'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Keyword'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a keyword
+      tags:
+      - Keywords
+    put:
+      consumes:
+      - application/json
+      description: Update an existing keyword
+      parameters:
+      - description: Keyword
+        in: body
+        name: keyword
+        required: true
+        schema:
+          $ref: '#/definitions/models.Keyword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Keyword'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a keyword
+      tags:
+      - Keywords
+  /v1/keywords/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a keyword by ID
+      parameters:
+      - description: Keyword ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a keyword
+      tags:
+      - Keywords
+    get:
+      consumes:
+      - application/json
+      description: Get a keyword by ID
+      parameters:
+      - description: Keyword ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Keyword'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a keyword
+      tags:
+      - Keywords
+  /v1/keywords/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all keywords for a specific program
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Keyword'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all keywords
+      tags:
+      - Keywords
   /v1/programs:
     get:
       description: Retrieves all programs from the database
@@ -1175,37 +1199,6 @@ paths:
       summary: Get staffs by program ID
       tags:
       - Staff
-  /v1/staffs/program/{program_id}/all:
-    get:
-      description: Fetches all staffs by program id
-      parameters:
-      - description: Program ID
-        in: path
-        name: program_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved staffs
-          schema:
-            items:
-              $ref: '#/definitions/models.Staff'
-            type: array
-        "400":
-          description: Invalid program ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Staffs not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get all staffs by program id
-      tags:
-      - Staff
   /v1/students/{student_id}:
     get:
       description: Retrieves a list of students for a given student ID
@@ -1492,6 +1485,37 @@ paths:
       summary: Upsert Project Resource Configurations
       tags:
       - ProjectResourceConfig
+  /v2/staffs/program/{program_id}:
+    get:
+      description: Fetches all staffs by program id
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved staffs
+          schema:
+            items:
+              $ref: '#/definitions/models.Staff'
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Staffs not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all staffs by program id
+      tags:
+      - Staff
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

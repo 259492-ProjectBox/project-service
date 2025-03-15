@@ -82,6 +82,7 @@ func (s *staffServiceImpl) GetAllStaff(ctx context.Context) ([]dtos.StaffRespons
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
 			ProgramID:   staff.ProgramID,
+			Program:     staff.Program,
 		})
 	}
 
