@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/project-box/models"
 	"github.com/project-box/services"
-	"net/http"
 )
 
 type KeywordHandler interface {
@@ -94,8 +95,8 @@ func (h *keywordHandler) GetKeyword(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /v1/keywords [post]
 func (h *keywordHandler) CreateKeyword(c *gin.Context) {
-	var keyword models.Keyword
-	if err := c.ShouldBindJSON(&keyword); err != nil {
+	var keyword *models.Keyword
+	if err := c.ShouldBindJSON(keyword); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -119,8 +120,8 @@ func (h *keywordHandler) CreateKeyword(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /v1/keywords [put]
 func (h *keywordHandler) UpdateKeyword(c *gin.Context) {
-	var keyword models.Keyword
-	if err := c.ShouldBindJSON(&keyword); err != nil {
+	var keyword *models.Keyword
+	if err := c.ShouldBindJSON(keyword); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
