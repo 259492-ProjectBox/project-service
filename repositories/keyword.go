@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+
 	"github.com/project-box/models"
 	"gorm.io/gorm"
 )
@@ -25,9 +26,9 @@ func NewKeywordRepository(db *gorm.DB) KeywordRepository {
 }
 
 func (r *keywordRepository) FindByKeywordAndProgramId(ctx context.Context, keyword string, programId int) (*models.Keyword, error) {
-	var keywordData *models.Keyword
-	err := r.DB.WithContext(ctx).Where("keyword = ? AND program_id = ?", keyword, programId).First(keywordData).Error
-	return keywordData, err
+	var keywordData models.Keyword                                                                                     // Initialize the variable as a value type (not a pointer)
+	err := r.DB.WithContext(ctx).Where("keyword = ? AND program_id = ?", keyword, programId).First(&keywordData).Error // Use a pointer to `keywordData`
+	return &keywordData, err                                                                                           // Return the pointer to `keywordData`
 }
 
 func (r *keywordRepository) FindAll(ctx context.Context) ([]models.Keyword, error) {
@@ -43,9 +44,9 @@ func (r *keywordRepository) FindAllByProgramId(ctx context.Context, programID st
 }
 
 func (r *keywordRepository) FindByID(ctx context.Context, id string) (*models.Keyword, error) {
-	var keyword *models.Keyword
-	err := r.DB.WithContext(ctx).Preload("Program").First(keyword, id).Error
-	return keyword, err
+	var keyword models.Keyword
+	err := r.DB.WithContext(ctx).Preload("Program").First(&keyword, id).Error
+	return &keyword, err
 }
 
 func (r *keywordRepository) Create(ctx context.Context, keyword *models.Keyword) error {

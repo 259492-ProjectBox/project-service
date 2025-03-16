@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"io"
 	"mime/multipart"
 	"net/url"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/project-box/models"
@@ -144,12 +145,10 @@ func (s *uploadServiceImpl) ProcessCreateProjectFile(ctx context.Context, progra
 	if err != nil {
 		return err
 	}
-
 	projectRequests, err := s.parseProjects(ctx, rows[3:], createProjectInfoColumns, programId)
 	if err != nil {
 		return err
 	}
-
 	err = s.projectService.CreateProjects(ctx, projectRequests)
 	if err != nil {
 		return err
