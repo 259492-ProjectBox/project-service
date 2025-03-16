@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mime/multipart"
 
 	"github.com/project-box/dtos"
@@ -38,6 +39,7 @@ func NewProjectService(
 ) ProjectService {
 	return &projectServiceImpl{
 		rabbitMQChannel: rabbitMQChannel,
+		resourceRepo:    resourceRepo,
 		projectRepo:     projectRepo,
 		committeeRepo:   committeeRepo,
 		programRepo:     programRepo,
@@ -138,6 +140,17 @@ func (s *projectServiceImpl) UpdateProjectWithFiles(ctx context.Context, project
 }
 
 func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
+	project, err := s.projectRepo.GetProjectByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	
+	for _, resource := range project.ProjectResources {
+		resourceID := fmt.Sprintf("%v", resource.ID)
+		if err := s.resourceRepo.DeleteProjectResourceByID(ctx, resourceID, resource.Path); err != nil {
+			return err
+		}
+	}
 
 	if err := s.projectRepo.Delete(ctx, id); err != nil {
 		return err
