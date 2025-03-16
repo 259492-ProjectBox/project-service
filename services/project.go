@@ -29,6 +29,7 @@ type projectServiceImpl struct {
 	projectRepo     repositories.ProjectRepository
 	committeeRepo   repositories.StaffRepository
 	programRepo     repositories.ProgramRepository
+	resourceRepo    repositories.ResourceRepository
 }
 
 func NewProjectService(
@@ -36,6 +37,7 @@ func NewProjectService(
 	projectRepo repositories.ProjectRepository,
 	committeeRepo repositories.StaffRepository,
 	programRepo repositories.ProgramRepository,
+	resourceRepo repositories.ResourceRepository,
 ) ProjectService {
 	return &projectServiceImpl{
 		rabbitMQChannel: rabbitMQChannel,
@@ -144,7 +146,7 @@ func (s *projectServiceImpl) DeleteProject(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, resource := range project.ProjectResources {
 		resourceID := fmt.Sprintf("%v", resource.ID)
 		if err := s.resourceRepo.DeleteProjectResourceByID(ctx, resourceID, resource.Path); err != nil {

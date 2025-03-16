@@ -25,32 +25,32 @@ VALUES
    ('MPE', 'Mining and Petroleum Engineering', 'วิศวกรรมเหมืองแร่และปิโตรเลียม');
 
 -- Insert mock data into keywords table
-INSERT INTO "keywords" ("keyword", "program_id") 
-VALUES 
-   ('machine learning', 1),
-   ('web development', 1),
-   ('data science', 2),
-   ('artificial intelligence', 2),
-   ('cloud computing', 3),
-   ('cyber security', 3),
-   ('internet of things', 4),
-   ('big data', 4),
-   ('blockchain', 5),
-   ('robotics', 5),
-   ('software engineering', 6),
-   ('network engineering', 6),
-   ('bioinformatics', 7),
-   ('quantum computing', 7),
-   ('virtual reality', 8),
-   ('augmented reality', 8),
-   ('game development', 9),
-   ('mobile app development', 9),
-   ('embedded systems', 10),
-   ('digital signal processing', 10);
+-- INSERT INTO "keywords" ("keyword", "program_id") 
+-- VALUES 
+--    ('machine learning', 1),
+--    ('web development', 1),
+--    ('data science', 2),
+--    ('artificial intelligence', 2),
+--    ('cloud computing', 3),
+--    ('cyber security', 3),
+--    ('internet of things', 4),
+--    ('big data', 4),
+--    ('blockchain', 5),
+--    ('robotics', 5),
+--    ('software engineering', 6),
+--    ('network engineering', 6),
+--    ('bioinformatics', 7),
+--    ('quantum computing', 7),
+--    ('virtual reality', 8),
+--    ('augmented reality', 8),
+--    ('game development', 9),
+--    ('mobile app development', 9),
+--    ('embedded systems', 10),
+--    ('digital signal processing', 10);
    
 INSERT INTO "configs" ("config_name", "value", "program_id")
 VALUES 
-    ('academic year', '2568', 1),
+    ('academic year', '2566', 1),
     ('academic year', '2568', 2),
     ('academic year', '2568', 3),
     ('academic year', '2568', 4),
@@ -71,7 +71,7 @@ VALUES
     ('semester', '2', 9),
     ('semester', '2', 10),
     ('highest_academic_year', '2568', NULL),
-    ('lowest_academic_year', '2568', NULL);
+    ('lowest_academic_year', '2566', NULL);
 
 INSERT INTO "project_roles" ("role_name_th", "role_name_en", "program_id") VALUES
 ('อาจารย์ที่ปรึกษา', 'Advisor', 1),

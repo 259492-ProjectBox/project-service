@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mime/multipart"
 	"os"
 	"time"
 
@@ -52,16 +51,6 @@ func (r *resourceRepository) buildObjectName(programName, uniqueFileName string)
 
 func (r *resourceRepository) buildFilePath(bucket, objectName string) string {
 	return fmt.Sprintf("%s/%s", bucket, objectName)
-}
-
-func (r *resourceRepository) uploadFileToMinio(ctx context.Context, objectName string, file *multipart.FileHeader) error {
-	err := r.uploadRepo.UploadFile(ctx, os.Getenv("MINIO_ASSET_BUCKET"), objectName, file, minio.PutObjectOptions{
-		ContentType: file.Header.Get("Content-Type"),
-	})
-	if err != nil {
-		return fmt.Errorf("failed to upload file to MinIO: %w", err)
-	}
-	return nil
 }
 
 func (r *resourceRepository) FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error) {
