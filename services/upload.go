@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"io"
 	"mime/multipart"
 	"net/url"
@@ -36,9 +37,10 @@ type uploadServiceImpl struct {
 	projectService     ProjectService
 	projectRepo        repositories.ProjectRepository
 	programRepo        repositories.ProgramRepository
+	keywordRepo        repositories.KeywordRepository
 }
 
-func NewUploadService(client *minio.Client, programRepo repositories.ProgramRepository, projectRepo repositories.ProjectRepository, staffService StaffService, projectRoleService ProjectRoleService, projectService ProjectService, configService ConfigService, studentService StudentService) UploadService {
+func NewUploadService(client *minio.Client, keywordRepo repositories.KeywordRepository, programRepo repositories.ProgramRepository, projectRepo repositories.ProjectRepository, staffService StaffService, projectRoleService ProjectRoleService, projectService ProjectService, configService ConfigService, studentService StudentService) UploadService {
 	return &uploadServiceImpl{
 		client:             client,
 		programRepo:        programRepo,
@@ -48,6 +50,7 @@ func NewUploadService(client *minio.Client, programRepo repositories.ProgramRepo
 		projectService:     projectService,
 		configService:      configService,
 		studentService:     studentService,
+		keywordRepo:        keywordRepo,
 	}
 }
 
@@ -279,10 +282,15 @@ func (s *uploadServiceImpl) getCreateProjectInfoColumns(headerRow []string) (map
 			columns["staffColumn"] = j
 		case matchColumn(col, "Staff Role"):
 			columns["staffRoleColumn"] = j
+		case matchColumn(col, "Keywords"):
+			columns["keywordsColumn"] = j
+		case matchColumn(col, "Is Public"):
+			columns["isPublicColumn"] = j
 		}
+
 	}
 
-	if columns["titleTHColumn"] == -1 || columns["titleENColumn"] == -1 || columns["abstractTextColumn"] == -1 || columns["secLabColumn"] == -1 || columns["studentIdColumn"] == -1 || columns["studentNameColumn"] == -1 || columns["staffColumn"] == -1 || columns["staffRoleColumn"] == -1 {
+	if columns["titleTHColumn"] == -1 || columns["titleENColumn"] == -1 || columns["abstractTextColumn"] == -1 || columns["secLabColumn"] == -1 || columns["studentIdColumn"] == -1 || columns["studentNameColumn"] == -1 || columns["staffColumn"] == -1 || columns["staffRoleColumn"] == -1 || columns["keywordsColumn"] == -1 || columns["isPublicColumn"] == -1 {
 		return nil, errors.New("missing one or more required columns in the header row")
 	}
 
@@ -389,14 +397,47 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			return nil, err
 		}
 
+		var keywordArray []models.Keyword
+		keywords := strings.Split(row[columns["keywordsColumn"]], ",")
+		for _, keyword := range keywords {
+			keyword = strings.TrimSpace(keyword)
+			if keyword == "" {
+				continue
+			}
+
+			keywordModel, err := s.keywordRepo.FindByKeywordAndProgramId(ctx, keyword, programId)
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				keywordModel = &models.Keyword{
+					Keyword:   keyword,
+					ProgramID: programId,
+				}
+				if err := s.keywordRepo.Create(ctx, keywordModel); err != nil {
+					return nil, err
+				}
+			}
+			keywordArray = append(keywordArray, *keywordModel)
+		}
+
 		titleTH := &row[columns["titleTHColumn"]]
 		titleEN := &row[columns["titleENColumn"]]
 		abstractText := &row[columns["abstractTextColumn"]]
 		sectionValue := row[columns["secLabColumn"]]
+		isPublicValue := row[columns["isPublicColumn"]]
+
 		var sectionID *string
 		if isSecLabSameOverAllMember {
 			sectionID = &sectionValue
 		}
+		var isPublic bool
+		if isPublicValue == "TRUE" {
+			isPublic = true
+		} else {
+			isPublic = false
+		}
+
 		project := models.ProjectRequest{
 			TitleTH:       titleTH,
 			TitleEN:       titleEN,
@@ -405,8 +446,10 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			Semester:      semester,
 			SectionID:     sectionID,
 			ProgramID:     programId,
+			IsPublic:      isPublic,
 			ProjectStaffs: projectStaffs,
 			Members:       members,
+			Keywords:      keywordArray,
 		}
 		projectRequests = append(projectRequests, project)
 	}

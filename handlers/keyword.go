@@ -54,7 +54,7 @@ func (h *keywordHandler) GetAllKeywords(c *gin.Context) {
 // @Router /v1/keywords [get]
 func (h *keywordHandler) GetKeywords(c *gin.Context) {
 	programID := c.Query("program_id")
-	keywords, err := h.service.GetKeywords(programID)
+	keywords, err := h.service.GetKeywords(c.Request.Context(), programID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,7 +74,7 @@ func (h *keywordHandler) GetKeywords(c *gin.Context) {
 // @Router /v1/keywords/{id} [get]
 func (h *keywordHandler) GetKeyword(c *gin.Context) {
 	id := c.Param("id")
-	keyword, err := h.service.GetKeyword(id)
+	keyword, err := h.service.GetKeyword(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Keyword not found"})
 		return
@@ -99,7 +99,7 @@ func (h *keywordHandler) CreateKeyword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.service.CreateKeyword(keyword); err != nil {
+	if err := h.service.CreateKeyword(c.Request.Context(), keyword); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -124,7 +124,7 @@ func (h *keywordHandler) UpdateKeyword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.service.UpdateKeyword(keyword); err != nil {
+	if err := h.service.UpdateKeyword(c.Request.Context(), keyword); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -143,7 +143,7 @@ func (h *keywordHandler) UpdateKeyword(c *gin.Context) {
 // @Router /v1/keywords/{id} [delete]
 func (h *keywordHandler) DeleteKeyword(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteKeyword(id); err != nil {
+	if err := h.service.DeleteKeyword(c.Request.Context(), id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

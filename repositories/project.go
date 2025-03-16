@@ -18,6 +18,7 @@ import (
 
 type ProjectRepository interface {
 	repository[models.Project]
+	GetTransaction() *gorm.DB
 	GetProjectMessageByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectByID(ctx context.Context, id int) (*dtos.ProjectData, error)
 	GetProjectWithPDFByID(ctx context.Context, id int) (*dtos.ProjectData, error)
@@ -55,6 +56,11 @@ func NewProjectRepository(db *gorm.DB, fileExtensionRepo FileExtensionRepository
 		repositoryImpl:           newRepository[models.Project](db),
 	}
 }
+
+func (r *projectRepositoryImpl) GetTransaction() *gorm.DB {
+	return r.db.Begin()
+}
+
 func isPDFFile(fileType string) bool { return fileType == "pdf" || fileType == "application/pdf" }
 
 func (r *projectRepositoryImpl) CreateProjectNumber(ctx context.Context, tx *gorm.DB, project *models.ProjectRequest) (*models.ProjectRequest, error) {
@@ -188,7 +194,6 @@ func (r *projectRepositoryImpl) CreateProjectWithFiles(ctx context.Context, tx *
 		return nil, err
 	}
 
-	fmt.Println(project)
 	projectData, err := r.GetProjectByID(ctx, project.ID)
 	if err != nil {
 		r.uploadRepo.DeleteUploadedFiles(ctx, r.projectBucketName, uploadedFilePaths, minio.RemoveObjectOptions{})

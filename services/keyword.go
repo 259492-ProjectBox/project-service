@@ -8,11 +8,11 @@ import (
 
 type KeywordService interface {
 	GetAllKeywords(ctx context.Context) ([]models.Keyword, error)
-	GetKeywords(programID string) ([]models.Keyword, error)
-	GetKeyword(id string) (models.Keyword, error)
-	CreateKeyword(keyword models.Keyword) error
-	UpdateKeyword(keyword models.Keyword) error
-	DeleteKeyword(id string) error
+	GetKeywords(ctx context.Context, programID string) ([]models.Keyword, error)
+	GetKeyword(ctx context.Context, id string) (*models.Keyword, error)
+	CreateKeyword(ctx context.Context, keyword *models.Keyword) error
+	UpdateKeyword(ctx context.Context, keyword *models.Keyword) error
+	DeleteKeyword(ctx context.Context, id string) error
 }
 
 type keywordService struct {
@@ -24,25 +24,25 @@ func NewKeywordService(repo repositories.KeywordRepository) KeywordService {
 }
 
 func (s *keywordService) GetAllKeywords(ctx context.Context) ([]models.Keyword, error) {
-	return s.repo.FindAll()
+	return s.repo.FindAll(ctx)
 }
 
-func (s *keywordService) GetKeywords(programID string) ([]models.Keyword, error) {
-	return s.repo.FindAllByProgramId(programID)
+func (s *keywordService) GetKeywords(ctx context.Context, programID string) ([]models.Keyword, error) {
+	return s.repo.FindAllByProgramId(ctx, programID)
 }
 
-func (s *keywordService) GetKeyword(id string) (models.Keyword, error) {
-	return s.repo.FindByID(id)
+func (s *keywordService) GetKeyword(ctx context.Context, id string) (*models.Keyword, error) {
+	return s.repo.FindByID(ctx, id)
 }
 
-func (s *keywordService) CreateKeyword(keyword models.Keyword) error {
-	return s.repo.Create(keyword)
+func (s *keywordService) CreateKeyword(ctx context.Context, keyword *models.Keyword) error {
+	return s.repo.Create(ctx, keyword)
 }
 
-func (s *keywordService) UpdateKeyword(keyword models.Keyword) error {
-	return s.repo.Update(keyword)
+func (s *keywordService) UpdateKeyword(ctx context.Context, keyword *models.Keyword) error {
+	return s.repo.Update(ctx, keyword)
 }
 
-func (s *keywordService) DeleteKeyword(id string) error {
-	return s.repo.Delete(id)
+func (s *keywordService) DeleteKeyword(ctx context.Context, id string) error {
+	return s.repo.Delete(ctx, id)
 }

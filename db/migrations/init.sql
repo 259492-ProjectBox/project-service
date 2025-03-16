@@ -150,9 +150,9 @@ CREATE UNIQUE INDEX ON "project_number_counters" ("academic_year", "semester", "
 
 CREATE UNIQUE INDEX ON "project_staffs" ("project_id", "staff_id", "project_role_id");
 
-ALTER TABLE "project_keywords" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ;
+ALTER TABLE "project_keywords" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") on DELETE CASCADE ON UPDATE CASCADE ;
 
-ALTER TABLE "project_keywords" ADD FOREIGN KEY ("keyword_id") REFERENCES "keywords" ("id") ;
+ALTER TABLE "project_keywords" ADD FOREIGN KEY ("keyword_id") REFERENCES "keywords" ("id") on DELETE CASCADE ON UPDATE CASCADE ;
 
 ALTER TABLE "keywords" ADD FOREIGN KEY ("program_id") REFERENCES "programs" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
