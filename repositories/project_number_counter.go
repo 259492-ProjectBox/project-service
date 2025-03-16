@@ -10,7 +10,7 @@ import (
 
 type ProjectNumberCounterRepository interface {
 	repository[models.ProjectNumberCounter]
-	GetNextProjectNumber(ctx context.Context, tx *gorm.DB, academicYear, semester, courseID int) (int, error)
+	GetNextProjectNumber(ctx context.Context, tx *gorm.DB, academicYear, semester int) (int, error)
 }
 
 type projectNumberCounterRepositoryImpl struct {
@@ -25,17 +25,16 @@ func NewProjectNumberCounterRepository(db *gorm.DB) ProjectNumberCounterReposito
 	}
 }
 
-func (r *projectNumberCounterRepositoryImpl) GetNextProjectNumber(ctx context.Context, tx *gorm.DB, academicYear, semester, courseID int) (int, error) {
+func (r *projectNumberCounterRepositoryImpl) GetNextProjectNumber(ctx context.Context, tx *gorm.DB, academicYear, semester int) (int, error) {
 	var counter models.ProjectNumberCounter
 	if tx == nil {
 		tx = r.db
 	}
-	result := tx.WithContext(ctx).Where("academic_year = ? AND semester = ? AND course_id = ?", academicYear, semester, courseID).First(&counter)
+	result := tx.WithContext(ctx).Where("academic_year = ? AND semester = ?", academicYear, semester).First(&counter)
 	if result.RowsAffected == 0 {
 		counter = models.ProjectNumberCounter{
 			AcademicYear: academicYear,
 			Semester:     semester,
-			CourseID:     courseID,
 			Number:       1,
 		}
 		if err := tx.Create(&counter).Error; err != nil {

@@ -45,7 +45,7 @@ func (r *studentRepositoryImpl) CheckStudentDuplicateProjectOnCurrentYearAndSeme
 
 func (r *studentRepositoryImpl) GetStudentByStudentId(ctx context.Context, studentId string) (*models.Student, error) {
 	var student models.Student
-	if err := r.db.WithContext(ctx).Where("student_id = ?", studentId).Order("created_at DESC").Preload("Course.Program").Preload("Program").First(&student).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("student_id = ?", studentId).Order("created_at DESC").Preload("Program").First(&student).Error; err != nil {
 		return nil, err
 	}
 	return &student, nil
@@ -55,7 +55,6 @@ func (r *studentRepositoryImpl) GetStudentByStudentIdAndProgramIdOnCurrentYearAn
 	var student models.Student
 	if err := r.db.WithContext(ctx).
 		Where("student_id = ? AND program_id = ? AND academic_year = ? AND semester = ? ", studentId, programId, academicYear, semester).
-		Preload("Course.Program").
 		Preload("Program").
 		First(&student).Error; err != nil {
 		return nil, err
@@ -66,7 +65,7 @@ func (r *studentRepositoryImpl) GetStudentByStudentIdAndProgramIdOnCurrentYearAn
 
 func (r *studentRepositoryImpl) GetStudentByProgramIdOnAcademicYearAndSemester(ctx context.Context, programId, academicYear, semester int) ([]models.Student, error) {
 	var students []models.Student
-	if err := r.db.WithContext(ctx).Where("program_id = ? AND academic_year = ? AND semester = ? ", programId, academicYear, semester).Preload("Course.Program").Preload("Program").Find(&students).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("program_id = ? AND academic_year = ? AND semester = ? ", programId, academicYear, semester).Preload("Program").Find(&students).Error; err != nil {
 		return nil, err
 	}
 	return students, nil

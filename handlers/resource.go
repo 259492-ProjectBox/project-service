@@ -6,14 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
-	"github.com/project-box/dtos"
 	"github.com/project-box/services"
 )
 
 type ResourceHandler interface {
-	GetAssetResourceByProgramID(c *gin.Context)
-	UploadAssetResource(c *gin.Context)
-	DeleteAssetResource(c *gin.Context)
 	DeleteProjectResource(c *gin.Context)
 }
 
@@ -63,40 +59,4 @@ func (h *resourceHandler) DeleteProjectResource(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project Resource deleted successfully"})
-}
-
-func (h *resourceHandler) GetAssetResourceByProgramID(c *gin.Context) {
-	programId := c.Param("program_id")
-	assetResources, err := h.resourceService.GetAssetResourceByProgramID(c, programId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve asset resources"})
-		return
-	}
-	c.JSON(http.StatusOK, assetResources)
-}
-
-func (h *resourceHandler) UploadAssetResource(c *gin.Context) {
-	req := &dtos.UploadAssetResource{}
-	if err := c.ShouldBind(req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	assetResource, err := h.resourceService.UploadAssetResource(c, req.File, req.AssetResource)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, *assetResource)
-}
-
-func (h *resourceHandler) DeleteAssetResource(c *gin.Context) {
-	id := c.Param("id")
-	err := h.resourceService.DeleteAssetResourceByID(c, id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Asset Resource deleted successfully"})
 }

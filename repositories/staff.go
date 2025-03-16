@@ -15,7 +15,7 @@ type StaffRepository interface {
 	GetStaffByProgramId(programId int) ([]models.Staff, error)
 	GetAllStaffs(ctx context.Context) ([]models.Staff, error)
 	GetAllStaffByProgramId(ctx context.Context, programId int) ([]models.Staff, error)
-	CreateStaff(staff *models.Staff) error
+	CreateStaff(ctx context.Context, staff *models.Staff) (*models.Staff, error)
 	CreateStaffs(ctx context.Context, staffs []models.Staff) error
 	UpdateStaff(updatedStaff *models.Staff) (*models.Staff, error)
 	GetByEmail(ctx context.Context, email string) (*models.Staff, error)
@@ -35,7 +35,7 @@ func NewStaffRepository(db *gorm.DB) StaffRepository {
 
 func (r *staffRepositoryImpl) GetAllStaffs(ctx context.Context) ([]models.Staff, error) {
 	var staffs []models.Staff
-	if err := r.db.Find(&staffs).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Program").Find(&staffs).Error; err != nil {
 		return nil, err
 	}
 	return staffs, nil
@@ -43,7 +43,7 @@ func (r *staffRepositoryImpl) GetAllStaffs(ctx context.Context) ([]models.Staff,
 
 func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 	var staff *models.Staff
-	if err := r.db.Where("id = ?", id).First(&staff).Error; err != nil {
+	if err := r.db.Where("id = ?", id).Preload("Program").First(&staff).Error; err != nil {
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (r *staffRepositoryImpl) GetStaffById(id int) (*models.Staff, error) {
 func (r *staffRepositoryImpl) GetStaffByProgramId(programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 
-	if err := r.db.Where("program_id = ?", programId).Find(&staffs).Error; err != nil {
+	if err := r.db.Where("program_id = ?", programId).Preload("Program").Find(&staffs).Error; err != nil {
 		return nil, err
 	}
 
@@ -61,11 +61,14 @@ func (r *staffRepositoryImpl) GetStaffByProgramId(programId int) ([]models.Staff
 }
 
 // create staff
-func (r *staffRepositoryImpl) CreateStaff(staff *models.Staff) error {
-	if err := r.db.Create(staff).Error; err != nil {
-		return err
+func (r *staffRepositoryImpl) CreateStaff(ctx context.Context, staff *models.Staff) (*models.Staff, error) {
+	if err := r.db.WithContext(ctx).Create(staff).Error; err != nil {
+		return nil, err
 	}
-	return nil
+	if err := r.db.WithContext(ctx).Preload("Program").First(staff).Error; err != nil {
+		return nil, err
+	}
+	return staff, nil
 }
 
 // update staff
@@ -107,13 +110,13 @@ func (r *staffRepositoryImpl) CreateStaffs(ctx context.Context, staffs []models.
 	return tx.Commit().Error
 }
 
-func (s *staffRepositoryImpl) createStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {
+func (r *staffRepositoryImpl) createStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {
 	return tx.Save(&staff).Error
 }
 
-func (s *staffRepositoryImpl) upsertStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {
-	existingStaff, err := s.GetByEmail(ctx, staff.Email)
-	if err != nil && err != gorm.ErrRecordNotFound {
+func (r *staffRepositoryImpl) upsertStaff(ctx context.Context, tx *gorm.DB, staff models.Staff) error {
+	existingStaff, err := r.GetByEmail(ctx, staff.Email)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
@@ -125,7 +128,7 @@ func (s *staffRepositoryImpl) upsertStaff(ctx context.Context, tx *gorm.DB, staf
 		existingStaff.FirstNameEN = staff.FirstNameEN
 		existingStaff.LastNameEN = staff.LastNameEN
 		existingStaff.ProgramID = staff.ProgramID
-		existingStaff.IsResigned = staff.IsResigned
+		existingStaff.IsActive = staff.IsActive
 		return tx.Save(existingStaff).Error
 	}
 

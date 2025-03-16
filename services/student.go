@@ -143,7 +143,6 @@ func updateStudentFields(existing, new *models.Student) *models.Student {
 	}
 	existing.Semester = new.Semester
 	existing.AcademicYear = new.AcademicYear
-	existing.CourseID = new.CourseID
 	existing.ProgramID = new.ProgramID
 	return existing
 }

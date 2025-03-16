@@ -33,8 +33,6 @@ var AppSet = wire.NewSet(
 
 var HandlerSet = wire.NewSet(
 	handlers.NewProjectHandler,
-	handlers.NewCalendarHandler,
-	handlers.NewCourseHandler,
 	handlers.NewResourceHandler,
 	handlers.NewStaffHandler,
 	handlers.NewConfigHandler,
@@ -44,12 +42,11 @@ var HandlerSet = wire.NewSet(
 	handlers.NewProgramHandler,
 	handlers.NewStudentHandler,
 	handlers.NewUploadHandler,
+	handlers.NewKeywordHandler,
 )
 
 var ServiceSet = wire.NewSet(
 	services.NewProjectService,
-	services.NewCalendarService,
-	services.NewCourseService,
 	services.NewResourceService,
 	services.NewStaffService,
 	services.NewConfigService,
@@ -59,6 +56,7 @@ var ServiceSet = wire.NewSet(
 	services.NewProgramService,
 	services.NewStudentService,
 	services.NewUploadService,
+	services.NewKeywordService,
 )
 
 var RepositorySet = wire.NewSet(
@@ -68,17 +66,15 @@ var RepositorySet = wire.NewSet(
 	repositories.NewStaffRepository,
 	repositories.NewFileExtensionRepository,
 	repositories.NewProgramRepository,
-	repositories.NewCourseRepository,
-	repositories.NewSectionRepository,
 	repositories.NewResourceRepository,
 	repositories.NewResourceTypeRepository,
-	repositories.NewCalendarRepository,
 	repositories.NewConfigRepository,
 	repositories.NewProjectConfigRepository,
 	repositories.NewProjectResourceConfigRepository,
 	repositories.NewProjectRoleRepository,
 	repositories.NewStudentRepository,
 	repositories.NewUploadRepository,
+	repositories.NewKeywordRepository,
 )
 
 var RedisSet = wire.NewSet()

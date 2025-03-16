@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"mime/multipart"
 
@@ -28,8 +29,6 @@ type projectServiceImpl struct {
 	projectRepo     repositories.ProjectRepository
 	committeeRepo   repositories.StaffRepository
 	programRepo     repositories.ProgramRepository
-	courseRepo      repositories.CourseRepository
-	resourceRepo    repositories.ResourceRepository
 }
 
 func NewProjectService(
@@ -37,14 +36,11 @@ func NewProjectService(
 	projectRepo repositories.ProjectRepository,
 	committeeRepo repositories.StaffRepository,
 	programRepo repositories.ProgramRepository,
-	courseRepo repositories.CourseRepository,
-	resourceRepo repositories.ResourceRepository,
 ) ProjectService {
 	return &projectServiceImpl{
 		rabbitMQChannel: rabbitMQChannel,
 		resourceRepo:    resourceRepo,
 		projectRepo:     projectRepo,
-		courseRepo:      courseRepo,
 		committeeRepo:   committeeRepo,
 		programRepo:     programRepo,
 	}
@@ -56,7 +52,10 @@ func (s *projectServiceImpl) CreateProjects(ctx context.Context, projects []mode
 		return err
 	}
 	for _, projectMessage := range projectMessages {
-		s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
+		err := s.PublishProjectMessageToElasticSearch(ctx, "create", projectMessage.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -64,7 +63,7 @@ func (s *projectServiceImpl) CreateProjects(ctx context.Context, projects []mode
 
 func (s *projectServiceImpl) getProjectMessage(ctx context.Context, projectId int) (*dtos.ProjectData, error) {
 	projectMessage, err := s.projectRepo.GetProjectMessageByID(ctx, projectId)
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 

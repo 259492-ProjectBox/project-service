@@ -27,25 +27,13 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		AcademicYear: project.AcademicYear,
 		SectionID:    project.SectionID,
 		Semester:     project.Semester,
+		IsPublic:     project.IsPublic,
 		ProgramID:    project.ProgramID,
 		Program: dtos.Program{
 			ID:            project.Program.ID,
 			Abbreviation:  project.Program.Abbreviation,
 			ProgramNameTH: project.Program.ProgramNameTH,
 			ProgramNameEN: project.Program.ProgramNameEN,
-		},
-		CourseID: project.Course.ID,
-		Course: dtos.Course{
-			ID:         project.Course.ID,
-			CourseNo:   project.Course.CourseNo,
-			CourseName: project.Course.CourseName,
-			ProgramID:  project.Course.ProgramID,
-			Program: dtos.Program{
-				ID:            project.Course.Program.ID,
-				Abbreviation:  project.Course.Program.Abbreviation,
-				ProgramNameTH: project.Program.ProgramNameTH,
-				ProgramNameEN: project.Program.ProgramNameEN,
-			},
 		},
 		CreatedAt: formatTime(project.CreatedAt),
 		UpdatedAt: formatTime(project.UpdatedAt),
@@ -61,7 +49,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			FirstNameEN: staff.FirstNameEN,
 			LastNameEN:  staff.LastNameEN,
 			Email:       staff.Email,
-			IsResigned:  staff.IsResigned,
+			IsActive:    staff.IsActive,
 			ProgramID:   staff.ProgramID,
 			Program: dtos.Program{
 				ID:            staff.Program.ID,
@@ -83,20 +71,7 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 			Email:        member.Email,
 			Semester:     member.Semester,
 			AcademicYear: member.AcademicYear,
-			CourseID:     member.CourseID,
-			Course: dtos.Course{
-				ID:         member.Course.ID,
-				CourseNo:   member.Course.CourseNo,
-				CourseName: member.Course.CourseName,
-				ProgramID:  member.Course.ProgramID,
-				Program: dtos.Program{
-					ID:            member.Course.Program.ID,
-					Abbreviation:  member.Course.Program.Abbreviation,
-					ProgramNameTH: member.Course.Program.ProgramNameTH,
-					ProgramNameEN: member.Course.Program.ProgramNameEN,
-				},
-			},
-			ProgramID: member.ProgramID,
+			ProgramID:    member.ProgramID,
 			Program: dtos.Program{
 				ID:            member.Program.ID,
 				Abbreviation:  member.Program.Abbreviation,
@@ -106,6 +81,19 @@ func SanitizeProjectMessage(project *models.Project) *dtos.ProjectData {
 		})
 	}
 
+	for _, keyword := range project.Keywords {
+		projectMessage.Keywords = append(projectMessage.Keywords, dtos.Keyword{
+			ID:      keyword.ID,
+			Keyword: keyword.Keyword,
+			Program: dtos.Program{
+				ID:            keyword.Program.ID,
+				Abbreviation:  keyword.Program.Abbreviation,
+				ProgramNameTH: keyword.Program.ProgramNameTH,
+				ProgramNameEN: keyword.Program.ProgramNameEN,
+			},
+			ProgramID: keyword.ProgramID,
+		})
+	}
 	for _, resource := range project.ProjectResources {
 		resourceType := dtos.ResourceType{
 			ID:       resource.ResourceTypeID,

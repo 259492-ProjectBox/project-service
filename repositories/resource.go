@@ -14,10 +14,6 @@ import (
 )
 
 type ResourceRepository interface {
-	CreateAssetResource(ctx context.Context, file *multipart.FileHeader, assetResource *models.AssetResource) (*models.AssetResource, error)
-	DeleteAssetResourceByID(ctx context.Context, id string) error
-	FindAssetResourcesByProgramID(ctx context.Context, id string) ([]models.AssetResource, error)
-
 	CreateProjectResource(ctx context.Context, tx *gorm.DB, projectResource *models.ProjectResource) error
 	FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error)
 	DeleteProjectResourceByID(ctx context.Context, id string, filePath *string) error
@@ -68,57 +64,6 @@ func (r *resourceRepository) uploadFileToMinio(ctx context.Context, objectName s
 	return nil
 }
 
-func (r *resourceRepository) CreateAssetResource(ctx context.Context, file *multipart.FileHeader, assetResource *models.AssetResource) (*models.AssetResource, error) {
-	tx := r.db.WithContext(ctx).Begin()
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback()
-			panic(p)
-		}
-	}()
-
-	if err := tx.Create(assetResource).Error; err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to create asset resource: %w", err)
-	}
-
-	if err := tx.Preload("Program").First(assetResource).Error; err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to preload program: %w", err)
-	}
-
-	programNameTH := assetResource.Program.ProgramNameTH
-	objectName, _ := r.generateFilePath(file.Filename, programNameTH, os.Getenv("MINIO_ASSET_BUCKET"))
-
-	if err := r.uploadFileToMinio(ctx, objectName, file); err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("file upload failed: %w", err)
-	}
-
-	if err := tx.Create(assetResource).Error; err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to create resource: %w", err)
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, fmt.Errorf("transaction commit failed: %w", err)
-	}
-
-	return assetResource, nil
-}
-
-func (r *resourceRepository) FindAssetResourcesByProgramID(ctx context.Context, program_id string) ([]models.AssetResource, error) {
-	var assetResources []models.AssetResource
-	if err := r.db.WithContext(ctx).Where("program_id = ?", program_id).Find(&assetResources).Error; err != nil {
-		return nil, err
-	}
-	return assetResources, nil
-}
-
 func (r *resourceRepository) FindDetailedResourceByID(ctx context.Context, id string) (*models.DetailedResource, error) {
 	var detailedResource models.DetailedResource
 
@@ -165,13 +110,6 @@ func (r *resourceRepository) DeleteProjectResourceByID(ctx context.Context, id s
 		return err
 	}
 
-	return nil
-}
-
-func (r *resourceRepository) DeleteAssetResourceByID(ctx context.Context, id string) error {
-	if result := r.db.WithContext(ctx).Delete(&models.AssetResource{}, id); result.Error != nil {
-		return result.Error
-	}
 	return nil
 }
 

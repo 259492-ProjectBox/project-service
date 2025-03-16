@@ -5,8 +5,8 @@ import (
 	"regexp"
 )
 
-func FormatProjectID(semester, academicYear int, nextProjectNumber int) string {
-	return fmt.Sprintf("P%04d-%d/%d", nextProjectNumber, semester, academicYear%100)
+func FormatProjectID(nextProjectNumber int) string {
+	return fmt.Sprintf("P%03d", nextProjectNumber)
 }
 
 func IsValidProjectNumberFormat(projectNo string) error {

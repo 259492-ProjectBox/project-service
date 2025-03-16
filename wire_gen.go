@@ -35,21 +35,18 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectRepository := repositories.NewProjectRepository(gormDB, fileExtensionRepository, projectStaffRepository, projectNumberCounterRepository, resourceRepository, resourceTypeRepository, uploadRepository)
 	staffRepository := repositories.NewStaffRepository(gormDB)
 	programRepository := repositories.NewProgramRepository(gormDB)
-	courseRepository := repositories.NewCourseRepository(gormDB)
-	projectService := services.NewProjectService(channel, projectRepository, staffRepository, programRepository, courseRepository)
+	projectService := services.NewProjectService(channel, projectRepository, staffRepository, programRepository)
 	projectHandler := handlers.NewProjectHandler(projectService)
-	calendarRepository := repositories.NewCalendarRepository(gormDB)
-	calendarService := services.NewCalendarService(calendarRepository, programRepository)
-	calendarHandler := handlers.NewCalendarHandler(calendarService)
 	resourceService := services.NewResourceService(resourceRepository)
 	resourceHandler := handlers.NewResourceHandler(client, resourceService, projectService)
 	staffService := services.NewStaffService(staffRepository)
 	staffHandler := handlers.NewStaffHandler(staffService)
-	courseService := services.NewCourseService(courseRepository)
-	courseHandler := handlers.NewCourseHandler(courseService)
 	configRepository := repositories.NewConfigRepository(gormDB)
 	configService := services.NewConfigService(configRepository)
 	configHandler := handlers.NewConfigHandler(configService)
+	keywordRepository := repositories.NewKeywordRepository(gormDB)
+	keywordService := services.NewKeywordService(keywordRepository)
+	keywordHandler := handlers.NewKeywordHandler(keywordService)
 	projectConfigRepository := repositories.NewProjectConfigRepository(gormDB)
 	projectConfigService := services.NewProjectConfigService(projectConfigRepository)
 	projectConfigHandler := handlers.NewProjectConfigHandler(projectConfigService)
@@ -59,14 +56,14 @@ func InitializeApp() (*gin.Engine, func(), error) {
 	projectRoleService := services.NewProjectRoleService(projectRoleRepository)
 	studentRepository := repositories.NewStudentRepository(gormDB, configRepository)
 	studentService := services.NewStudentService(configService, studentRepository, gormDB)
-	uploadService := services.NewUploadService(client, programRepository, projectRepository, staffService, projectRoleService, projectService, courseService, configService, studentService)
+	uploadService := services.NewUploadService(client, keywordRepository, programRepository, projectRepository, staffService, projectRoleService, projectService, configService, studentService)
 	projectResourceConfigService := services.NewProjectResourceConfigService(projectResourceConfigRepository, programService, uploadService)
 	projectResourceConfigHandler := handlers.NewProjectResourceConfigHandler(projectResourceConfigService)
 	projectRoleHandler := handlers.NewProjectRoleHandler(projectRoleService)
 	programHandler := handlers.NewProgramHandler(programService)
 	studentHandler := handlers.NewStudentHandler(studentService)
 	uploadHandler := handlers.NewUploadHandler(uploadService)
-	engine, err := NewApp(projectHandler, calendarHandler, resourceHandler, staffHandler, courseHandler, configHandler, projectConfigHandler, projectResourceConfigHandler, projectRoleHandler, programHandler, studentHandler, uploadHandler)
+	engine, err := NewApp(projectHandler, resourceHandler, staffHandler, configHandler, keywordHandler, projectConfigHandler, projectResourceConfigHandler, projectRoleHandler, programHandler, studentHandler, uploadHandler)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -80,10 +77,10 @@ var AppSet = wire.NewSet(
 	NewApp, db2.NewPostgresDatabase, db3.NewMinIOConnection, db.NewRabbitMQConnection,
 )
 
-var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewCalendarHandler, handlers.NewCourseHandler, handlers.NewResourceHandler, handlers.NewStaffHandler, handlers.NewConfigHandler, handlers.NewProjectConfigHandler, handlers.NewProjectResourceConfigHandler, handlers.NewProjectRoleHandler, handlers.NewProgramHandler, handlers.NewStudentHandler, handlers.NewUploadHandler)
+var HandlerSet = wire.NewSet(handlers.NewProjectHandler, handlers.NewResourceHandler, handlers.NewStaffHandler, handlers.NewConfigHandler, handlers.NewProjectConfigHandler, handlers.NewProjectResourceConfigHandler, handlers.NewProjectRoleHandler, handlers.NewProgramHandler, handlers.NewStudentHandler, handlers.NewUploadHandler, handlers.NewKeywordHandler)
 
-var ServiceSet = wire.NewSet(services.NewProjectService, services.NewCalendarService, services.NewCourseService, services.NewResourceService, services.NewStaffService, services.NewConfigService, services.NewProjectConfigService, services.NewProjectResourceConfigService, services.NewProjectRoleService, services.NewProgramService, services.NewStudentService, services.NewUploadService)
+var ServiceSet = wire.NewSet(services.NewProjectService, services.NewResourceService, services.NewStaffService, services.NewConfigService, services.NewProjectConfigService, services.NewProjectResourceConfigService, services.NewProjectRoleService, services.NewProgramService, services.NewStudentService, services.NewUploadService, services.NewKeywordService)
 
-var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectStaffRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewFileExtensionRepository, repositories.NewProgramRepository, repositories.NewCourseRepository, repositories.NewSectionRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewCalendarRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository, repositories.NewProjectResourceConfigRepository, repositories.NewProjectRoleRepository, repositories.NewStudentRepository, repositories.NewUploadRepository)
+var RepositorySet = wire.NewSet(repositories.NewProjectRepository, repositories.NewProjectStaffRepository, repositories.NewProjectNumberCounterRepository, repositories.NewStaffRepository, repositories.NewFileExtensionRepository, repositories.NewProgramRepository, repositories.NewResourceRepository, repositories.NewResourceTypeRepository, repositories.NewConfigRepository, repositories.NewProjectConfigRepository, repositories.NewProjectResourceConfigRepository, repositories.NewProjectRoleRepository, repositories.NewStudentRepository, repositories.NewUploadRepository, repositories.NewKeywordRepository)
 
 var RedisSet = wire.NewSet()

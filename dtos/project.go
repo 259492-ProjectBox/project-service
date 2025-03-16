@@ -29,11 +29,11 @@ type ProjectData struct {
 	SectionID        *string               `json:"section_id"`
 	ProgramID        int                   `json:"program_id"`
 	Program          Program               `json:"program"`
-	CourseID         int                   `json:"course_id"`
-	Course           Course                `json:"course"`
 	ProjectStaffs    []ProjectStaffMessage `json:"staffs"`
 	Members          []Student             `json:"members"`
+	Keywords         []Keyword             `json:"keywords"`
 	ProjectResources []ProjectResource     `json:"project_resources"`
+	IsPublic         bool                  `json:"is_public"`
 	CreatedAt        string                `json:"created_at"`
 	UpdatedAt        string                `json:"updated_at"`
 }

@@ -7,34 +7,6 @@ definitions:
       year_be:
         type: integer
     type: object
-  dtos.CalendarResponse:
-    properties:
-      description:
-        type: string
-      end_date:
-        type: string
-      id:
-        type: integer
-      program_name:
-        type: string
-      start_date:
-        type: string
-      title:
-        type: string
-    type: object
-  dtos.CreateCalendarRequest:
-    properties:
-      description:
-        type: string
-      end_date:
-        type: string
-      program_id:
-        type: integer
-      start_date:
-        type: string
-      title:
-        type: string
-    type: object
   dtos.CreateProgramRequest:
     properties:
       program_name_en:
@@ -50,7 +22,7 @@ definitions:
         type: string
       first_name_th:
         type: string
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -95,7 +67,7 @@ definitions:
         type: string
       id:
         type: integer
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -105,23 +77,10 @@ definitions:
         type: string
       prefix_th:
         type: string
+      program:
+        $ref: '#/definitions/models.Program'
       program_id:
         type: integer
-    type: object
-  dtos.UpdateCalendarRequest:
-    properties:
-      description:
-        type: string
-      end_date:
-        type: string
-      id:
-        type: integer
-      program_id:
-        type: integer
-      start_date:
-        type: string
-      title:
-        type: string
     type: object
   dtos.UpdateStaffRequest:
     properties:
@@ -133,7 +92,7 @@ definitions:
         type: string
       id:
         type: integer
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -159,19 +118,6 @@ definitions:
       value:
         type: string
     type: object
-  models.Course:
-    properties:
-      course_name:
-        type: string
-      course_no:
-        type: string
-      id:
-        type: integer
-      program:
-        $ref: '#/definitions/models.Program'
-      program_id:
-        type: integer
-    type: object
   models.FileExtension:
     properties:
       extension_name:
@@ -180,6 +126,17 @@ definitions:
         type: integer
       mime_type:
         type: string
+    type: object
+  models.Keyword:
+    properties:
+      id:
+        type: integer
+      keyword:
+        type: string
+      program:
+        $ref: '#/definitions/models.Program'
+      program_id:
+        type: integer
     type: object
   models.Program:
     properties:
@@ -198,14 +155,16 @@ definitions:
         type: string
       academic_year:
         type: integer
-      course:
-        $ref: '#/definitions/models.Course'
-      course_id:
-        type: integer
       created_at:
         type: string
       id:
         type: integer
+      is_public:
+        type: boolean
+      keywords:
+        items:
+          $ref: '#/definitions/models.Keyword'
+        type: array
       members:
         items:
           $ref: '#/definitions/models.Student'
@@ -309,7 +268,7 @@ definitions:
         type: string
       id:
         type: integer
-      is_resigned:
+      is_active:
         type: boolean
       last_name_en:
         type: string
@@ -325,8 +284,6 @@ definitions:
   models.Student:
     properties:
       academic_year:
-        type: integer
-      course_id:
         type: integer
       created_at:
         type: string
@@ -360,130 +317,6 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /v1/calendars:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new calendarof that program
-      parameters:
-      - description: Calendar Data
-        in: body
-        name: project
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.CreateCalendarRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Successfully created calendar
-          schema:
-            $ref: '#/definitions/dtos.CalendarResponse'
-        "400":
-          description: Invalid request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a new Calendar
-      tags:
-      - Calendar
-    put:
-      consumes:
-      - application/json
-      description: Updates an event by its ID with the provided data
-      parameters:
-      - description: Updated Event Data
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UpdateCalendarRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated event
-          schema:
-            $ref: '#/definitions/dtos.CalendarResponse'
-        "400":
-          description: Invalid event ID or request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update an existing event
-      tags:
-      - Calendar
-  /v1/calendars/{id}:
-    delete:
-      description: Deletes the specified event using its ID
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Event deleted successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid event ID
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete an event by ID
-      tags:
-      - Calendar
-  /v1/calendars/program/{program_id}:
-    get:
-      description: Fetches all calendar events for a given program
-      parameters:
-      - description: Program ID
-        in: path
-        name: program_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved calendar events
-          schema:
-            items:
-              $ref: '#/definitions/dtos.CalendarResponse'
-            type: array
-        "400":
-          description: Invalid program ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Calendar events not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get calendar by program ID
-      tags:
-      - Calendar
   /v1/configs:
     put:
       description: Creates a new config or updates an existing config for the given
@@ -611,151 +444,181 @@ paths:
       summary: Get config by program ID
       tags:
       - Config
-  /v1/courses:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new course
-      parameters:
-      - description: Course data
-        in: body
-        name: course
-        required: true
-        schema:
-          $ref: '#/definitions/models.Course'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Successfully created course
-          schema:
-            $ref: '#/definitions/models.Course'
-        "400":
-          description: Invalid request body
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a new course
-      tags:
-      - Course
-    put:
-      consumes:
-      - application/json
-      description: Updates an existing course
-      parameters:
-      - description: Course data
-        in: body
-        name: course
-        required: true
-        schema:
-          $ref: '#/definitions/models.Course'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated course
-          schema:
-            $ref: '#/definitions/models.Course'
-        "400":
-          description: Invalid request body
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update an existing course
-      tags:
-      - Course
-  /v1/courses/{course_id}:
-    delete:
-      description: Deletes a course by its ID
-      parameters:
-      - description: Course ID
-        in: path
-        name: course_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: Successfully deleted course
-        "400":
-          description: Invalid course ID
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete a course
-      tags:
-      - Course
-  /v1/courses/{course_no}:
+  /v1/keywords:
     get:
-      description: Retrieves a course by its course number
+      consumes:
+      - application/json
+      description: Get all keywords for a specific program
       parameters:
-      - description: Course Number
-        in: path
-        name: course_no
+      - description: Program ID
+        in: query
+        name: program_id
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully retrieved course
+          description: OK
           schema:
-            $ref: '#/definitions/models.Course'
+            items:
+              $ref: '#/definitions/models.Keyword'
+            type: array
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get course by course number
+      summary: Get keywords by program
       tags:
-      - Course
-  /v1/courses/program/{program_id}:
-    get:
-      description: Retrieves a list of courses for a given program ID
+      - Keywords
+    post:
+      consumes:
+      - application/json
+      description: Create a new keyword
       parameters:
-      - description: Program ID
-        in: path
-        name: program_id
+      - description: Keyword
+        in: body
+        name: keyword
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/models.Keyword'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Keyword'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a keyword
+      tags:
+      - Keywords
+    put:
+      consumes:
+      - application/json
+      description: Update an existing keyword
+      parameters:
+      - description: Keyword
+        in: body
+        name: keyword
+        required: true
+        schema:
+          $ref: '#/definitions/models.Keyword'
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully retrieved courses
+          description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Course'
-            type: array
+            $ref: '#/definitions/models.Keyword'
         "400":
-          description: Invalid program ID
+          description: Bad Request
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
             type: object
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get courses by program ID
+      summary: Update a keyword
       tags:
-      - Course
+      - Keywords
+  /v1/keywords/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a keyword by ID
+      parameters:
+      - description: Keyword ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a keyword
+      tags:
+      - Keywords
+    get:
+      consumes:
+      - application/json
+      description: Get a keyword by ID
+      parameters:
+      - description: Keyword ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Keyword'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a keyword
+      tags:
+      - Keywords
+  /v1/keywords/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all keywords for a specific program
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Keyword'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all keywords
+      tags:
+      - Keywords
   /v1/programs:
     get:
       description: Retrieves all programs from the database
@@ -1336,37 +1199,6 @@ paths:
       summary: Get staffs by program ID
       tags:
       - Staff
-  /v1/staffs/program/{program_id}/all:
-    get:
-      description: Fetches all staffs by program id
-      parameters:
-      - description: Program ID
-        in: path
-        name: program_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved staffs
-          schema:
-            items:
-              $ref: '#/definitions/models.Staff'
-            type: array
-        "400":
-          description: Invalid program ID
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Staffs not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get all staffs by program id
-      tags:
-      - Staff
   /v1/students/{student_id}:
     get:
       description: Retrieves a list of students for a given student ID
@@ -1653,6 +1485,37 @@ paths:
       summary: Upsert Project Resource Configurations
       tags:
       - ProjectResourceConfig
+  /v2/staffs/program/{program_id}:
+    get:
+      description: Fetches all staffs by program id
+      parameters:
+      - description: Program ID
+        in: path
+        name: program_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved staffs
+          schema:
+            items:
+              $ref: '#/definitions/models.Staff'
+            type: array
+        "400":
+          description: Invalid program ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Staffs not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all staffs by program id
+      tags:
+      - Staff
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"io"
 	"mime/multipart"
 	"net/url"
@@ -29,7 +30,6 @@ type UploadService interface {
 
 type uploadServiceImpl struct {
 	client             *minio.Client
-	courseService      CourseService
 	studentService     StudentService
 	staffService       StaffService
 	projectRoleService ProjectRoleService
@@ -37,9 +37,10 @@ type uploadServiceImpl struct {
 	projectService     ProjectService
 	projectRepo        repositories.ProjectRepository
 	programRepo        repositories.ProgramRepository
+	keywordRepo        repositories.KeywordRepository
 }
 
-func NewUploadService(client *minio.Client, programRepo repositories.ProgramRepository, projectRepo repositories.ProjectRepository, staffService StaffService, projectRoleService ProjectRoleService, projectService ProjectService, courseService CourseService, configService ConfigService, studentService StudentService) UploadService {
+func NewUploadService(client *minio.Client, keywordRepo repositories.KeywordRepository, programRepo repositories.ProgramRepository, projectRepo repositories.ProjectRepository, staffService StaffService, projectRoleService ProjectRoleService, projectService ProjectService, configService ConfigService, studentService StudentService) UploadService {
 	return &uploadServiceImpl{
 		client:             client,
 		programRepo:        programRepo,
@@ -47,9 +48,9 @@ func NewUploadService(client *minio.Client, programRepo repositories.ProgramRepo
 		staffService:       staffService,
 		projectRoleService: projectRoleService,
 		projectService:     projectService,
-		courseService:      courseService,
 		configService:      configService,
 		studentService:     studentService,
+		keywordRepo:        keywordRepo,
 	}
 }
 
@@ -70,7 +71,12 @@ func (s *uploadServiceImpl) readExcelFile(file *multipart.FileHeader) ([][]strin
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
-	defer src.Close()
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
+
+		}
+	}(src)
 
 	excelFile, err := excelize.OpenReader(src)
 	if err != nil {
@@ -104,22 +110,12 @@ func (s *uploadServiceImpl) ProcessStudentEnrollmentFile(ctx context.Context, pr
 		return errors.New("excel file is empty or does not have enough rows")
 	}
 
-	courseNo, err := s.getCourseNo(rows)
-	if err != nil {
-		return err
-	}
-
-	course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
-	if err != nil {
-		return err
-	}
-
 	studentInfoColumns, err := s.getStudentInfoColumns(rows[3])
 	if err != nil {
 		return err
 	}
 
-	students, err := s.parseStudents(ctx, rows[4:], studentInfoColumns, course.ID, programId)
+	students, err := s.parseStudents(ctx, rows[4:], studentInfoColumns, programId)
 	if err != nil {
 		return err
 	}
@@ -144,22 +140,12 @@ func (s *uploadServiceImpl) ProcessCreateProjectFile(ctx context.Context, progra
 		return errors.New("excel file is empty or does not have enough rows")
 	}
 
-	courseNo, err := s.getCourseNo(rows)
-	if err != nil {
-		return err
-	}
-
-	course, err := s.courseService.FindCourseByCourseNo(ctx, courseNo)
-	if err != nil {
-		return err
-	}
-
 	createProjectInfoColumns, err := s.getCreateProjectInfoColumns(rows[2])
 	if err != nil {
 		return err
 	}
 
-	projectRequests, err := s.parseProjects(ctx, rows[3:], createProjectInfoColumns, course.ID, programId)
+	projectRequests, err := s.parseProjects(ctx, rows[3:], createProjectInfoColumns, programId)
 	if err != nil {
 		return err
 	}
@@ -205,12 +191,12 @@ func (s *uploadServiceImpl) ProcessCreateStaffFile(ctx context.Context, programI
 
 func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]int, error) {
 	columns := map[string]int{
-		"staffPrefixTHColumn":   -1,
-		"staffPrefixENColumn":   -1,
-		"staffNameTHColumn":     -1,
-		"staffNameENColumn":     -1,
-		"staffEmailColumn":      -1,
-		"staffIsResignedColumn": -1,
+		"staffPrefixTHColumn": -1,
+		"staffPrefixENColumn": -1,
+		"staffNameTHColumn":   -1,
+		"staffNameENColumn":   -1,
+		"staffEmailColumn":    -1,
+		"staffIsActiveColumn": -1,
 	}
 
 	for j, col := range headerRow {
@@ -225,26 +211,16 @@ func (s *uploadServiceImpl) getStaffInfoColumns(headerRow []string) (map[string]
 			columns["staffNameENColumn"] = j
 		case matchColumn(col, "Email (required)"):
 			columns["staffEmailColumn"] = j
-		case matchColumn(col, "IsResigned"):
-			columns["staffIsResignedColumn"] = j
+		case matchColumn(col, "InActive"):
+			columns["staffIsActiveColumn"] = j
 		}
 	}
 
-	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 || columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsResignedColumn"] == -1 {
+	if columns["staffPrefixTHColumn"] == -1 || columns["staffPrefixENColumn"] == -1 || columns["staffNameTHColumn"] == -1 || columns["staffNameENColumn"] == -1 || columns["staffEmailColumn"] == -1 || columns["staffIsActiveColumn"] == -1 {
 		return nil, errors.New("missing one or more required columns in the header row")
 	}
 
 	return columns, nil
-}
-
-func (s *uploadServiceImpl) getCourseNo(rows [][]string) (string, error) {
-	courseRow := rows[1]
-	for j, col := range courseRow {
-		if matchColumn(col, "COURSE NO :") {
-			return rows[1][j+2], nil
-		}
-	}
-	return "", errors.New("course number not found")
 }
 
 func (s *uploadServiceImpl) getStudentInfoColumns(headerRow []string) (map[string]int, error) {
@@ -306,17 +282,22 @@ func (s *uploadServiceImpl) getCreateProjectInfoColumns(headerRow []string) (map
 			columns["staffColumn"] = j
 		case matchColumn(col, "Staff Role"):
 			columns["staffRoleColumn"] = j
+		case matchColumn(col, "Keywords"):
+			columns["keywordsColumn"] = j
+		case matchColumn(col, "Is Public"):
+			columns["isPublicColumn"] = j
 		}
+
 	}
 
-	if columns["titleTHColumn"] == -1 || columns["titleENColumn"] == -1 || columns["abstractTextColumn"] == -1 || columns["secLabColumn"] == -1 || columns["studentIdColumn"] == -1 || columns["studentNameColumn"] == -1 || columns["staffColumn"] == -1 || columns["staffRoleColumn"] == -1 {
+	if columns["titleTHColumn"] == -1 || columns["titleENColumn"] == -1 || columns["abstractTextColumn"] == -1 || columns["secLabColumn"] == -1 || columns["studentIdColumn"] == -1 || columns["studentNameColumn"] == -1 || columns["staffColumn"] == -1 || columns["staffRoleColumn"] == -1 || columns["keywordsColumn"] == -1 || columns["isPublicColumn"] == -1 {
 		return nil, errors.New("missing one or more required columns in the header row")
 	}
 
 	return columns, nil
 }
 
-func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, columns map[string]int, courseId, programId int) ([]models.Student, error) {
+func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, columns map[string]int, programId int) ([]models.Student, error) {
 	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
 	if err != nil {
 		return nil, err
@@ -340,7 +321,6 @@ func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, 
 			Email:        email,
 			Semester:     semester,
 			AcademicYear: academicYear,
-			CourseID:     courseId,
 			ProgramID:    programId,
 		}
 		students = append(students, student)
@@ -352,7 +332,7 @@ func (s *uploadServiceImpl) parseStudents(ctx context.Context, rows [][]string, 
 func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int, programId int) ([]models.Staff, error) {
 	var staffs []models.Staff
 	for _, row := range rows {
-		if len(row) <= columns["staffPrefixTHColumn"] || len(row) <= columns["staffPrefixENColumn"] || len(row) <= columns["staffNameTHColumn"] || len(row) <= columns["staffNameTHColumn"]+1 || len(row) <= columns["staffNameENColumn"] || len(row) <= columns["staffNameENColumn"]+1 || len(row) <= columns["staffEmailColumn"] || len(row) <= columns["staffIsResignedColumn"] {
+		if len(row) <= columns["staffPrefixTHColumn"] || len(row) <= columns["staffPrefixENColumn"] || len(row) <= columns["staffNameTHColumn"] || len(row) <= columns["staffNameTHColumn"]+1 || len(row) <= columns["staffNameENColumn"] || len(row) <= columns["staffNameENColumn"]+1 || len(row) <= columns["staffEmailColumn"] || len(row) <= columns["staffIsActiveColumn"] {
 			continue
 		}
 
@@ -360,9 +340,9 @@ func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int,
 			return nil, fmt.Errorf("row does not have staff email: %v", row)
 		}
 
-		isResigned, err := strconv.ParseBool(row[columns["staffIsResignedColumn"]])
+		isActive, err := strconv.ParseBool(row[columns["staffIsActiveColumn"]])
 		if err != nil {
-			return nil, fmt.Errorf("invalid value for Is Resigned: %v", row[columns["staffIsResignedColumn"]])
+			return nil, fmt.Errorf("invalid value for Is Resigned: %v", row[columns["staffIsActiveColumn"]])
 		}
 
 		staff := models.Staff{
@@ -373,7 +353,7 @@ func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int,
 			FirstNameEN: row[columns["staffNameENColumn"]],
 			LastNameEN:  row[columns["staffNameENColumn"]+1],
 			Email:       row[columns["staffEmailColumn"]],
-			IsResigned:  isResigned,
+			IsActive:    isActive,
 			ProgramID:   programId,
 		}
 		staffs = append(staffs, staff)
@@ -382,7 +362,7 @@ func (s *uploadServiceImpl) parseStaffs(rows [][]string, columns map[string]int,
 	return staffs, nil
 }
 
-func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, columns map[string]int, courseId, programId int) ([]models.ProjectRequest, error) {
+func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, columns map[string]int, programId int) ([]models.ProjectRequest, error) {
 	academicYear, semester, err := s.configService.GetCurrentAcademicYearAndSemester(ctx, programId)
 	if err != nil {
 		return nil, err
@@ -402,7 +382,7 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			return nil, fmt.Errorf("project with title TH: %s and title EN: %s already exists", row[columns["titleTHColumn"]], row[columns["titleENColumn"]])
 		}
 
-		members, isSecLabSameOverAllMember, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, courseId, programId)
+		members, isSecLabSameOverAllMember, err := s.getProjectMembers(rows, rowIdx, columns, semester, academicYear, programId)
 		if err != nil {
 			return nil, err
 		}
@@ -417,14 +397,47 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			return nil, err
 		}
 
+		var keywordArray []models.Keyword
+		keywords := strings.Split(row[columns["keywordsColumn"]], ",")
+		for _, keyword := range keywords {
+			keyword = strings.TrimSpace(keyword)
+			if keyword == "" {
+				continue
+			}
+
+			keywordModel, err := s.keywordRepo.FindByKeywordAndProgramId(ctx, keyword, programId)
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				keywordModel = &models.Keyword{
+					Keyword:   keyword,
+					ProgramID: programId,
+				}
+				if err := s.keywordRepo.Create(ctx, keywordModel); err != nil {
+					return nil, err
+				}
+			}
+			keywordArray = append(keywordArray, *keywordModel)
+		}
+
 		titleTH := &row[columns["titleTHColumn"]]
 		titleEN := &row[columns["titleENColumn"]]
 		abstractText := &row[columns["abstractTextColumn"]]
 		sectionValue := row[columns["secLabColumn"]]
+		isPublicValue := row[columns["isPublicColumn"]]
+
 		var sectionID *string
 		if isSecLabSameOverAllMember {
 			sectionID = &sectionValue
 		}
+		var isPublic bool
+		if isPublicValue == "TRUE" {
+			isPublic = true
+		} else {
+			isPublic = false
+		}
+
 		project := models.ProjectRequest{
 			TitleTH:       titleTH,
 			TitleEN:       titleEN,
@@ -432,10 +445,11 @@ func (s *uploadServiceImpl) parseProjects(ctx context.Context, rows [][]string, 
 			AcademicYear:  academicYear,
 			Semester:      semester,
 			SectionID:     sectionID,
-			CourseID:      courseId,
 			ProgramID:     programId,
+			IsPublic:      isPublic,
 			ProjectStaffs: projectStaffs,
 			Members:       members,
+			Keywords:      keywordArray,
 		}
 		projectRequests = append(projectRequests, project)
 	}
@@ -454,7 +468,7 @@ func (s *uploadServiceImpl) isValidProjectRow(ctx context.Context, row []string,
 			row[columns["courseNoColumn"]] == "")
 }
 
-func (s *uploadServiceImpl) getProjectMembers(rows [][]string, rowIdx int, columns map[string]int, semester, academicYear, courseId, programId int) ([]models.Student, bool, error) {
+func (s *uploadServiceImpl) getProjectMembers(rows [][]string, rowIdx int, columns map[string]int, semester, academicYear, programId int) ([]models.Student, bool, error) {
 	var members []models.Student
 	memberIdx := 0
 	currentSeclab := ""
@@ -476,7 +490,6 @@ func (s *uploadServiceImpl) getProjectMembers(rows [][]string, rowIdx int, colum
 			LastName:     rows[rowIdx+memberIdx][columns["studentNameColumn"]+1],
 			Semester:     semester,
 			AcademicYear: academicYear,
-			CourseID:     courseId,
 			ProgramID:    programId,
 		}
 		members = append(members, student)

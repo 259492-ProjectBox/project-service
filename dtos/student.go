@@ -9,8 +9,6 @@ type Student struct {
 	Email        *string `json:"email"`         // Unique email address
 	Semester     int     `json:"semester"`      // Semester
 	AcademicYear int     `json:"academic_year"` // Academic year
-	CourseID     int     `json:"course_id"`
-	Course       Course  `json:"course"`
-	ProgramID    int     `json:"program_id"` // Program ID
+	ProgramID    int     `json:"program_id"`    // Program ID
 	Program      Program `json:"program"`
 }

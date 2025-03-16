@@ -111,7 +111,12 @@ func (s *projectResourceConfigServiceImpl) uploadNewIcon(ctx context.Context, pr
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file multipart.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	contentType := icon.Header.Get("Content-Type")
 	fileSize := icon.Size

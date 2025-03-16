@@ -24,190 +24,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/calendars": {
-            "put": {
-                "description": "Updates an event by its ID with the provided data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Calendar"
-                ],
-                "summary": "Update an existing event",
-                "parameters": [
-                    {
-                        "description": "Updated Event Data",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UpdateCalendarRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully updated event",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.CalendarResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid event ID or request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new calendarof that program",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Calendar"
-                ],
-                "summary": "Create a new Calendar",
-                "parameters": [
-                    {
-                        "description": "Calendar Data",
-                        "name": "project",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.CreateCalendarRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successfully created calendar",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.CalendarResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/calendars/program/{program_id}": {
-            "get": {
-                "description": "Fetches all calendar events for a given program",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Calendar"
-                ],
-                "summary": "Get calendar by program ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Program ID",
-                        "name": "program_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved calendar events",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dtos.CalendarResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid program ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Calendar events not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/calendars/{id}": {
-            "delete": {
-                "description": "Deletes the specified event using its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Calendar"
-                ],
-                "summary": "Delete an event by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Event ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Event deleted successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid event ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/v1/configs": {
             "put": {
                 "description": "Creates a new config or updates an existing config for the given program",
@@ -394,9 +210,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/courses": {
-            "put": {
-                "description": "Updates an existing course",
+        "/v1/keywords": {
+            "get": {
+                "description": "Get all keywords for a specific program",
                 "consumes": [
                     "application/json"
                 ],
@@ -404,45 +220,100 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Course"
+                    "Keywords"
                 ],
-                "summary": "Update an existing course",
+                "summary": "Get keywords by program",
                 "parameters": [
                     {
-                        "description": "Course data",
-                        "name": "course",
+                        "type": "string",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Keyword"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing keyword",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Keywords"
+                ],
+                "summary": "Update a keyword",
+                "parameters": [
+                    {
+                        "description": "Keyword",
+                        "name": "keyword",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Course"
+                            "$ref": "#/definitions/models.Keyword"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully updated course",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Course"
+                            "$ref": "#/definitions/models.Keyword"
                         }
                     },
                     "400": {
-                        "description": "Invalid request body",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "post": {
-                "description": "Creates a new course",
+                "description": "Create a new keyword",
                 "consumes": [
                     "application/json"
                 ],
@@ -450,161 +321,155 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Course"
+                    "Keywords"
                 ],
-                "summary": "Create a new course",
+                "summary": "Create a keyword",
                 "parameters": [
                     {
-                        "description": "Course data",
-                        "name": "course",
+                        "description": "Keyword",
+                        "name": "keyword",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Course"
+                            "$ref": "#/definitions/models.Keyword"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Successfully created course",
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Course"
+                            "$ref": "#/definitions/models.Keyword"
                         }
                     },
                     "400": {
-                        "description": "Invalid request body",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             }
         },
-        "/v1/courses/program/{program_id}": {
+        "/v1/keywords/all": {
             "get": {
-                "description": "Retrieves a list of courses for a given program ID",
+                "description": "Get all keywords for a specific program",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Course"
+                    "Keywords"
                 ],
-                "summary": "Get courses by program ID",
+                "summary": "Get all keywords",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Keyword"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/keywords/{id}": {
+            "get": {
+                "description": "Get a keyword by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Keywords"
+                ],
+                "summary": "Get a keyword",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Program ID",
-                        "name": "program_id",
+                        "type": "string",
+                        "description": "Keyword ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved courses",
+                        "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Course"
+                            "$ref": "#/definitions/models.Keyword"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid program ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
                         }
                     }
                 }
-            }
-        },
-        "/v1/courses/{course_id}": {
+            },
             "delete": {
-                "description": "Deletes a course by its ID",
+                "description": "Delete a keyword by ID",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Course"
+                    "Keywords"
                 ],
-                "summary": "Delete a course",
+                "summary": "Delete a keyword",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Course ID",
-                        "name": "course_id",
+                        "type": "string",
+                        "description": "Keyword ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "Successfully deleted course"
-                    },
-                    "400": {
-                        "description": "Invalid course ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "No Content"
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/courses/{course_no}": {
-            "get": {
-                "description": "Retrieves a course by its course number",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Course"
-                ],
-                "summary": "Get course by course number",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Course Number",
-                        "name": "course_no",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved course",
-                        "schema": {
-                            "$ref": "#/definitions/models.Course"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -1423,52 +1288,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/staffs/program/{program_id}/all": {
-            "get": {
-                "description": "Fetches all staffs by program id",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Staff"
-                ],
-                "summary": "Get all staffs by program id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Program ID",
-                        "name": "program_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved staffs",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Staff"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid program ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Staffs not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/v1/staffs/{id}": {
             "get": {
                 "description": "Fetches an staff by their ID",
@@ -1922,6 +1741,52 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v2/staffs/program/{program_id}": {
+            "get": {
+                "description": "Fetches all staffs by program id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get all staffs by program id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Program ID",
+                        "name": "program_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved staffs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Staff"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid program ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Staffs not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1933,49 +1798,6 @@ const docTemplate = `{
                 },
                 "year_be": {
                     "type": "integer"
-                }
-            }
-        },
-        "dtos.CalendarResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "end_date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "program_name": {
-                    "type": "string"
-                },
-                "start_date": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.CreateCalendarRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "end_date": {
-                    "type": "string"
-                },
-                "program_id": {
-                    "type": "integer"
-                },
-                "start_date": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
                 }
             }
         },
@@ -2002,7 +1824,7 @@ const docTemplate = `{
                 "first_name_th": {
                     "type": "string"
                 },
-                "is_resigned": {
+                "is_active": {
                     "type": "boolean"
                 },
                 "last_name_en": {
@@ -2071,7 +1893,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_resigned": {
+                "is_active": {
                     "type": "boolean"
                 },
                 "last_name_en": {
@@ -2086,31 +1908,11 @@ const docTemplate = `{
                 "prefix_th": {
                     "type": "string"
                 },
-                "program_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dtos.UpdateCalendarRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "end_date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
+                "program": {
+                    "$ref": "#/definitions/models.Program"
                 },
                 "program_id": {
                     "type": "integer"
-                },
-                "start_date": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
                 }
             }
         },
@@ -2129,7 +1931,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_resigned": {
+                "is_active": {
                     "type": "boolean"
                 },
                 "last_name_en": {
@@ -2169,26 +1971,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Course": {
-            "type": "object",
-            "properties": {
-                "course_name": {
-                    "type": "string"
-                },
-                "course_no": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "program": {
-                    "$ref": "#/definitions/models.Program"
-                },
-                "program_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.FileExtension": {
             "type": "object",
             "properties": {
@@ -2200,6 +1982,23 @@ const docTemplate = `{
                 },
                 "mime_type": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Keyword": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "program": {
+                    "$ref": "#/definitions/models.Program"
+                },
+                "program_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -2229,17 +2028,20 @@ const docTemplate = `{
                 "academic_year": {
                     "type": "integer"
                 },
-                "course": {
-                    "$ref": "#/definitions/models.Course"
-                },
-                "course_id": {
-                    "type": "integer"
-                },
                 "created_at": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Keyword"
+                    }
                 },
                 "members": {
                     "type": "array",
@@ -2398,7 +2200,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_resigned": {
+                "is_active": {
                     "type": "boolean"
                 },
                 "last_name_en": {
@@ -2422,9 +2224,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "academic_year": {
-                    "type": "integer"
-                },
-                "course_id": {
                     "type": "integer"
                 },
                 "created_at": {
