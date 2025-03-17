@@ -267,6 +267,19 @@ func (r *projectRepositoryImpl) deleteProjectAssociations(ctx context.Context, t
 	if err := r.deleteProjectResources(ctx, tx, projectID); err != nil {
 		return err
 	}
+
+	if err := r.deleteProjectKeyword(ctx, tx, projectID); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (r *projectRepositoryImpl) deleteProjectKeyword(ctx context.Context, tx *gorm.DB, projectID int) error {
+	if err := tx.WithContext(ctx).Where("project_id = ?", projectID).Delete(&models.ProjectKeyword{}).Error; err != nil {
+		return err
+	}
 	return nil
 }
 
