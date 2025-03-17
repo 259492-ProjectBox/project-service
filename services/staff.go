@@ -210,9 +210,11 @@ func (s *staffServiceImpl) GetStaffByProgramId(ctx context.Context, programId in
 func (s *staffServiceImpl) GetStaffByEmail(ctx context.Context, email string) (*models.Staff, error) {
 	staff, err := s.staffRepo.GetByEmail(ctx, email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
-
 	return staff, nil
 }
 
