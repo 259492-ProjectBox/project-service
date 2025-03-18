@@ -95,12 +95,12 @@ func (h *keywordHandler) GetKeyword(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /v1/keywords [post]
 func (h *keywordHandler) CreateKeyword(c *gin.Context) {
-	var keyword *models.Keyword
-	if err := c.ShouldBindJSON(keyword); err != nil {
+	var keyword models.Keyword
+	if err := c.ShouldBindJSON(&keyword); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.service.CreateKeyword(c.Request.Context(), keyword); err != nil {
+	if err := h.service.CreateKeyword(c.Request.Context(), &keyword); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -120,12 +120,12 @@ func (h *keywordHandler) CreateKeyword(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /v1/keywords [put]
 func (h *keywordHandler) UpdateKeyword(c *gin.Context) {
-	var keyword *models.Keyword
-	if err := c.ShouldBindJSON(keyword); err != nil {
+	var keyword models.Keyword
+	if err := c.ShouldBindJSON(&keyword); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.service.UpdateKeyword(c.Request.Context(), keyword); err != nil {
+	if err := h.service.UpdateKeyword(c.Request.Context(), &keyword); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
