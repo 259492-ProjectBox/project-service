@@ -419,6 +419,7 @@ func (r *projectRepositoryImpl) updateProject(ctx context.Context, tx *gorm.DB, 
 		Semester:     projectReq.Semester,
 		ProgramID:    projectReq.ProgramID,
 		Members:      projectReq.Members,
+		Keywords:     projectReq.Keywords,
 	}
 
 	if err := tx.WithContext(ctx).Save(project).Error; err != nil {
